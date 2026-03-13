@@ -1,4 +1,3 @@
-from colorama import Fore, Back, Style, init
 from os import system
 import random
 

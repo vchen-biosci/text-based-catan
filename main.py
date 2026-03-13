@@ -263,7 +263,7 @@ def roll_die():
 
 class Commands_List:
     def __init__(self):
-        self.start_game = [start_game, "start game"]
+        self.start_game = [self.start_game, "start game"]
         self.pcl = [print_commands_list, "pcl"]
         self.end_game = [end_game, "end game"]
         self.pbc = [print_building_costs, "pbc"]
@@ -273,8 +273,9 @@ class Commands_List:
         self.ru = [print_game_rules, "roll"]
         self.roll = [print_game_rules, "ru"]
         self.list = [self.start_game, self.pcl, self.end_game, self.pbc, self.pod, self.inf, self.cr, self.ru, self.roll]
-valid_commands = [cmd[1] for cmd in COMMANDS_LIST.list]
+
 COMMANDS_LIST = Commands_List()
+valid_commands = [cmd[1] for cmd in COMMANDS_LIST.list]
 
 welcome_players()
 print_commands_list()
