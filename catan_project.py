@@ -4,10 +4,15 @@ import random
 
 init(autoreset=True)
 
+class Player_Info_Class:
+    def __init__(self):
+        self.player_info = {"name": 123}
+Player_Info = Player_Info_Class()
+
 class Game:
         
     def __init__(self):
-        self.player_decks = "player_decks"
+        self.player_info = Player_Info.player_info
         self.log = []
         self.running = False
         self.credits = """Code created by Vivienne C, Kellett School Hong Kong
@@ -25,13 +30,15 @@ Official game belongs to CATAN\n"""
 > roll: roll die
           
 Happy playing ^^ """
-        self.rules = """My lovely people, the official catan link is available at this link! 
+        self.rules = """RULES
+My lovely people, the official catan link is available at this link! 
 https://www.catan.com/sites/default/files/2024-01/Almanac%20CATAN-3D.pdf
 I mean... I sure hope it works? But if the link doesn't work you can just search it up :D"""
         self.info = self.commands + self.credits + self.rules
         self.player_directory = {}
         self.full_directory = {}
         self.grid = f"""n"""
+        self.turn = Player_Info.player_info["name"]
 
     def print_commands(self):
             print("\n")
@@ -51,26 +58,28 @@ I mean... I sure hope it works? But if the link doesn't work you can just search
         print("Game has now started!")
         return False
     
+    def roll_die(self):
+
+        dice_1 = random.randint(1, 6)
+        dice_2 = random.randint(1, 6)
+        roll = dice_1 + dice_2
+        print(f"The dice have spoken!! |{dice_1}| |{dice_2}| ... {dice_1} + {dice_2} = {roll}! You have rolled a {roll}")
+
+        return roll
+    
     def create_player_directory(self):
         self.player_directory = {"cmds": self.print_commands, "info": self.print_info, "log": self.print_log, "rules": self.print_rules, "start": self.start_game}
 
     def create_full_directory(self):
-        self.full_directory = {}
+        self.full_directory = {"roll_die": self.roll_die}
         self.full_directory.update(self.player_directory)
+
+    
 
     #def __init__(self):
         #self.directory = {"cmds": print_commands, "info": print_info, "log": print_log, "rules": print_rules, "start": start_game}
         
 GAME = Game()
-
-def roll_die():
-
-    dice_1 = random.randint(1, 6)
-    dice_2 = random.randint(1, 6)
-    roll = dice_1 + dice_2
-    print(f"The dice have spoken!! |{dice_1}| |{dice_2}| ... {dice_1} + {dice_2} = {roll}! You have rolled a {roll}")
-
-    return roll
 
 def welcome_players():
 
@@ -79,19 +88,20 @@ def welcome_players():
 
 def main():
     
-    ##start by welcoming the players
-    ##btw imma put everything that needs to access data into a class called Game
     welcome_players()
-    ##then, ask the player if they want to display more information or start the game
+    
     GAME.create_player_directory()
     while GAME.running == False:
         input_loop = True
+
         while input_loop:
+
             action = input("\nWhat would you like to do? :) (hint: 'start' to start a new game or 'info' to view more information)\n> ").strip().lower()
             if action in GAME.player_directory:
                 GAME.player_directory[action]()
+
             else:
-                print("That's not an available command! Type 'cmds' to see the available commands!")
+                print("That's not an available command when you haven't yet started the game! Type 'cmds' to see the available commands!")
 
         
     while GAME.running == True:
