@@ -8,7 +8,7 @@ text = """
                                                              /              \\                                                                   
                                                             /                \\                                                                
                                                                                                                                                                
-                                   2:1 grain port         /       ݁ ˖𓂃.𖠰       \\               3:1 port                                       
+                                   2:1 grain port         /       ݁ ˖𓂃.𖠰        \\               3:1 port                                       
                                     |    \\   __ __ __ __ /          12          \\ __ __ __ __    /                                       
                                     |   C /           D  \\         Wood         / E        F  \\    |                                          
                                     |    /                \\         S1         /               \\   |                                         
@@ -63,7 +63,7 @@ text = """
 
 
 
-"""
+"""##WAIT Why sefaoseiurcalewirucyabew why does it look so weirddd noooo
 
 print(text)
 
