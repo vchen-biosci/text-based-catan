@@ -125,16 +125,48 @@ kaomojis = {
 
 print(tiles)
 
+possible_locs = "abcdefghijklmnopqrstuvwxyz".upper()
+possible_locs = possible_locs + possible_locs.lower()
+possible_locs = possible_locs + "+"
+settlement_locs = {}
+
+for letter in possible_locs:
+    settlement_locs[letter] = {"display": letter}
+    settlement_locs[letter]["port"] = ""
+
+
+for loc in "ABFJouxy":
+    settlement_locs[loc]["port"] = {"3:1 port"}
+i = 0
+ports = ["wood", "grain", "cow", "ore", "brick"]
+reps = 0
+for loc in "RQCGWcvwjp":
+    reps += 1
+    thing_to_put = f"2:1 {ports[i]} port"
+    settlement_locs[loc]["port"] = thing_to_put
+    if reps%2 == 0:
+        i += 1
+
+
+
+print(settlement_locs)
 
 encoded_grid = (
     "\n" + 
     #line 1
-    (" " * 65) + "3: 1 port"
+    (" " * 65) + "3: 1 port" + "\n" +
     #line 2
-    #wait im confused how should i do this?? with a class, dictionary, array, list?
-
+    (" " * 65) + "/      \\" + "\n" +
+    #line 3
+    (" " * 64) + "/        \\" + "\n" +
+    #line 4
+    (" " * 20) + "sea" + (" " * 38) + settlement_locs["A"]["display"] + " __ __ __ __ " + settlement_locs["B"]["display"] + (" " * 38) + "sea"
 )
 
 
 
+print(len("                  "))
+
 print(encoded_grid)
+
+
