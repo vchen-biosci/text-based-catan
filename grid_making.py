@@ -1,6 +1,6 @@
 import random
 
-grid_1 = """\n                                                                 3:1 port                                                                                                                                                                           
+grid_1 = """                                                                3:1 port                                                                                                                                                                           
                                                                  /      \\
                                                                 /        \\                                                                                
                     sea                                      A __ __ __ __ B                  sea                                             
@@ -54,15 +54,13 @@ grid_1 = """\n                                                                 3
                                              \\         /                             \\        /                                                           
                                               \\       /      \\                 /      \\      /                                                                                   
                                              2:1 ore port     \\z __ __ __ __  /+      3:1 port 
-\n"""
+"""
 
 print(grid_1)
 
 for line in grid_1.splitlines():
     line = line.rstrip()
     print(line)
-
-    "𐔌՞. .՞𐦯"
 
 tiles = {}
 
@@ -152,21 +150,30 @@ for loc in "RQCGWcvwjp":
 print(settlement_locs)
 
 encoded_grid = (
-    "\n" + 
-    #line 1
     (" " * 65) + "3: 1 port" + "\n" +
     #line 2
     (" " * 65) + "/      \\" + "\n" +
     #line 3
     (" " * 64) + "/        \\" + "\n" +
     #line 4
-    (" " * 20) + "sea" + (" " * 38) + settlement_locs["A"]["display"] + " __ __ __ __ " + settlement_locs["B"]["display"] + (" " * 38) + "sea"
+    (" " * 20) + "sea" + (" " * 38) + settlement_locs["A"]["display"] + " __ __ __ __ " + settlement_locs["B"]["display"] + (" " * 38) + "sea" + "\n" +
+    #line 5 
+    (" " * 61) + ("/              \\") + "\n" +
+    #line 6
+    (" " * 60) + ("/                \\") + "\n" +
+    #line 7
+    "\n" +
+    #line 8
+    (" " * 35) + ("2:1 grain port") + (" " * 9) + "/" + (" " * ((20 - (len(kaomojis[tiles["S1"]["biome"]])))//2)) + (kaomojis[tiles["S1"]["biome"]]) + (" " * ((20 - (len(kaomojis[tiles["S1"]["biome"]])))//2)) + "\\" + (" " * 15) + "3:1 port" + "\n" +
+    #line 9
+    (" " * 36) + "|    \\   __ __ __ __ /" + (" " * ((22 - len(str(tiles["S1"]["number"])))//2)) + str(tiles["S1"]["number"]) + (" " * ((22 - len(str(tiles["S1"]["number"])))//2)) + "\\ __ __ __ __    /" + "\n"
 )
 
 
 
-print(len("                  "))
+
 
 print(encoded_grid)
+
 
 
