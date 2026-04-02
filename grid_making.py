@@ -164,9 +164,11 @@ encoded_grid = (
     #line 7
     "\n" +
     #line 8
-    (" " * 35) + ("2:1 grain port") + (" " * 9) + "/" + (" " * ((20 - (len(kaomojis[tiles["S1"]["biome"]])))//2)) + (kaomojis[tiles["S1"]["biome"]]) + (" " * ((20 - (len(kaomojis[tiles["S1"]["biome"]])))//2)) + "\\" + (" " * 15) + "3:1 port" + "\n" +
+    (" " * 35) + ("2:1 grain port") + (" " * 9) + "/" + (" " * ((20 - (len(kaomojis[tiles["S1"]["biome"]])))//2)) + (kaomojis[tiles["S1"]["biome"]]) + (" " * ((20 - (len(kaomojis[tiles["S1"]["biome"]])))//2)) + (" " * ((20 - (len(kaomojis[tiles["S1"]["biome"]])))% 2)) + "\\" + (" " * 15) + "3:1 port" + "\n" +
     #line 9
-    (" " * 36) + "|    \\   __ __ __ __ /" + (" " * ((22 - len(str(tiles["S1"]["number"])))//2)) + str(tiles["S1"]["number"]) + (" " * ((22 - len(str(tiles["S1"]["number"])))//2)) + "\\ __ __ __ __    /" + "\n"
+    (" " * 36) + "|    \\   __ __ __ __ /" + (" " * ((22 - len(str(tiles["S1"]["number"])))//2)) + str(tiles["S1"]["number"]) + (" " * ((22 - len(str(tiles["S1"]["number"])))//2)) + "\\ __ __ __ __    /   |" + "\n" +
+    #line 10
+    (" " * 36) + "|" + (" " * 3) + settlement_locs["C"]["display"] + (" /") + (" " * 11) + settlement_locs["D"]["display"] + "  \\" + (" " * ((22 - len(str(tiles["S1"]["biome"])))//2)) + tiles["S1"]["biome"] + (" " * 9) + "/ " + settlement_locs["E"]["display"] + (" " * 8) + settlement_locs["F"]["display"] + "  \\     |"
 )
 
 
@@ -174,6 +176,4 @@ encoded_grid = (
 
 
 print(encoded_grid)
-
-
 
