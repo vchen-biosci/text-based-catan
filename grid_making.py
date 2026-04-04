@@ -114,11 +114,11 @@ for i in range(18):
 
 kaomojis = {
     "ores": "‧₊˚🗻`˖*⋆",
-    "brick": "ᨒ↟ 𖠰",
+    "brick": "^~ᨒ↟ 𖠰~",
     "grain": "˚ʚ 🌱 ₊˚✧",
-    "wood": " ݁ ˖𓂃.𖠰",
-    "sheep": "𐔌՞. .՞𐦯", 
-    "desert": "⛰︎ ོ ༄"
+    "wood": "🪵 ⋆˙⟡♡~",
+    "sheep": ">𐔌՞. .՞𐦯~", 
+    "desert": "!!"
 }
 
 print(tiles)
@@ -164,16 +164,24 @@ encoded_grid = (
     #line 7
     "\n" +
     #line 8
-    (" " * 35) + ("2:1 grain port") + (" " * 9) + "/" + (" " * ((20 - (len(kaomojis[tiles["S1"]["biome"]])))//2)) + (kaomojis[tiles["S1"]["biome"]]) + (" " * ((20 - (len(kaomojis[tiles["S1"]["biome"]])))//2)) + (" " * ((20 - (len(kaomojis[tiles["S1"]["biome"]])))% 2)) + "\\" + (" " * 15) + "3:1 port" + "\n" +
+    (" " * 35) + ("2:1 grain port") + (" " * 9) + "/" + (" " * ((20 - (len(kaomojis[tiles["S1"]["biome"]])))//2)) + (kaomojis[tiles["S1"]["biome"]]) + (" " * ((20 - (len(kaomojis[tiles["S1"]["biome"]])))//2)) + (" " * ((20 - (len(kaomojis[tiles["S1"]["biome"]])))% 2)) + "\\" + (" " * 15) + "3:1 port\n" +
     #line 9
-    (" " * 36) + "|    \\   __ __ __ __ /" + (" " * ((22 - len(str(tiles["S1"]["number"])))//2)) + str(tiles["S1"]["number"]) + (" " * ((22 - len(str(tiles["S1"]["number"])))//2)) + "\\ __ __ __ __    /   |" + "\n" +
+    (" " * 36) + "|    \\   __ __ __ __ /" + (" " * ((22 - len(str(tiles["S1"]["number"])))//2)) + str(tiles["S1"]["number"]) + (" " * ((22 - len(str(tiles["S1"]["number"])))//2)) + "\\ __ __ __ __    /   |\n" +
     #line 10
-    (" " * 36) + "|" + (" " * 3) + settlement_locs["C"]["display"] + (" /") + (" " * 11) + settlement_locs["D"]["display"] + "  \\" + (" " * ((22 - len(str(tiles["S1"]["biome"])))//2)) + tiles["S1"]["biome"] + (" " * 9) + "/ " + settlement_locs["E"]["display"] + (" " * 8) + settlement_locs["F"]["display"] + "  \\     |"
+    (" " * 36) + "|" + (" " * 3) + settlement_locs["C"]["display"] + (" /") + (" " * 11) + settlement_locs["D"]["display"] + "  \\" + (" " * ((22 - len(str(tiles["S1"]["biome"])))//2)) + tiles["S1"]["biome"] + (" " * 9) + "/ " + settlement_locs["E"]["display"] + (" " * 8) + settlement_locs["F"]["display"] + "  \\     |\n" +
+    #line 11
+    (" " * 36) + "|" + "    /" +  (" " * 16) + "\\" + (" " * 9) + "S1" + (" " * 9) + "/" + (" " * 15) + "\\    |" + "\n" +
+    #line 12
+    (" " * 36) + "|" + (" " * 63) + "|" + "\n" +
+    #line 13
+    (" " * 36) + "|" + "  /" + (" " * ((19 - (len(kaomojis[tiles["S2"]["biome"]])))//2)) + (kaomojis[tiles["S2"]["biome"]]) + (" " * ((19 - (len(kaomojis[tiles["S2"]["biome"]])))//2)) + (" " * ((19 - (len(kaomojis[tiles["S2"]["biome"]])))% 2)) + "\\" + (" " * 16) + "/ "  + (" " * ((18 - (len(kaomojis[tiles["S3"]["biome"]])))//2)) + (kaomojis[tiles["S3"]["biome"]]) + (" " * ((18 - (len(kaomojis[tiles["S3"]["biome"]])))//2)) + (" " * ((18 - (len(kaomojis[tiles["S3"]["biome"]])))% 2)) + "\\  |\n" +
+    #line 14
+    (" " * 23) + ("__ " * 4) + settlement_locs["G"]["display"] + "  /" + (" " * ((21 - len(str(tiles["S2"]["number"])))//2)) + str(tiles["S2"]["number"]) + (" " * ((18 - len(str(tiles["S2"]["number"])))//2)) + settlement_locs["H"]["display"] + " \\ " + (" __" * 4) + " / " + settlement_locs["I"]["display"]
 )
 
 
 
-
+##you see, what im doing is super clever. becasue for each display, i can change it once it falls into a player's possession and stitch on some ansi labels hehehehe i mean at least i hope they dont get processed as commands... idkdkdkdkk
 
 print(encoded_grid)
 
