@@ -13,7 +13,7 @@ grid_1 = """                                                                3:1 
                                     |    /                \\         S1         /               \\    |                                          
                                     |                                                               |                                           
                                     |  /    ˚ʚ 🌱 ₊˚✧       \\                /      𐔌՞. .՞𐦯     \\   |                                                             
-                       __ __ __ __ G  /           3        H \\  __ __ __ __ / I        6        J \\ | __ __ __ __ K                                  
+                      $__ __ __ __ G  /           3        H \\  __ __ __ __ / I        6        J \\ | __ __ __ __ K                                  
                      /                \\       Grain :)       /              \\       Sheep!        /              \\                                  
                     /                  \\         S2         /                \\        S3         /                \\                                  
                                                                                                                                                     
@@ -56,6 +56,8 @@ grid_1 = """                                                                3:1 
                                              2:1 ore port     \\z __ __ __ __  /+      3:1 port 
 """
 
+#123456
+#‧₊˚🗻`
 print(grid_1)
 
 for line in grid_1.splitlines():
@@ -113,13 +115,14 @@ for i in range(18):
         tiles[("S"+str(i+1))]["number"] = chosen_number
 
 kaomojis = {
-    "ores": "‧₊˚🗻`˖*⋆",
-    "brick": "^~ᨒ↟ 𖠰~",
-    "grain": "˚ʚ 🌱 ₊˚✧",
-    "wood": "🪵 ⋆˙⟡♡~",
-    "sheep": ">𐔌՞. .՞𐦯~", 
-    "desert": "!!"
+    "ores": "‧₊˚🗻`",
+    "brick": "↟↟↟↟↟↟",
+    "grain": "˚ʚ🌱₊˚",
+    "wood": " ݁˖𓂃.𖠰.",
+    "sheep": ":3 ^^~", 
+    "desert": " ⛰︎ ོ ༄-"
 }
+
 
 print(tiles)
 
@@ -145,7 +148,7 @@ for loc in "RQCGWcvwjp":
     if reps%2 == 0:
         i += 1
 
-
+routes = "ABBEEIIHHDDA"
 
 print(settlement_locs)
 
@@ -164,7 +167,7 @@ encoded_grid = (
     #line 7
     "\n" +
     #line 8
-    (" " * 35) + ("2:1 grain port") + (" " * 9) + "/" + (" " * ((20 - (len(kaomojis[tiles["S1"]["biome"]])))//2)) + (kaomojis[tiles["S1"]["biome"]]) + (" " * ((20 - (len(kaomojis[tiles["S1"]["biome"]])))//2)) + (" " * ((20 - (len(kaomojis[tiles["S1"]["biome"]])))% 2)) + "\\" + (" " * 15) + "3:1 port\n" +
+    (" " * 35) + ("2:1 grain port") + (" " * 9) + "/" + (" " * 8) + (kaomojis[tiles["S1"]["biome"]]) + (" " * ((20 - (len(kaomojis[tiles["S1"]["biome"]])))//2)) + (" " * ((20 - (len(kaomojis[tiles["S1"]["biome"]])))% 2)) + "\\" + (" " * 15) + "3:1 port\n" +
     #line 9
     (" " * 36) + "|    \\   __ __ __ __ /" + (" " * ((22 - len(str(tiles["S1"]["number"])))//2)) + str(tiles["S1"]["number"]) + (" " * ((22 - len(str(tiles["S1"]["number"])))//2)) + "\\ __ __ __ __    /   |\n" +
     #line 10
@@ -185,3 +188,18 @@ encoded_grid = (
 
 print(encoded_grid)
 
+print("\n\n\n\n\n")
+new_freaking_grid = (
+    (" " * 65) + "3: 1 port" + "\n" +
+    (" " * 65) + "/      \\" + "\n" +
+    (" " * 64) + "/        \\" + "\n" +
+    (" " * 20) + "sea" + (" " * 38) + settlement_locs["A"]["display"] + " __ __ __ __ " + settlement_locs["B"]["display"] + (" " * 38) + "sea" + "\n" +
+    (" " * 61) + ("/              \\") + "\n" +
+    (" " * 60) + ("/                \\") + "\n\n" +
+    (" " * 35) + ("2:1 grain port") + (" " * 9) + "/" + (" " * 7) + kaomojis[tiles["S1"]["biome"]] + (" "* 7) + "\\" +"\n" +
+    (" " * 36) + "|    \\   __ __ __ __ /" + (" " * 10) + str(tiles["S1"]["number"]) + (" " * 11 if len(str(tiles["S1"]["number"])) == 1 else " " * 10) + "\\ __ __ __ __    /   |\n" 
+    ####YAYYYYY I LEARNT HOW TO USE PYTHON 1 LINERS I THINK I THINK I THIHNK THIS IS SO COOL
+    
+
+)
+print(new_freaking_grid)
