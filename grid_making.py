@@ -214,7 +214,7 @@ grid_part_1 = (
     + (" " * 15) + "/" + (" " * 7) + kaomojis[tiles["S6"]["biome"]] + (" " * 7) + "\\" + "\n" + 
     #line 19
     (" " * 15) + settlement_locs["L"]["display"] + " " + "/" + (" " * 11) + str(tiles["S4"]["number"]) + (" " * (10 if len(str(tiles["S4"]["number"])) == 1 else 9)) + settlement_locs["M"]["display"] +
-    " " + "\\" + "  " + ("__ " * 4) + "/" + settlement_locs["N"]["display"] + (" " * 10) + str(tiles["S5"]["number"]) + (" " * 8 if len(str(tiles["S5"]["number"])) == 1 else " " * 7) + settlement_locs["O"]["display"] +
+    " " + "\\" + "  " + ("__ " * 4) + "/" + settlement_locs["N"]["display"] + (" " * 9) + str(tiles["S5"]["number"]) + (" " * 9 if len(str(tiles["S5"]["number"])) == 1 else " " * 8) + settlement_locs["O"]["display"] +
     " " + "\\" + " " + ("__ " * 4) + "/" + " " + settlement_locs["P"]["display"] + (" " * 8) + str(tiles["S6"]["number"]) + (" " * 11 if len(str(tiles["S6"]["number"])) == 1 else " " * 10) + "\\"
     + " " + settlement_locs["Q"]["display"] + "\n" +
     #line 20
@@ -231,7 +231,7 @@ grid_part_1 = (
 
 grid_part_2 = (
     #line 24
-    (" " * 4) + "2:1 wood port - " + settlement_locs["R"]["display"] + " " + "\\" + " " + ("__ " * 4) + settlement_locs["S"]["display"] + " " + "/" + (" " * 10) + str(tiles["S7"]["number"]) + 
+    (" " * 3) + "2:1 wood port - " + settlement_locs["R"]["display"] + " " + "\\" + "  " + ("__ " * 4) + settlement_locs["S"]["display"] + " " + "/" + (" " * 10) + str(tiles["S7"]["number"]) + 
     (" " * 8 if len(str(tiles["S7"]["number"])) == 1 else " " * 7) + settlement_locs["T"]["display"] + "  " + "\\" + "  " + ("__ " * 4) + "/" + " " + settlement_locs["U"]["display"] +
     (" " * 8) + str(tiles["S8"]["number"]) + (" " * 8 if len(str(tiles["S8"]["number"])) == 1 else " " * 7) + settlement_locs["V"]["display"] + " " + "\\" + " " + ("__ " * 4) + " " + "/" + 
     settlement_locs["W"]["display"] +  " _ _ _  2:1 sheep port" + "\n" +
@@ -245,13 +245,26 @@ grid_part_2 = (
     #line 27
     (" " * 10) + "\\" + (" " * 110) + "/" + "\n" +
     #line 28
-    (" " * 11) + "\\" + (" " * 6) + "/" + (" " * 8) + kaomojis[tiles["S9"]["biome"]] + (" " * 8) + "\\" + (" " * 16) + "/" + (" " * 7) + kaomojis[tiles["S10"]["biome"]] + (" " * 7) + "\\"
+    (" " * 11) + "\\" + (" " * 6) + "/" + (" " * 8) + kaomojis[tiles["S9"]["biome"]] + (" " * 8) + "\\" + (" " * 16) + "/" + (" " * 6) + kaomojis[tiles["S10"]["biome"]] + (" " * 8) + "\\"
     + (" " * 15) + "/" + (" " * 7) + kaomojis[tiles["S11"]["biome"]] + (" " * 7) + "\\" + "   /" + "\n" +
     #line 29
     (" " * 12) + "\\  " + settlement_locs["Q"]["display"] + " " + "/" + (" " * 12) + str(tiles["S9"]["number"]) + (" " * 9 if len(str(tiles["S9"]["number"])) == 1 else " " * 8) 
-    + settlement_locs["Y"]["display"] + " " + "\\" + " " + ("__ " * 4) + settlement_locs["Z"]["display"] + "/" + (" " * 11) + str(tiles["S10"]["number"]) + 
-    (" " * 10 if len(str(tiles["S10"]["number"])) == 1 else " " * 9) + "\\"
-
+    + settlement_locs["Y"]["display"] + " " + "\\" + " " + ("__ " * 4) + settlement_locs["Z"]["display"] + "/" + (" " * 10) + str(tiles["S10"]["number"]) + 
+    (" " * 9 if len(str(tiles["S10"]["number"])) == 1 else " " * 8) + settlement_locs["a"]["display"] + " " + "\\" + (" __" * 4) + settlement_locs["b"]["display"] + "/" +
+    (" " * 10) + str(tiles["S11"]["number"]) + (" " * 11 if len(str(tiles["S11"]["number"])) == 1 else " " * 10) + "\\" + " " + settlement_locs["c"]["display"] + "\n" +
+    #line 30
+    (" " * 17) + "\\" + (" " * ((24 - len(str(tiles["S9"]["biome"])))//2)) + tiles["S9"]["biome"] + (" " * (((24-len(str(tiles["S9"]["biome"])))//2) + (1 if len(str(tiles["S9"]["biome"]))%2 != 0 else 0))) 
+    + "/" + (" " * 14) + "\\" + (" " * ((22 - len(str(tiles["S10"]["biome"])))//2)) + tiles["S10"]["biome"] + 
+    (" " * (((22-len(str(tiles["S10"]["biome"])))//2) + (1 if len(str(tiles["S10"]["biome"]))%2 != 0 else 0))) + "/" + (" " * 13) + "\\" +
+    (" " * ((22 - len(str(tiles["S11"]["biome"])))//2)) + tiles["S11"]["biome"] + 
+    (" " * (((22-len(str(tiles["S11"]["biome"])))//2) + (1 if len(str(tiles["S11"]["biome"]))%2 != 0 else 0))) + "/" + "\n" +
+    #line 31 & 32
+    (" " * 18) + "\\" + (" " * 10) + "S9" + (" " * 10) + "/" + (" " * 16) + "\\" + (" " * 8) + "S10" + (" " * 9) + "/" + (" " * 15) + "\\" + (" " * 9) + "S11" + (" " * 8) + "/" + "\n\n" +
+    #line 33
+    (" " * 20) + "\\" + (" " * 18) + "/" + (" " * 7) + kaomojis[tiles["S12"]["biome"]] + (" " * 7) + "\\" + (" " * 16) + "/" + (" " * 7) + kaomojis[tiles["S13"]["biome"]] + (" " * 6) + "\\" + (" " * 16) + "/" 
+    + "\n" +
+    #line 34
+    (" " * 19) + settlement_locs["d"]["display"] + " " + "\\" + " " + ("__ " * 4)
 )
 
 
