@@ -169,41 +169,6 @@ routes = "ABBEEIIHHDDA"
 
 print(settlement_locs)
 
-encoded_grid = (
-    (" " * 65) + "3: 1 port" + "\n" +
-    #line 2
-    (" " * 65) + "/      \\" + "\n" +
-    #line 3
-    (" " * 64) + "/        \\" + "\n" +
-    #line 4
-    (" " * 20) + "sea" + (" " * 38) + settlement_locs["A"]["display"] + " __ __ __ __ " + settlement_locs["B"]["display"] + (" " * 38) + "sea" + "\n" +
-    #line 5 
-    (" " * 61) + ("/              \\") + "\n" +
-    #line 6
-    (" " * 60) + ("/                \\") + "\n" +
-    #line 7
-    "\n" +
-    #line 8
-    (" " * 35) + ("2:1 grain port") + (" " * 9) + "/" + (" " * 8) + (kaomojis[tiles["S1"]["biome"]]) + (" " * ((20 - (len(kaomojis[tiles["S1"]["biome"]])))//2)) + (" " * ((20 - (len(kaomojis[tiles["S1"]["biome"]])))% 2)) + "\\" + (" " * 15) + "3:1 port\n" +
-    #line 9
-    (" " * 36) + "|    \\   __ __ __ __ /" + (" " * ((22 - len(str(tiles["S1"]["number"])))//2)) + str(tiles["S1"]["number"]) + (" " * ((22 - len(str(tiles["S1"]["number"])))//2)) + "\\ __ __ __ __    /   |\n" +
-    #line 10
-    (" " * 36) + "|" + (" " * 3) + settlement_locs["C"]["display"] + (" /") + (" " * 11) + settlement_locs["D"]["display"] + "  \\" + (" " * ((22 - len(str(tiles["S1"]["biome"])))//2)) + tiles["S1"]["biome"] + (" " * 9) + "/ " + settlement_locs["E"]["display"] + (" " * 8) + settlement_locs["F"]["display"] + "  \\     |\n" +
-    #line 11
-    (" " * 36) + "|" + "    /" +  (" " * 16) + "\\" + (" " * 9) + "S1" + (" " * 9) + "/" + (" " * 15) + "\\    |" + "\n" +
-    #line 12
-    (" " * 36) + "|" + (" " * 63) + "|" + "\n" +
-    #line 13
-    (" " * 36) + "|" + "  /" + (" " * ((19 - (len(kaomojis[tiles["S2"]["biome"]])))//2)) + (kaomojis[tiles["S2"]["biome"]]) + (" " * ((19 - (len(kaomojis[tiles["S2"]["biome"]])))//2)) + (" " * ((19 - (len(kaomojis[tiles["S2"]["biome"]])))% 2)) + "\\" + (" " * 16) + "/ "  + (" " * ((18 - (len(kaomojis[tiles["S3"]["biome"]])))//2)) + (kaomojis[tiles["S3"]["biome"]]) + (" " * ((18 - (len(kaomojis[tiles["S3"]["biome"]])))//2)) + (" " * ((18 - (len(kaomojis[tiles["S3"]["biome"]])))% 2)) + "\\  |\n" +
-    #line 14
-    (" " * 23) + ("__ " * 4) + settlement_locs["G"]["display"] + "  /" + (" " * ((21 - len(str(tiles["S2"]["number"])))//2)) + str(tiles["S2"]["number"]) + (" " * ((18 - len(str(tiles["S2"]["number"])))//2)) + settlement_locs["H"]["display"] + " \\ " + (" __" * 4) + " / " + settlement_locs["I"]["display"]
-)
-
-
-
-##you see, what im doing is super clever. becasue for each display, i can change it once it falls into a player's possession and stitch on some ansi labels hehehehe i mean at least i hope they dont get processed as commands... idkdkdkdkk
-
-print(encoded_grid)
 
 print("\n\n\n\n\n")
 new_freaking_grid = (
@@ -237,15 +202,28 @@ new_freaking_grid = (
     + (" " * 16) + "/ "  + (" " * 6) + (kaomojis[tiles["S3"]["biome"]]) 
     + (" " * 6) + "\\  |\n" +
     #line 14
-    #(" " * 23) + ("__ " * 4) + (" " * 10) + str(tiles["S1"]["number"]) + (" " * 11 if len(str(tiles["S1"]["number"])) == 1 else " " * 10) + "\\ __ __ __ __    /   |\n" +
     (" " * 23) + ("__ " * 4) + settlement_locs["G"]["display"] + "  /" + (" " * 10) + str(tiles["S2"]["number"]) + 
     (" " * 9 if len(str(tiles["S2"]["number"])) == 1 else " " * 8) + settlement_locs["H"]["display"] + " \\ " + (" __" * 4) + " / " + settlement_locs["I"]["display"] +
-    (" " * 8) + str(tiles["S3"]["number"]) + (" " * 8 if len(str(tiles["S3"]["number"])) == 1 else " " * 7) + settlement_locs["J"]["display"] + " " + "\\" + " | " + ("__ " * 4) + settlement_locs["K"]["display"] + "\n" +
+    (" " * 8) + str(tiles["S3"]["number"]) + (" " * 8 if len(str(tiles["S3"]["number"])) == 1 else " " * 7) + settlement_locs["J"]["display"] + " " + "\\" + " | " + ("__ " * 4) 
+    + settlement_locs["K"]["display"] + "\n" +
     #line 15
     (" " * 21) + "/" + (" " * 16) + "\\" + (" " * ((22 - len(str(tiles["S2"]["biome"])))//2)) + tiles["S2"]["biome"] + (" " * 9 if tiles["S2"]["biome"] != "desert" else " " * 8)
-    + "/" + (" " * 14) + "\\" + (" " * ((21 - len(str(tiles["S3"]["biome"])))//2)) + tiles["S3"]["biome"] + (" " * ( (21 - len(tiles["S3"]["biome"])) //2   ) ) + (" " * (1 if len(tiles["S3"]["biome"]) % 2 != 1 else 0)) + "/"
-    + (" " * 14) + "\\"
-    
+    + "/" + (" " * 14) + "\\" + (" " * ((21 - len(str(tiles["S3"]["biome"])))//2)) + tiles["S3"]["biome"] + (" " * ( (21 - len(tiles["S3"]["biome"])) //2   ) ) + 
+    (" " * (1 if len(tiles["S3"]["biome"]) % 2 != 1 else 0)) + "/" + (" " * 14) + "\\" + "\n" +
+    #line 16&17 
+    (" " * 20) + "/" + (" " * 18) + "\\" + (" " * 9) + "S2" + (" " * 9) + "/" + (" " * 16) + "\\" + (" " * 8) + "S3" + (" " * 9) + "/" + (" " * 16) + "\\" + "\n\n" +
+    #line 18
+    (" " * 18) + "/" + (" " * 8) + kaomojis[tiles["S4"]["biome"]] + (" " * 8) + "\\" + (" " * 16) + "/" + (" " * 7) + kaomojis[tiles["S5"]["biome"]] + (" " * 7) + "\\"
+    + (" " * 15) + "/" + (" " * 7) + kaomojis[tiles["S6"]["biome"]] + (" " * 7) + "\\" + "\n" + 
+    #line 19
+    (" " * 15) + settlement_locs["L"]["display"] + " " + "/" + (" " * 11) + str(tiles["S4"]["number"]) + (" " * (10 if len(str(tiles["S4"]["number"])) == 1 else 9)) + settlement_locs["M"]["display"] +
+    " " + "\\" + "  " + ("__ " * 4) + "/" + settlement_locs["N"]["display"] + (" " * 10) + str(tiles["S5"]["number"]) + (" " * 8 if len(str(tiles["S5"]["number"])) == 1 else " " * 7) + settlement_locs["O"]["display"] +
+    " " + "\\" + " " + ("__ " * 4) + "/" + " " + settlement_locs["P"]["display"] + (" " * 8) + str(tiles["S6"]["number"]) + (" " * 11 if len(str(tiles["S6"]["number"])) == 1 else " " * 10) + "\\"
+    + " " + settlement_locs["Q"]["display"] + "\n" +
+    #line 20
+    (" " * 17) + "\\" + (" " * ((24 - len(str(tiles["S4"]["biome"])))//2)) + tiles["S4"]["biome"] + (" " * 10 if tiles["S4"]["biome"] != "desert" else " " * 9) + "/" + (" " * 14) + "\\" +
+     (" " * ((22 - len(str(tiles["S5"]["biome"])))//2)) + tiles["S5"]["biome"] + (" " * 9 if tiles["S5"]["biome"] != "desert" else " " * 8) + "/" + (" " * 13) + "\\" +
+      (" " * ((22 - len(str(tiles["S6"]["biome"])))//2)) + tiles["S6"]["biome"] + (" " * 9 if tiles["S6"]["biome"] != "desert" else " " * 8) + "/"
 
 
 )
