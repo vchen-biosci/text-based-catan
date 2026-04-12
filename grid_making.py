@@ -23,7 +23,7 @@ grid_1 = """                                                                3:1 
                   \\         S4           /                \\         S5        /                \\         S6         /                                  
                                                                                                                                                                  
                     \\                  /        ᨒ↟ 𖠰       \\                /     ‧₊˚🗻`˖*⋆      \\               /                                  
-   2:1 wood port - R \\ __ __ __ __ S  /          5         T \\ __ __ __ __ / U        2          V\\ __ __ __ __ /W _ _ _  2:1 cow port                 
+   2:1 wood port - R \\ __ __ __ __ S  /          5         T \\ __ __ __ __ / U        2          V\\ __ __ __ __ /W _ _ _  2:1 sheep port                 
         \\            /                \\         Brick         /             \\        Ores         /             \\         /                             
          \\          /                  \\         S7          /               \\         S8        /               \\       /                               
           \\                                                                                                             /                      
@@ -68,9 +68,6 @@ tiles = {}
 
 for i in range(19):
     tiles[("S"+str(i+1))] = {}
-
-for tile in tiles:
-    print("x")
 
 print(tiles)
 
@@ -156,7 +153,7 @@ for letter in possible_locs:
 for loc in "ABFJouxy":
     settlement_locs[loc]["port"] = {"3:1 port"}
 i = 0
-ports = ["wood", "grain", "cow", "ore", "brick"]
+ports = ["wood", "grain", "sheep", "ore", "brick"]
 reps = 0
 for loc in "RQCGWcvwjp":
     reps += 1
@@ -171,7 +168,7 @@ print(settlement_locs)
 
 
 print("\n\n\n\n\n")
-new_freaking_grid = (
+grid_part_1 = (
     #line 1
     (" " * 65) + "3: 1 port" + "\n" +
     #line 2
@@ -210,7 +207,7 @@ new_freaking_grid = (
     (" " * 21) + "/" + (" " * 16) + "\\" + (" " * ((22 - len(str(tiles["S2"]["biome"])))//2)) + tiles["S2"]["biome"] + (" " * 9 if tiles["S2"]["biome"] != "desert" else " " * 8)
     + "/" + (" " * 14) + "\\" + (" " * ((21 - len(str(tiles["S3"]["biome"])))//2)) + tiles["S3"]["biome"] + (" " * ( (21 - len(tiles["S3"]["biome"])) //2   ) ) + 
     (" " * (1 if len(tiles["S3"]["biome"]) % 2 != 1 else 0)) + "/" + (" " * 14) + "\\" + "\n" +
-    #line 16&17 
+    #line 16 & 17 
     (" " * 20) + "/" + (" " * 18) + "\\" + (" " * 9) + "S2" + (" " * 9) + "/" + (" " * 16) + "\\" + (" " * 8) + "S3" + (" " * 9) + "/" + (" " * 16) + "\\" + "\n\n" +
     #line 18
     (" " * 18) + "/" + (" " * 8) + kaomojis[tiles["S4"]["biome"]] + (" " * 8) + "\\" + (" " * 16) + "/" + (" " * 7) + kaomojis[tiles["S5"]["biome"]] + (" " * 7) + "\\"
@@ -222,10 +219,41 @@ new_freaking_grid = (
     + " " + settlement_locs["Q"]["display"] + "\n" +
     #line 20
     (" " * 17) + "\\" + (" " * ((24 - len(str(tiles["S4"]["biome"])))//2)) + tiles["S4"]["biome"] + (" " * 10 if tiles["S4"]["biome"] != "desert" else " " * 9) + "/" + (" " * 14) + "\\" +
-     (" " * ((22 - len(str(tiles["S5"]["biome"])))//2)) + tiles["S5"]["biome"] + (" " * 9 if tiles["S5"]["biome"] != "desert" else " " * 8) + "/" + (" " * 13) + "\\" +
-      (" " * ((22 - len(str(tiles["S6"]["biome"])))//2)) + tiles["S6"]["biome"] + (" " * 9 if tiles["S6"]["biome"] != "desert" else " " * 8) + "/"
+    (" " * ((22 - len(str(tiles["S5"]["biome"])))//2)) + tiles["S5"]["biome"] + (" " * 9 if tiles["S5"]["biome"] != "desert" else " " * 8) + "/" + (" " * 13) + "\\" +
+    (" " * ((22 - len(str(tiles["S6"]["biome"])))//2)) + tiles["S6"]["biome"] + (" " * 9 if tiles["S6"]["biome"] != "desert" else " " * 8) + "/" + "\n" +
+    #line 21 & 22
+    (" " * 18) + "\\" + (" " * 10) + "S4" + (" " * 10) + "/" + (" " * 16) + "\\" + (" " * 9) + "S5" + (" " * 9) + "/" + (" " * 15) + "\\" + (" " * 9) + "S6" + (" " * 9) + "/" + "\n\n" +
+    #line 23
+    (" " * 20) + "\\" + (" " * 18) + "/" + (" " * 7) + kaomojis[tiles["S7"]["biome"]] + (" " * 7) + "\\" + (" " * 16) + "/" + (" " * 7) + kaomojis[tiles["S8"]["biome"]]  + (" " * 6) + "\\" +
+    (" " * 16) + "/"
+    
+)
 
+grid_part_2 = (
+    #line 24
+    (" " * 4) + "2:1 wood port - " + settlement_locs["R"]["display"] + " " + "\\" + " " + ("__ " * 4) + settlement_locs["S"]["display"] + " " + "/" + (" " * 10) + str(tiles["S7"]["number"]) + 
+    (" " * 8 if len(str(tiles["S7"]["number"])) == 1 else " " * 7) + settlement_locs["T"]["display"] + "  " + "\\" + "  " + ("__ " * 4) + "/" + " " + settlement_locs["U"]["display"] +
+    (" " * 8) + str(tiles["S8"]["number"]) + (" " * 8 if len(str(tiles["S8"]["number"])) == 1 else " " * 7) + settlement_locs["V"]["display"] + " " + "\\" + " " + ("__ " * 4) + " " + "/" + 
+    settlement_locs["W"]["display"] +  " _ _ _  2:1 sheep port" + "\n" +
+    #line 25
+    (" " * 8) + "\\" + (" " * 12) + "/" + (" " * 16) + "\\" + (" " * ((22 - len(str(tiles["S7"]["biome"])))//2)) + tiles["S7"]["biome"] + 
+    (" " * (((22-len(str(tiles["S7"]["biome"])))//2) + (1 if len(str(tiles["S7"]["biome"]))%2 != 0 else 0))) + "/" + (" " * 14) + "\\" +
+    (" " * ((21 - len(str(tiles["S8"]["biome"])))//2)) + tiles["S8"]["biome"] + 
+    (" " * (((21-len(str(tiles["S8"]["biome"])))//2) + (1 if len(str(tiles["S8"]["biome"]))%2 != 1 else 0))) + "/" + (" " * 14) + "\\" + "         /\n" +
+    #line 26
+    (" " * 9) + "\\" + (" " * 10) + "/" + (" " * 18) + "\\" + (" " * 9) + "S7" + (" " * 9) + "/" + (" " * 16) + "\\" + (" " * 8) + "S8" + (" " * 9) + "/" + (" " * 16) + "\\" + "       /" + "\n" +
+    #line 27
+    (" " * 10) + "\\" + (" " * 110) + "/" + "\n" +
+    #line 28
+    (" " * 11) + "\\" + (" " * 6) + "/" + (" " * 8) + kaomojis[tiles["S9"]["biome"]] + (" " * 8) + "\\" + (" " * 16) + "/" + (" " * 7) + kaomojis[tiles["S10"]["biome"]] + (" " * 7) + "\\"
+    + (" " * 15) + "/" + (" " * 7) + kaomojis[tiles["S11"]["biome"]] + (" " * 7) + "\\" + "   /" + "\n" +
+    #line 29
+    (" " * 12) + "\\  " + settlement_locs["Q"]["display"] + " " + "/" + (" " * 12) + str(tiles["S9"]["number"]) + (" " * 9 if len(str(tiles["S9"]["number"])) == 1 else " " * 8) 
+    + settlement_locs["Y"]["display"] + " " + "\\" + " " + ("__ " * 4) + settlement_locs["Z"]["display"] + "/" + (" " * 11) + str(tiles["S10"]["number"]) + 
+    (" " * 10 if len(str(tiles["S10"]["number"])) == 1 else " " * 9) + "\\"
 
 )
 
-print(new_freaking_grid)
+
+print(grid_part_1)
+print(grid_part_2)
