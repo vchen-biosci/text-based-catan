@@ -97,7 +97,7 @@ desert_placement = random.randint(1, 19)
 tiles[("S"+str(desert_placement))]["biome"] = "desert"
 tiles[("S"+str(desert_placement))]["number"] = 7
 
-for i in range(18):
+for i in range(19):
 
     try:
         x = tiles[("S"+str(i+1))]["biome"] != "desert"
@@ -284,7 +284,7 @@ grid_part_3 = (
     (" " * 15) + settlement_locs["j"]["display"] + " " + "/" + (" " * 11) + str(tiles["S14"]["number"]) + (" " * 10 if len(str(tiles["S14"]["number"])) == 1 else " " * 9) + settlement_locs["k"]["display"]
     + " " + "\\" + " " + ("__ " * 4) + settlement_locs["l"]["display"] + "/" + (" " * 10) + str(tiles["S15"]["number"]) + (" " * 9 if len(str(tiles["S15"]["number"])) == 1 else " " * 8)
     + settlement_locs["m"]["display"] + " " + "\\" + " " + ("__ " * 4) + "/" + settlement_locs["n"]["display"] + (" " * 9) + str(tiles["S16"]["number"]) + 
-    (" " * 11 if len(str(tiles["S16"]["number"])) == 1 else " " * 10) + "\\" + settlement_locs["o"]["display"] + "\n" +
+    (" " * 11 if len(str(tiles["S16"]["number"])) == 1 else " " * 10) + "\\" + " " + settlement_locs["o"]["display"] + "\n" +
     #line 40
     (" " * 17) + "\\" + (" " * ((24 - len(str(tiles["S14"]["biome"])))//2)) + tiles["S14"]["biome"] +
     (" " * (((24-len(str(tiles["S14"]["biome"])))//2) + (1 if len(str(tiles["S14"]["biome"]))%2 != 0 else 0))) + "/" + (" " * 14) + "\\" +
@@ -306,7 +306,30 @@ grid_part_3 = (
     str(tiles["S18"]["number"]) + (" " * 8 if len(str(tiles["S18"]["number"])) == 1 else " " * 7) + settlement_locs["t"]["display"] + " " + "\\" + " " + ("__ " * 4) + " " + "/" +
     settlement_locs["u"]["display"] + "  _ _ 3:1 port" + "\n" +
     #line 45
-    (" " * 38)
+    (" " * 38) + "\\" + (" " * ((22 - len(str(tiles["S17"]["biome"])))//2)) + tiles["S17"]["biome"] + 
+    (" " * (((22 - len(str(tiles["S17"]["biome"])))//2) + (1 if len(str(tiles["S17"]["biome"]))%2 != 0 else 0))) + "/" + (" " * 14) + "\\" +
+    (" " * ((21 - len(str(tiles["S18"]["biome"])))//2)) + tiles["S18"]["biome"] + 
+    (" " * (((21 - len(str(tiles["S18"]["biome"])))//2) + (1 if len(str(tiles["S18"]["biome"]))%2 != 1 else 0))) + "/" + "\n" +
+    #line 46 & 47
+    (" " * 39) + "\\" + (" " * 8)  + "S17" + (" " * 9) + "/" + (" " * 16) + "\\" + (" " * 8) + "S18" + (" " * 8) + "/" + "\n\n" +
+    #line 48
+    (" " * 41) + "\\" + (" " * 16) + "/" + (" " * 7) + kaomojis[tiles["S19"]["biome"]] + (" " * 7) + "\\" + (" " * 15) + "/" + "\n" +
+    #line 49
+    (" " * 42) + "\\" + settlement_locs["v"]["display"] + " " + ("__ " * 4) + settlement_locs["w"]["display"] + (" " * 10) + str(tiles["S19"]["number"]) +
+    (" " * 9 if len(str(tiles["S19"]["number"])) == 1 else " " * 8) + settlement_locs["x"]["display"] + " " + "\\" + " " + ("__ " * 4) + "/" + " " 
+    + settlement_locs["y"]["display"] + "\n" +
+    #line 50
+    (" " * 58) + "\\" +(" " * ((21 - len(str(tiles["S19"]["biome"])))//2)) + tiles["S19"]["biome"] + 
+    (" " * (((21 - len(str(tiles["S19"]["biome"])))//2) + (1 if len(str(tiles["S19"]["biome"]))%2 != 1 else 0))) + "/" + "\n" +
+    #line 51
+    (" " * 44) + "\\" + (" " * 11) + "/  " + "\\" + (" " * 8) + "S19" + (" " * 8) + "/" + "  \\          /" + "\n" +
+    #line 52
+    (" " * 45) + "\\         /" + (" " * 27) + "\\" + "        " + "/" + "\n" +
+    #line 53
+    (" " * 46) + "\\       /      " + "\\" + "               " + "/" + "      " + "\\" + "      " + "/" + "\n" +
+    #line 54
+    (" " * 45) + "2:1 ore port     " + "\\" + settlement_locs["z"]["display"] + " " + ("__ " * 4) + settlement_locs["+"]["display"] + "      3:1 port"
+
 )
 
 
