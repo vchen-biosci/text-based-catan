@@ -123,6 +123,23 @@ kaomojis = {
     "desert": " ⛰︎ ོ ༄-"
 }
 
+tiles["S1"]["roads"] = []
+counter = 0
+roads_string = "ABBEEIIHHDDA"
+for i in range((len(roads_string))//2):
+
+    road = ""
+    road += roads_string[counter]
+    counter += 1
+    road += roads_string[counter]
+    counter += 1
+    
+    if road[0] > road[1]:
+        road = road[1] + road[0]
+    tiles["S1"]["roads"].append(road)
+    
+print(f'\n\n\n\n\n{tiles["S1"]["roads"]}\n\n\n\n')
+    
 
 print(tiles)
 
@@ -190,16 +207,47 @@ print(encoded_grid)
 
 print("\n\n\n\n\n")
 new_freaking_grid = (
+    #line 1
     (" " * 65) + "3: 1 port" + "\n" +
+    #line 2
     (" " * 65) + "/      \\" + "\n" +
+    #line 3
     (" " * 64) + "/        \\" + "\n" +
+    #line 4
     (" " * 20) + "sea" + (" " * 38) + settlement_locs["A"]["display"] + " __ __ __ __ " + settlement_locs["B"]["display"] + (" " * 38) + "sea" + "\n" +
+    #line 5
     (" " * 61) + ("/              \\") + "\n" +
+    #line 6 & 7
     (" " * 60) + ("/                \\") + "\n\n" +
-    (" " * 35) + ("2:1 grain port") + (" " * 9) + "/" + (" " * 7) + kaomojis[tiles["S1"]["biome"]] + (" "* 7) + "\\" +"\n" +
-    (" " * 36) + "|    \\   __ __ __ __ /" + (" " * 10) + str(tiles["S1"]["number"]) + (" " * 11 if len(str(tiles["S1"]["number"])) == 1 else " " * 10) + "\\ __ __ __ __    /   |\n" 
-    ####YAYYYYY I LEARNT HOW TO USE PYTHON 1 LINERS I THINK I THINK I THIHNK THIS IS SO COOL
+    #line 8
+    (" " * 35) + ("2:1 grain port") + (" " * 9) + "/" + (" " * 7) + kaomojis[tiles["S1"]["biome"]] + (" "* 7) + "\\" + (" " * 16) + "3:1 port" + "\n" +
+    #line 9
+    (" " * 36) + "|    \\   __ __ __ __ /" + (" " * 10) + str(tiles["S1"]["number"]) + (" " * 11 if len(str(tiles["S1"]["number"])) == 1 else " " * 10) + "\\ __ __ __ __    /  |\n" +
+    #line 10
+    (" " * 36) + "|" + (" " * 3) + settlement_locs["C"]["display"] + (" /") + (" " * 11) + settlement_locs["D"]["display"] + "  \\" 
+    + (" " * ((22 - len(str(tiles["S1"]["biome"])))//2)) + tiles["S1"]["biome"] + 
+    (" " * (((22-len(str(tiles["S1"]["biome"])))//2)+ (1 if len(str(tiles["S1"]["biome"]))%2 != 0 else 0)))
+    + "/ " + settlement_locs["E"]["display"] + (" " * 8) + settlement_locs["F"]["display"] + "  \\     |\n" +
+    #line 11
+    (" " * 36) + "|" + "    /" +  (" " * 16) + "\\" + (" " * 9) + "S1" + (" " * 9) + "/" + (" " * 15) + "\\    |" + "\n" +
+    #line 12
+    (" " * 36) + "|" + (" " * 63) + "|" + "\n" +
+    #line 13
+    (" " * 36) + "|" + "  /" + (" " * 7) + kaomojis[tiles["S2"]["biome"]] + (" " * 7) + "\\" 
+    + (" " * 16) + "/ "  + (" " * 6) + (kaomojis[tiles["S3"]["biome"]]) 
+    + (" " * 6) + "\\  |\n" +
+    #line 14
+    #(" " * 23) + ("__ " * 4) + (" " * 10) + str(tiles["S1"]["number"]) + (" " * 11 if len(str(tiles["S1"]["number"])) == 1 else " " * 10) + "\\ __ __ __ __    /   |\n" +
+    (" " * 23) + ("__ " * 4) + settlement_locs["G"]["display"] + "  /" + (" " * 10) + str(tiles["S2"]["number"]) + 
+    (" " * 9 if len(str(tiles["S2"]["number"])) == 1 else " " * 8) + settlement_locs["H"]["display"] + " \\ " + (" __" * 4) + " / " + settlement_locs["I"]["display"] +
+    (" " * 8) + str(tiles["S3"]["number"]) + (" " * 8 if len(str(tiles["S3"]["number"])) == 1 else " " * 7) + settlement_locs["J"]["display"] + " " + "\\" + " | " + ("__ " * 4) + settlement_locs["K"]["display"] + "\n" +
+    #line 15
+    (" " * 21) + "/" + (" " * 16) + "\\" + (" " * ((22 - len(str(tiles["S2"]["biome"])))//2)) + tiles["S2"]["biome"] + (" " * 9 if tiles["S2"]["biome"] != "desert" else " " * 8)
+    + "/" + (" " * 14) + "\\" + (" " * ((21 - len(str(tiles["S3"]["biome"])))//2)) + tiles["S3"]["biome"] + (" " * ( (21 - len(tiles["S3"]["biome"])) //2   ) ) + (" " * (1 if len(tiles["S3"]["biome"]) % 2 != 1 else 0)) + "/"
+    + (" " * 14) + "\\"
     
 
+
 )
+
 print(new_freaking_grid)
