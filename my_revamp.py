@@ -16,13 +16,93 @@ def setup_player_names(initial_dict : dict):
 
         return initial_dict
 
+def ansi_stitching(color : list, text):
+        
+        colored_ver = ""
+        colored_ver += "\x1b[38;2;"
+
+        reps = 0
+        for value in color:
+                colored_ver += str(value)
+                reps += 1
+
+                if reps != 3:
+                        colored_ver += ";"
+        
+        colored_ver += "m"
+        colored_ver += text
+        colored_ver += "\x1b[0m"
+
+        return colored_ver
+
 def assign_player_colours(initial_dict : dict):
 
         player_number = initial_dict["player_number"]
 
+        table = """"""
+
         for i in range(player_number):
-                """write this code after studying ANSII codes and how they work. I think I can pass stuff in as a string later, and i hope python processes it like this."""
-                initial_dict[str(i + 1)]["colour"] = "whatever ansii code they want lowk though i should ask them if theyre sure or not about codes that fall within a certain range. I also need to check if they're valid."
+                colors = ["red", "green", "blue"]
+
+                for player in range(player_number):
+                        player_colour = []
+                        big_loop = True
+                        while big_loop:
+                                for color in colors:
+
+                                        
+
+                                        action = input(f"Player {player + 1}, what value would you like to use for {color}? " + 
+                                                        "Type 'table' to see available colour tables.\n> ").strip().lower()
+                                        
+                                        if action == "table":
+                                                print(table)
+
+                                        else:
+                                                loop = True
+                                                while loop:
+
+                                                        try:
+                                                                if int(action) <= 255:
+                                                                        player_colour.append(int(action))
+                                                                        loop = False
+
+                                                                        
+                                                                else:
+                                                                        print("Sorry; RGB values only go up to 255.")
+                                                                        action = input(f"Player {player + 1}, what value would you like to use for {color}? " + 
+                                                        "Type 'table' to see available colour tables.\n> ").strip().lower()
+
+                                                        except ValueError:
+
+                                                                if action == "table":
+                                                                        print(table)
+                                                                else:
+                                                                        print("Please input a valid integer, in arabic numerals, within the range of 0 to 255.")
+                                                                
+                                                                action = input(f"Player {player + 1}, what value would you like to use for {color}? " + 
+                                                        "Type 'table' to see available colour tables.\n> ").strip().lower()
+
+                                confirm_loop = True
+                                while confirm_loop:
+
+                                        confirm = input(ansi_stitching(player_colour, """This is what your colour looks like - are you sure you want it? Type 'Y' for yes and 'N' for no. 
+Please make sure all other players are able to read this!\n> """)).strip()
+                                        
+                                        
+                                        if confirm == "N":
+                                                colors = []
+                                                confirm_loop = False
+                                        
+                                        elif confirm == "Y":
+                                                confirm_loop = False
+                                                big_loop = False
+                                                
+                                        else:
+                                                print("Please type either 'Y' or 'N'. This is case sensitive.")
+
+                                                        
+                                
                 
         return initial_dict
 
@@ -127,6 +207,7 @@ def set_up_game(game_info : dict):
 
 def welcome_player():
         print("WELCOME TO MY TEXT-BASED CATAN!")
+        print("Hi! Before we start, make sure \x1b[38;2;142;194;21mthis text\x1b[0m is green!")
         print("""CREDITS: Vivienne, CATAN game studio""")
         print("ENTER YOUR COMMAND TO BEGIN :)")
 
