@@ -1,7 +1,6 @@
 from os import system
 import random
 
-init(autoreset=True)
 
 class Game:
         

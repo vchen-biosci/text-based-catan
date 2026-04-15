@@ -1,5 +1,5 @@
 from os import system
-import random
+import random, time
 
 ##at the start of the game, welcome the player
 ##then ask if they want to see credits/start a game. use a while loop to make sure that the game has not yet started.
