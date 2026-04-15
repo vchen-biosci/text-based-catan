@@ -131,7 +131,7 @@ for road_type in road_types:
 
                 road = quick_reorder(road)
                 
-                roads[road] = ansi_stitching([0, 201, 184], road_type)
+                roads[road] = road_type
         counter = 0
 
         print(roads)
