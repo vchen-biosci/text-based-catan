@@ -252,6 +252,9 @@ def generate_grid(game : dict, CONSTS : dict):
                         i += 1
         time.sleep(0.5)
 
+        print("Paving your roads...")
+        time.sleep(0.5)
+
 
 
 
@@ -512,6 +515,8 @@ ENTER YOUR COMMAND TO BEGIN :)""",
                         game["input type"] = CONSTS["commands"]
                         print("Starting your game...")
                         game = setup_game(game, CONSTS)
+                        print("The game's over! Wanna try again? ^^")
+                        main()
                         
                 else:
                         try:
