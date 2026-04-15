@@ -1,295 +1,7 @@
-from os import system
-import random, os
+import random, os, time
 
-def setup_player_names(initial_dict : dict):
-
-        player_number = initial_dict["player_number"]
-
-        for i in range(player_number):
-                "first insert different dictionaries into the dictionary"
-                initial_dict[str(i + 1)] = {}
-
-        for i in range(player_number):
-                "then I'll iterate through the players and put their names into their respective dictionaries, putting name in the key called name"
-                player_name = input(f"What do you want to be called?, player {i + 1}?\n> ").strip()
-                initial_dict[str(i + 1)]["name"] = player_name 
-
-        return initial_dict
-
-def ansi_stitching(color : list, text):
+def infinite_rng(game : dict, CONSTS : dict):
         
-        colored_ver = ""
-        colored_ver += "\x1b[38;2;"
-
-        reps = 0
-        for value in color:
-                colored_ver += str(value)
-                reps += 1
-
-                if reps != 3:
-                        colored_ver += ";"
-        
-        colored_ver += "m"
-        colored_ver += text
-        colored_ver += "\x1b[0m"
-
-        return colored_ver
-
-def assign_player_colours(initial_dict : dict):
-
-        player_number = initial_dict["player_number"]
-
-        table = """"""
-
-        for i in range(player_number):
-                colors = ["red", "green", "blue"]
-
-                for player in range(player_number):
-                        player_colour = []
-                        big_loop = True
-                        while big_loop:
-                                for color in colors:
-
-                                        
-
-                                        action = input(f"Player {player + 1}, what value would you like to use for {color}? " + 
-                                                        "Type 'table' to see available colour tables.\n> ").strip().lower()
-                                        
-                                        if action == "table":
-                                                print(table)
-
-                                        else:
-                                                loop = True
-                                                while loop:
-
-                                                        try:
-                                                                if int(action) <= 255:
-                                                                        player_colour.append(int(action))
-                                                                        loop = False
-
-                                                                        
-                                                                else:
-                                                                        print("Sorry; RGB values only go up to 255.")
-                                                                        action = input(f"Player {player + 1}, what value would you like to use for {color}? " + 
-                                                        "Type 'table' to see available colour tables.\n> ").strip().lower()
-
-                                                        except ValueError:
-
-                                                                if action == "table":
-                                                                        print(table)
-                                                                else:
-                                                                        print("Please input a valid integer, in arabic numerals, within the range of 0 to 255.")
-                                                                
-                                                                action = input(f"Player {player + 1}, what value would you like to use for {color}? " + 
-                                                        "Type 'table' to see available colour tables.\n> ").strip().lower()
-
-                                confirm_loop = True
-                                while confirm_loop:
-
-                                        confirm = input(ansi_stitching(player_colour, """This is what your colour looks like - are you sure you want it? Type 'Y' for yes and 'N' for no. 
-Please make sure all other players are able to read this!\n> """)).strip()
-                                        
-                                        
-                                        if confirm == "N":
-                                                colors = []
-                                                confirm_loop = False
-                                        
-                                        elif confirm == "Y":
-                                                confirm_loop = False
-                                                big_loop = False
-                                                
-                                        else:
-                                                print("Please type either 'Y' or 'N'. This is case sensitive.")
-
-                                                        
-                                
-                
-        return initial_dict
-
-def get_player_number():
-        while True:
-                try:
-                        player_number = int(input("How many people are playing? :)\n> ").strip()) 
-                        if player_number in [3, 4]:
-                                break
-                        else: 
-                                print("You can only play with 3 or 4 people, sorry!")
-
-                except ValueError:
-                        print("Enter an integer 3 or 4 please.")
-
-        return player_number
-
-def assign_resource_cards(initial_dict):
-        
-        for i in range(initial_dict["player_number"]):
-                initial_dict[str(i + 1)]["resource_cards"] = {}
-
-        return initial_dict
-
-def edit_game_bank(game_bank : dict, initial_dict : dict, game_info : dict):
-        
-        
-        "give them resource card dictionaries."
-
-        if game_info["game_state"] == "setup":
-                print("Setting up your resource cards...")
-                for resource in game_info["resources"]:
-                        game_bank[resource] = 19
-                print("Setting up your development cards...")
-                """then set up development cards lol"""
-
-        return game_bank
-
-        #we add different categories. ok, we can do this by making a big list of stuff to add first.
-
-def print_commands_list(game_info):
-
-        print("Here are the commands available to you during the game:\n")
-        for key in GAME_COMMANDS:
-                print(key, end=" ")
-
-        print("\n")
-
-        print("And here are the commands available to you before the game starts:\n")
-        for key in PRE_COMMANDS:
-                print(key, end=", ")
-
-        print("\n")
-
-def print_building_costs(game_info):
-
-        #dude im setting this up later. i cant be bothered.
-        print("""HEre are your building costs my friend:""")
-
-def display_info(game_info):
-        print("Here's yo info but im lazy rn")
-
-def print_credits(game_info):
-        print("Once again my love, im lazy")
-
-def print_own_deck(game_info : dict, initial_dict : dict):
-        
-        print("Here are your resource cards:")
-        for key in initial_dict[game_info["turn"]]["resource_cards"]:
-                print(key, initial_dict[game_info["turn"]]["resource_cards"][key])
-        print("And here are your development cards.")
-        for key in initial_dict[game_info["turn"]]["dev_cards"]:
-                print(key, initial_dict[game_info["turn"]]["dev_cards"][key])
-        print(f"And here are your victory points: {initial_dict[game_info['turn']]['victory_points']}")
-
-def roll_die(game_info : dict):
-        "i swear this is actually written yukw ill transfer it rn"
-
-        dice_1 = random.randint(1, 6)
-        dice_2 = random.randint(1, 6)
-        roll = dice_1 + dice_2
-        print(f"The die have spoken!! |{dice_1}| |{dice_2}| ... {dice_1} + {dice_2} = {roll}! You have rolled a {roll} :3")
-
-        return roll
-
-def print_game_rules(game_info : dict):
-        print(game_info["rules"])
-
-def set_up_game(game_info : dict):
-
-        initial_dict = {}
-        game_bank = {}
-
-        initial_dict["player_number"] = get_player_number()
-        initial_dict = setup_player_names(initial_dict)
-        initial_dict = assign_player_colours(initial_dict)
-        initial_dict = assign_resource_cards(initial_dict)
-        
-        game_bank = edit_game_bank(game_bank, initial_dict, game_info)
-
-        return initial_dict, game_bank
-
-def welcome_player():
-        print("WELCOME TO MY TEXT-BASED CATAN!")
-        print("Hi! Before we start, make sure \x1b[38;2;142;194;21mthis text\x1b[0m is green!")
-        print("""CREDITS: Vivienne, CATAN game studio""")
-        print("ENTER YOUR COMMAND TO BEGIN :)")
-
-def setup_terrain(game_info):
-        print("Rendering your grid...")
-        tiles = {}
-        for i in range(19):
-                tiles[("S"+str(i+1))] = {}
-
-        biomes = []
-        for i in range(3):
-                biomes.append("ores")
-                biomes.append("brick")
-        for i in range(4):
-                biomes.append("grain")
-                biomes.append("wood")
-                biomes.append("sheep")
-
-
-        number_tokens = []
-        for i in range(10):
-                if (i + 2) != 7:
-                        for x in range(2):
-                                number_tokens.append(i + 2)
-        number_tokens.append(1)
-        number_tokens.append(12)
-
-        desert_placement = random.randint(1, 19)
-        tiles[("S"+str(desert_placement))]["biome"] = "desert"
-        tiles[("S"+str(desert_placement))]["number"] = 7
-
-        for i in range(18):
-
-                try:
-                        x = tiles[("S"+str(i+1))]["biome"] != "desert"
-                                
-                except KeyError:
-                        random.shuffle(biomes)
-                        chosen_biome = biomes.pop()
-                        tiles[("S"+str(i+1))]["biome"] = chosen_biome
-
-                        random.shuffle(number_tokens)
-                        chosen_number = number_tokens.pop()
-                        tiles[("S"+str(i+1))]["number"] = chosen_number
-        
-        return tiles
-
-def setup_locs(game_info):
-
-        possible_locs = "abcdefghijklmnopqrstuvwxyz".upper()
-        possible_locs = possible_locs + possible_locs.lower()
-        possible_locs = possible_locs + "+"
-        settlement_locs = {}
-
-        for letter in possible_locs:
-                settlement_locs[letter] = {"display": letter}
-                settlement_locs[letter]["port"] = ""
-
-
-        for loc in "ABFJouxy":
-                settlement_locs[loc]["port"] = {"3:1 port"}
-        i = 0
-        ports = ["wood", "grain", "cow", "ore", "brick"]
-        reps = 0
-        for loc in "RQCGWcvwjp":
-                reps += 1
-                thing_to_put = f"2:1 {ports[i]} port"
-                settlement_locs[loc]["port"] = thing_to_put
-                if reps%2 == 0:
-                        i += 1
-        
-        return settlement_locs
-
-def main_game_loop():
-
-
-
-
-
-        pass
-
-def infinite_rng(game_info : dict):
         
         possible_stat_commands = ["cache", "mode", "mean", "num", "?", "reset", "indie"]
         print("Ohohoho, it seems you wish to play infinite rng, hm?")
@@ -432,54 +144,382 @@ def infinite_rng(game_info : dict):
                         print("(Erasing all your gambling records...)")
                         rng_loop = False
 
-GAME_COMMANDS = {
-        "pcl": print_commands_list, 
-        "pbc": print_building_costs,
-        "pod": print_own_deck, 
-        "inf": display_info, 
-        "cr": print_credits,
-        "roll": roll_die,
-        "ru": print_game_rules
-        }
+def setup_player_dicts(game : dict, CONSTS : dict):
 
-PRE_COMMANDS = {
-        "ru": print_game_rules, 
-        "cr": print_credits, 
-        "inf": display_info,
-        "pcl": print_commands_list,
-        "rng": infinite_rng
-        }
+        while True:
+                try:
+                        player_number = int(input("How many people are playing? :)\n> ").strip()) 
+                        if player_number in [3, 4]:
+                                break
+                        else: 
+                                print("You can only play with 3 or 4 people, sorry!")
+
+                except ValueError:
+                        print("Enter an integer 3 or 4 please.")
+                        
+        game["player_number"] = player_number
+        quick_key = []
+        for player in range(player_number):
+                quick_key.append(player + 1)
+        game["quick_key"] = quick_key
+
+        player_names = []
+        for i in range(player_number):
+                game[i + 1] = {}
+                valid_name = False
+                while not valid_name:
+
+                        player_name = input(f"What do you want to be called?, player {i + 1}?\n> ").strip()
+                        if player_name not in player_names:
+                                
+                                break
+
+                        else:
+                                print("Stop stealing another player's name!! Weirdo!!")
+
+                player_names.append(player_name)
+                game[i + 1]["name"] = player_name 
+        
+        game["player_names"] = player_names
+
+
+        return game
+
+def print_own_deck(game : dict, CONSTS : dict):
+        print("this is ur deck")
+
+def roll_die(game : dict, CONSTS : dict):
+
+
+        dice_1 = random.randint(1, 6)
+        dice_2 = random.randint(1, 6)
+        roll = dice_1 + dice_2
+        print(f"The die have spoken!! |{dice_1}| |{dice_2}| ... {dice_1} + {dice_2} = {roll}! You have rolled a {roll} :3")
+
+        return roll
+
+def quick_reorder(road : str):
+
+        if road[0] > road[1]:
+                road = road[1] + road[0]
+
+        return road
+
+def generate_grid(game : dict, CONSTS : dict):
+
+        print("Setting up your tiles...")
+        tiles = {}
+        for i in range(19):
+                tiles[("S"+str(i+1))] = {}
+        time.sleep(0.5)
+
+        print("Spawning your desert...")
+        desert_placement = random.randint(1, 19)
+        tiles[("S"+str(desert_placement))]["biome"] = "desert"
+        tiles[("S"+str(desert_placement))]["number"] = 7
+        time.sleep(0.5)
+
+        print("Generating random numbers...")
+        for i in range(19):
+
+                try:
+                        tiles[("S"+str(i+1))]["biome"]
+                
+                except KeyError:
+                        random.shuffle(CONSTS["biomes"])
+                        chosen_biome = CONSTS["biomes"].pop()
+                        tiles[("S"+str(i+1))]["biome"] = chosen_biome
+
+                        random.shuffle(CONSTS["number_tokens"])
+                        chosen_number = CONSTS["number_tokens"].pop()
+                        tiles[("S"+str(i+1))]["number"] = chosen_number
+        time.sleep(0.5)
+
+        print("Sailing to your ports...")
+        settlement_locs = {}
+        for letter in CONSTS["settlement_locations"]:
+                settlement_locs[letter] = {"display": letter}
+                settlement_locs[letter]["port"] = ""
+        for loc in "ABFJouxy":
+                settlement_locs[loc]["port"] = {"3:1 port"}
+        i = 0
+        reps = 0
+        for loc in "RQCGWcvwjp":
+                reps += 1
+                port_to_place = f"2:1 {CONSTS['ports'][i]} port"
+                settlement_locs[loc]["port"] = port_to_place
+                if reps % 2 == 0:
+                        i += 1
+        time.sleep(0.5)
+
+
+
+
+        game["tiles"] = tiles
+
+        return game
+
+def setup_game(game : dict, CONSTS : dict):
+
+        print("Notice: While setting up the game, you temporarily can't use other commands.")
+        time.sleep(0.5)
+
+        game = setup_player_dicts(game, CONSTS)
+
+        print("Okay; your names are: ")
+        for player in range(game['player_number']):
+                print(game['player_names'][player], end="")
+                if player != 3:
+                        print(", ", end="")
+                else:
+                        print(".\n")
+        time.sleep(0.5)
+
+        game = assign_player_colours(game, CONSTS)
+
+        print("\nTime to set up your game, are you excited?")
+
+        print("Initialising player cards...")
+        for player in game["quick_key"]:
+                game[player]["resources"] = {}
+                for resource in CONSTS["resources"]:
+                        game[player]["resources"][resource] = 0
+                        
+                game[player]["dev_cards"] = {}
+                quick_dev_dict = dict(zip(CONSTS['dev_cards'], CONSTS["dev_card_numbers"]))
+                for dev_card in quick_dev_dict:
+                        game[player]["dev_cards"][dev_card] = quick_dev_dict[dev_card]
+        time.sleep(0.5)
+
+        print("Setting up the resource bank...")
+        game["resource_bank"] = {}
+        for resource in CONSTS["resources"]:
+                game["resource_bank"][resource] = 19
+        game["dev_cards"] = {}
+        for dev_card in quick_dev_dict:
+                game["dev_cards"][dev_card] = quick_dev_dict[dev_card]
+        time.sleep(0.5)
+
+        print("Generating your grid...")
+        time.sleep(0.5)
+
+        print("Rendering your grid...")
+        time.sleep(0.5)
+
+        return game
+
+def ansi_stitching(color : list, text : str):
+        
+        colored_ver = ""
+        colored_ver += "\x1b[38;2;"
+
+        reps = 0
+        for value in color:
+                colored_ver += str(value)
+                reps += 1
+
+                if reps != 3:
+                        colored_ver += ";"
+        
+        colored_ver += "m"
+        colored_ver += text
+        colored_ver += "\x1b[0m"
+
+        return colored_ver
+
+def choose_colours(CONSTS):
+
+        player_color = []
+
+        satisfied = False
+        while not satisfied:
+                for color in CONSTS["colors"]:                  
+                        
+                        valid_input = False
+                        while not valid_input:
+                                action = input(f"What value would you like to use for {color}?\n> ").strip().lower()
+
+                                try:
+                                        if int(action) <= 255:
+                                                player_color.append(int(action))
+                                                valid_input = True
+
+                                                
+                                        else:
+                                                print("Sorry; RGB values only go up to 255.")
+                                        
+
+                                except ValueError:
+
+                                        print("Please input a valid integer, in arabic numerals, within the range of 0 to 255.")     
+                                        
+                confirmed = False
+                while not confirmed:
+
+                        confirm = input(ansi_stitching(player_color, """This is what your colour looks like - are you sure you want it? Type 'Y' for yes and 'N' for no. 
+Please make sure all other players are able to read this!\n""") + "> ").strip()
+                        
+                        if confirm == "N":
+                                player_color = []
+                                confirmed = True
+                        
+                        elif confirm == "Y":
+                                satisfied = True
+                                confirmed = True
+                                
+                        else:
+                                print("Please type either 'Y' or 'N'. This is case sensitive.")
+
+        return player_color
+
+def assign_player_colours(game : dict, CONSTS : dict):
+
+
+        preset_colors = [[0, 201, 184], [252, 210, 0], [252, 84, 0], [210, 0, 252]]
+
+        manual = ""
+        while manual not in ["y", "m"]:
+
+                manual = input("Would you like to use our pre-selected, super aesthetic colours or customise your own? Please be responsible!!" +
+                        " Type 'Y' for yes and 'M' to manually select.\n> ").lower().strip()
+                
+        if manual == "m":
+
+                for player in range(game["player_number"]):
+                        print(f"OKAY! PLAYER {player + 1}, YOU'RE UP!!!")
+                        game[player + 1]["color"] = choose_colours(CONSTS)
+
+        else:
+                
+                for player in range(game["player_number"]):
+                        game[player+1]["color"] = preset_colors[player]
+
+        for player in range(game["player_number"]):
+                print(ansi_stitching(game[player + 1]["color"], f"Player {player + 1}, this is your colour."))
+                time.sleep(0.5)
+
+
+        return game
 
 def main():
+        CONSTS = {
 
-        welcome_player()
+                "rules": """Dear players, this is the link to the official Catan Almanac! 
+https://www.catan.com/sites/default/files/2024-01/Almanac%20CATAN-3D.pdf
+If the link doesn't work, please paste it into your browser.""",
 
-        game_info = {}
-        game_info["rules"] = """Um idk."""
-        game_info["resources"] = ["ores", "grain", "wood", "brick", "sheep"]
-        game_info["dev_cards"] = ["knight", "progress", "vps"]
+                "resources": ["ores", "grain", "wood", "brick", "sheep"],
 
-        game_info["game_state"] = "off"
-        while game_info["game_state"] == "off":
+                "dev_cards": ["knight", "year of plenty", "road building", "monopoly", "VICTORY POINT"],  
+
+                "dev_card_numbers": [14, 2, 2, 2, 5],
+
+                "ports": ["wood", "grain", "cow", "ore", "brick"],
+                "welcome_message": """WELCOME TO MY TEXT-BASED CATAN!
+Before we start, make sure \x1b[38;2;142;194;21mthis text\x1b[0m is green!
+CREDITS: Vivienne, CATAN game studio
+ENTER YOUR COMMAND TO BEGIN :)""",
+
+                "pre_commands" : {
+                        "rng": infinite_rng
+},
+
+                "commands" : { 
+                        "pod": print_own_deck, 
+                        "roll": roll_die,
+},
+
+                "credits": """The credits for this code are as follows:""",
+
+                "commands info" : """These are the commands available to you and what they mean""",
+
+                "building costs" : "building costs are:",
+
+                "colors" : ["red", "green", "blue"],
+
+                "biome_tiles" : [],
+
+                "number_tokens" : [],
+
+                "kaomojis" : {
+                        "ores": "‧₊˚🗻`",
+                        "brick": "↟↟↟↟↟↟",
+                        "grain": "˚ʚ🌱₊˚",
+                        "wood": " ݁˖𓂃.𖠰.",
+                        "sheep": ":3 ^^~", 
+                        "desert": " ⛰︎ ོ ༄-"
+
+                
+},
+                "settlement_locations" : [],
+
+                "ports" : ["wood", "grain", "sheep", "ore", "brick"]
+
+        }
+
+        
+        for i in range(10):
+                if (i + 2) != 7:
+                        for x in range(2):
+                                CONSTS["number_tokens"].append(i + 2)
+        CONSTS["number_tokens"].append(1)
+        CONSTS["number_tokens"].append(12)
+
+        CONSTS["settlement_locations"] = "abcdefghijklmnopqrstuvwxyz".upper()
+        CONSTS["settlement_locations"] += CONSTS["settlement_locations"].lower() + "+"
+
+        for i in range(3):
+                
+                CONSTS["biome_tiles"].append("ores")
+                CONSTS["biome_tiles"].append("brick")
+
+        for i in range(4):
+                
+                CONSTS["biome_tiles"].append("grain")
+                CONSTS["biome_tiles"].append("wood")
+                CONSTS["biome_tiles"].append("sheep")
+
+        
+
+        game = {
+                "input type" : CONSTS["pre_commands"],
+                "on" : True
+        }
+
+
+        print(CONSTS["welcome_message"])
+
+        while True:
+        
                 action = input("> ").strip().lower()
-                if not action in PRE_COMMANDS and action in GAME_COMMANDS:
-                        print("That command's game specific! meuehhrhehre try againnnn")
+
+                if not action in game["input type"] and action in [CONSTS["commands"], CONSTS["pre_commands"]]:
+                        print("That command's not available right now! Please enter something allowed in the commands.")
+
+                elif action == "ru":
+                        print(CONSTS["rules"])
+
+                elif action == "cr":
+                        print(CONSTS["credits"])
+
+                elif action == "pcl":
+                        print(CONSTS["commands info"])
+
+                elif action == "pbc":
+                        print(CONSTS["building costs"])
+
                 elif action == 'start game':
-                        print("\nStarting your game...\n")
-                        game_info["game_state"] = "setup"
+                        game["input type"] = CONSTS["commands"]
+                        print("Starting your game...")
+                        game = setup_game(game, CONSTS)
+                        print("The game's over! Wanna try again? ^^")
+                        main()
+                        
                 else:
                         try:
-                                PRE_COMMANDS[action](game_info)
+                                CONSTS["pre_commands"][action](game, CONSTS)
                         except KeyError:
-                                print("That command doesn't seem to be available. Do you want to check commands with 'pcl'?")
-
-        initial_dict, game_bank = set_up_game(game_info)
-        print("Shuffling your terrains...")
-        tiles = setup_terrain(game_info)
-        print("Adding your settlement spots...")
-        settlement_locs = setup_locs(game_info)
-        print("Making your actual grid...")
-
+                                print("That command doesn't seem to exist. Do you want to check commands with 'pcl'?")
 
 if __name__== "__main__":
         main()
