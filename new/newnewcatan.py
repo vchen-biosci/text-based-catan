@@ -464,10 +464,15 @@ settlement_locs["u"]["display"] + "  _ _ 3:1 port" + "\n" +
         return game
 
 def print_board(game : dict, CONSTS : dict):
-        print('this is the player whos totally playing rn')
+        print("________ WELCOME TO THE WORLD OF CATAN!!! WHERE WILL YOU SETTLE TODAY? ________\n")
+        print(f"It's player {game['player_turn']}'s turn! Go ahead, {game[game['player_turn']]['name']} :)")
         print('this is the stats of the game banks and stuff')
+        for player in game['quick_key']:
+                print(ansi_stitching(game[player]['color'], f"Player {player} ({game[player]['name']})"), end="  ||  ")
+        print("\n")
         print_grid(game)
         print(f"The robber is currently pillaging the citizens of {game['robber']} and stealing all their {game['tiles'][game['robber']]['biome']}! Poor villagers :(")
+        print("\n")
 
 def setup_game(game : dict, CONSTS : dict):
 
@@ -515,7 +520,15 @@ def setup_game(game : dict, CONSTS : dict):
         game = generate_grid(game, CONSTS)
         time.sleep(0.5)
 
-        print_board(game, CONSTS)
+        print("Clearing screen in: 3", end="")
+        time.sleep(0.5)
+        print(", 2", end="")
+        time.sleep(0.5)
+        print(", 1...")
+        time.sleep(0.5)
+
+        print("\033[H\033[J", end="")
+
 
         return game
 
@@ -610,6 +623,13 @@ def assign_player_colours(game : dict, CONSTS : dict):
                 time.sleep(0.5)
 
 
+        return game
+
+def main_game(game : dict, CONSTS : dict):
+        game['player_turn'] = 1
+        print_board(game, CONSTS)
+
+        print("We'll go from player 1 to player 4. Please choose where to place your settlements!")
         return game
 
 def main():
@@ -729,6 +749,7 @@ ENTER YOUR COMMAND TO BEGIN :)""",
                         game["input type"] = CONSTS["commands"]
                         print("Starting your game...")
                         game = setup_game(game, CONSTS)
+                        game = main_game(game, CONSTS)
                         print("The game's over! Wanna try again? ^^")
                         main()
                         
