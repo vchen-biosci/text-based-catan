@@ -1,6 +1,6 @@
 import random, os, time
 
-def infinite_rng(game, CONSTS):
+def infinite_rng(game : dict, CONSTS : dict):
         
         
         possible_stat_commands = ["cache", "mode", "mean", "num", "?", "reset", "indie"]
@@ -144,7 +144,7 @@ def infinite_rng(game, CONSTS):
                         print("(Erasing all your gambling records...)")
                         rng_loop = False
 
-def setup_player_dicts(game, CONSTS):
+def setup_player_dicts(game : dict, CONSTS : dict):
 
         game = game
 
@@ -187,10 +187,10 @@ def setup_player_dicts(game, CONSTS):
 
         return game
 
-def print_own_deck(game, CONSTS):
+def print_own_deck(game : dict, CONSTS : dict):
         print("this is ur deck")
 
-def roll_die(game, CONSTS):
+def roll_die(game : dict, CONSTS : dict):
 
 
         dice_1 = random.randint(1, 6)
@@ -200,7 +200,15 @@ def roll_die(game, CONSTS):
 
         return roll
 
-def setup_game(game, CONSTS):
+def quick_reorder(road : str):
+
+        if road[0] > road[1]:
+                road = road[1] + road[0]
+
+        return road
+
+def setup_game(game : dict, CONSTS : dict):
+
         print("Notice: While setting up the game, you temporarily can't use other commands.")
         time.sleep(0.5)
 
@@ -219,21 +227,25 @@ def setup_game(game, CONSTS):
 
         print("Initialising player cards...")
         for player in game["quick_key"]:
+                game[player]["resources"] = {}
                 for resource in CONSTS["resources"]:
-                        game[player][resource] = 0
-                for dev_card in CONSTS["dev_cards"]:
-                        game[player]["dev_cards"] = 0
+                        game[player]["resources"][resource] = 0
+                        
+                game[player]["dev_cards"] = {}
+                quick_dev_dict = dict(zip(CONSTS['dev_cards'], CONSTS["dev_card_numbers"]))
+                for dev_card in quick_dev_dict:
+                        game[player]["dev_cards"][dev_card] = quick_dev_dict[dev_card]
         time.sleep(0.3)
 
         print("Setting up the resource bank...")
         for resource in CONSTS["resources"]:
                 game[resource] = 19
-        for dev_card in CONSTS["dev_cards"]:
-                pass
+        for dev_card in quick_dev_dict:
+                game["dev_cards"][dev_card] = quick_dev_dict[dev_card]
         time.sleep(0.3)
 
-        
-
+        print("Generating your biome...")
+        time.sleep(0.3)
 
 
 
@@ -303,7 +315,7 @@ Please make sure all other players are able to read this!\n""") + "> ").strip()
 
         return player_color
 
-def assign_player_colours(game, CONSTS):
+def assign_player_colours(game : dict, CONSTS : dict):
 
 
         preset_colors = [[0, 201, 184], [252, 210, 0], [252, 84, 0], [210, 0, 252]]
@@ -338,7 +350,9 @@ def main():
 
                 "resources": ["ores", "grain", "wood", "brick", "sheep"],
 
-                "dev_cards": ["knight", "progress", "vps"],  
+                "dev_cards": ["knight", "year of plenty", "road building", "monopoly", "VICTORY POINT"],  
+
+                "dev_card_numbers": [14, 2, 2, 2, 5],
 
                 "ports": ["wood", "grain", "cow", "ore", "brick"],
                 "welcome_message": """WELCOME TO MY TEXT-BASED CATAN!
@@ -407,12 +421,6 @@ ENTER YOUR COMMAND TO BEGIN :)""",
                         except KeyError:
                                 print("That command doesn't seem to exist. Do you want to check commands with 'pcl'?")
 
-
-
-
-
-
-
 if __name__== "__main__":
-        break program lowk
+        kill program
         main()
