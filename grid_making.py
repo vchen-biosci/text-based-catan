@@ -88,7 +88,7 @@ for i in range(19):
 
 possible_locs = "abcdefghijklmnopqrstuvwxyz".upper()
 possible_locs = possible_locs + possible_locs.lower()
-possible_locs = possible_locs + "+"
+possible_locs = possible_locs + "+" + "$"
 settlement_locs = {}
 
 for letter in possible_locs:
@@ -111,20 +111,28 @@ for loc in "RQCGWcvwjp":
         if reps % 2 == 0:
                 i += 1
 
-existing_roads = "ABBEEFFJJKKQQWWcciioouuttyyxx++zzwwvvqqppjjddXXRRLL$$GGCCDDADHHIIEGMMNNHIOOPPJRSSMNTTUUOPVVWSYYZZTUaabbVdeeYZffggabhhiekkllfgmmnnhpqqklrrssmnttuvwwrsxxyz+"
-roads = {}
+
+road_types = ["__", "/", "\\"]
+road_strings = ["ABCDEF$GHIJKMNOPRSTUVWYZabdefghiklmnpqrstuvwxyz+", 
+                "ADCG$LRXMSHNEIJPQWVbcihnoutyx+rwmsflagOUTZYedjkq",
+                "BEFJDHIOGMLRSYNTxdekjpqvwzsxntiobhwcKQPVUazfgmlr"]
+
 counter = 0
-for i in range(len(existing_roads)//2):
+quick_dict = dict(zip(road_types, road_strings))
+roads = {}
+for road_type in road_types:
+        for i in range(len(quick_dict[road_type])//2):
 
-        road = ""
-        road += existing_roads[counter]
-        counter += 1
-        road += existing_roads[counter]
-        counter += 1
-        
-        roads[road] = ""
+                road = ""
+                road += quick_dict[road_type][counter]
+                counter += 1
+                road += quick_dict[road_type][counter]
+                counter += 1
+                
+                roads[road] = ansi_stitching([0, 201, 184], road_type)
+        counter = 0
 
-print(roads)
+        print(roads)
 
 
 grid_part_1 = (
@@ -136,7 +144,7 @@ grid_part_1 = (
         #line 3
         (" " * 64) + "/        \\" + "\n" +
         #line 4
-        (" " * 20) + "sea" + (" " * 38) + settlement_locs["A"]["display"] + " __ __ __ __ " + settlement_locs["B"]["display"] + (" " * 38) + "sea" + "\n" +
+        (" " * 20) + "sea" + (" " * 38) + settlement_locs["A"]["display"] + " " + (roads["AB"] + " ") * 4 + settlement_locs["B"]["display"] + (" " * 38) + "sea" + "\n" +
         #line 5
         (" " * 61) + ("/              \\") + "\n" +
         #line 6 & 7
@@ -144,7 +152,7 @@ grid_part_1 = (
         #line 8
         (" " * 35) + ("2:1 grain port") + (" " * 9) + "/" + (" " * 7) + kaomojis[tiles["S1"]["biome"]] + (" "* 7) + "\\" + (" " * 16) + "3:1 port" + "\n" +
         #line 9
-        (" " * 36) + "|    \\   __ __ __ __ /" + (" " * 10) + str(tiles["S1"]["number"]) + (" " * 11 if len(str(tiles["S1"]["number"])) == 1 else " " * 10) + "\\ __ __ __ __    /  |\n" +
+        (" " * 36) + "|    \\   " + (roads["CD"] + " ") * 4 +"/" + (" " * 10) + str(tiles["S1"]["number"]) + (" " * 11 if len(str(tiles["S1"]["number"])) == 1 else " " * 10) + "\\ " + (roads["EF"] + " ") * 4 + "   /  |\n" +
         #line 10
         (" " * 36) + "|" + (" " * 3) + settlement_locs["C"]["display"] + (" /") + (" " * 11) + settlement_locs["D"]["display"] + "  \\" 
         + (" " * ((22 - len(str(tiles["S1"]["biome"])))//2)) + tiles["S1"]["biome"] + 
@@ -159,7 +167,7 @@ grid_part_1 = (
         + (" " * 16) + "/ "  + (" " * 6) + (kaomojis[tiles["S3"]["biome"]]) 
         + (" " * 6) + "\\  |\n" +
         #line 14
-        (" " * 23) + ("__ " * 4) + settlement_locs["G"]["display"] + "  /" + (" " * 10) + str(tiles["S2"]["number"]) + 
+        (" " * 21) + settlement_locs["$"]["display"] + " " + (roads[quick_reorder("G$")] + " ") * 4 + settlement_locs["G"]["display"] + "  /" + (" " * 10) + str(tiles["S2"]["number"]) + 
         (" " * 9 if len(str(tiles["S2"]["number"])) == 1 else " " * 8) + settlement_locs["H"]["display"] + " \\ " + (" __" * 4) + " / " + settlement_locs["I"]["display"] +
         (" " * 8) + str(tiles["S3"]["number"]) + (" " * 8 if len(str(tiles["S3"]["number"])) == 1 else " " * 7) + settlement_locs["J"]["display"] + " " + "\\" + " | " + ("__ " * 4) 
         + settlement_locs["K"]["display"] + "\n" +
@@ -182,7 +190,10 @@ grid_part_1 = (
         (" " * ((22 - len(str(tiles["S5"]["biome"])))//2)) + tiles["S5"]["biome"] + (" " * 9 if tiles["S5"]["biome"] != "desert" else " " * 8) + "/" + (" " * 13) + "\\" +
         (" " * ((22 - len(str(tiles["S6"]["biome"])))//2)) + tiles["S6"]["biome"] + (" " * 9 if tiles["S6"]["biome"] != "desert" else " " * 8) + "/" + "\n" +
         #line 21 & 22
-        (" " * 18) + "\\" + (" " * 10) + "S4" + (" " * 10) + "/" + (" " * 16) + "\\" + (" " * 9) + "S5" + (" " * 9) + "/" + (" " * 15) + "\\" + (" " * 9) + "S6" + (" " * 9) + "/" + "\n\n" +
+        (" " * 18) + "\\" + (" " * 10) + "S4" + (" " * 10) + "/" + (" " * 16) + "\\" + (" " * 9) + "S5" + (" " * 9) + "/" + (" " * 15) + "\\" + (" " * 9) + "S6" + (" " * 9) + "/" + "\n\n"
+)
+
+grid_mid = (
         #line 23
         (" " * 20) + "\\" + (" " * 18) + "/" + (" " * 7) + kaomojis[tiles["S7"]["biome"]] + (" " * 7) + "\\" + (" " * 16) + "/" + (" " * 7) + kaomojis[tiles["S8"]["biome"]]  + (" " * 6) + "\\" +
         (" " * 16) + "/" + "\n"
@@ -292,7 +303,7 @@ grid_part_3 = (
 
 )
 
-grid = [grid_part_1, grid_part_2, grid_part_3]
+grid = [grid_part_1, grid_mid, grid_part_2, grid_part_3]
 for part in grid:
         print(part, end="")
 print("\n")

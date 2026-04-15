@@ -146,8 +146,6 @@ def infinite_rng(game : dict, CONSTS : dict):
 
 def setup_player_dicts(game : dict, CONSTS : dict):
 
-        game = game
-
         while True:
                 try:
                         player_number = int(input("How many people are playing? :)\n> ").strip()) 
@@ -207,6 +205,60 @@ def quick_reorder(road : str):
 
         return road
 
+def generate_grid(game : dict, CONSTS : dict):
+
+        print("Setting up your tiles...")
+        tiles = {}
+        for i in range(19):
+                tiles[("S"+str(i+1))] = {}
+        time.sleep(0.5)
+
+        print("Spawning your desert...")
+        desert_placement = random.randint(1, 19)
+        tiles[("S"+str(desert_placement))]["biome"] = "desert"
+        tiles[("S"+str(desert_placement))]["number"] = 7
+        time.sleep(0.5)
+
+        print("Generating random numbers...")
+        for i in range(19):
+
+                try:
+                        tiles[("S"+str(i+1))]["biome"]
+                
+                except KeyError:
+                        random.shuffle(CONSTS["biomes"])
+                        chosen_biome = CONSTS["biomes"].pop()
+                        tiles[("S"+str(i+1))]["biome"] = chosen_biome
+
+                        random.shuffle(CONSTS["number_tokens"])
+                        chosen_number = CONSTS["number_tokens"].pop()
+                        tiles[("S"+str(i+1))]["number"] = chosen_number
+        time.sleep(0.5)
+
+        print("Sailing to your ports...")
+        settlement_locs = {}
+        for letter in CONSTS["settlement_locations"]:
+                settlement_locs[letter] = {"display": letter}
+                settlement_locs[letter]["port"] = ""
+        for loc in "ABFJouxy":
+                settlement_locs[loc]["port"] = {"3:1 port"}
+        i = 0
+        reps = 0
+        for loc in "RQCGWcvwjp":
+                reps += 1
+                port_to_place = f"2:1 {CONSTS['ports'][i]} port"
+                settlement_locs[loc]["port"] = port_to_place
+                if reps % 2 == 0:
+                        i += 1
+        time.sleep(0.5)
+
+
+
+
+        game["tiles"] = tiles
+
+        return game
+
 def setup_game(game : dict, CONSTS : dict):
 
         print("Notice: While setting up the game, you temporarily can't use other commands.")
@@ -225,6 +277,8 @@ def setup_game(game : dict, CONSTS : dict):
 
         game = assign_player_colours(game, CONSTS)
 
+        print("\nTime to set up your game, are you excited?")
+
         print("Initialising player cards...")
         for player in game["quick_key"]:
                 game[player]["resources"] = {}
@@ -235,19 +289,22 @@ def setup_game(game : dict, CONSTS : dict):
                 quick_dev_dict = dict(zip(CONSTS['dev_cards'], CONSTS["dev_card_numbers"]))
                 for dev_card in quick_dev_dict:
                         game[player]["dev_cards"][dev_card] = quick_dev_dict[dev_card]
-        time.sleep(0.3)
+        time.sleep(0.5)
 
         print("Setting up the resource bank...")
+        game["resource_bank"] = {}
         for resource in CONSTS["resources"]:
-                game[resource] = 19
+                game["resource_bank"][resource] = 19
+        game["dev_cards"] = {}
         for dev_card in quick_dev_dict:
                 game["dev_cards"][dev_card] = quick_dev_dict[dev_card]
-        time.sleep(0.3)
+        time.sleep(0.5)
 
-        print("Generating your biome...")
-        time.sleep(0.3)
+        print("Generating your grid...")
+        time.sleep(0.5)
 
-
+        print("Rendering your grid...")
+        time.sleep(0.5)
 
         return game
 
@@ -339,14 +396,17 @@ def assign_player_colours(game : dict, CONSTS : dict):
 
         for player in range(game["player_number"]):
                 print(ansi_stitching(game[player + 1]["color"], f"Player {player + 1}, this is your colour."))
-                time.sleep(0.3)
+                time.sleep(0.5)
+
 
         return game
 
 def main():
         CONSTS = {
 
-                "rules": "The rules of catan are as follows: meow",
+                "rules": """Dear players, this is the link to the official Catan Almanac! 
+https://www.catan.com/sites/default/files/2024-01/Almanac%20CATAN-3D.pdf
+If the link doesn't work, please paste it into your browser.""",
 
                 "resources": ["ores", "grain", "wood", "brick", "sheep"],
 
@@ -368,23 +428,64 @@ ENTER YOUR COMMAND TO BEGIN :)""",
                         "pod": print_own_deck, 
                         "roll": roll_die,
 },
-        
 
                 "credits": """The credits for this code are as follows:""",
-
 
                 "commands info" : """These are the commands available to you and what they mean""",
 
                 "building costs" : "building costs are:",
 
-                "colors" : ["red", "green", "blue"]
+                "colors" : ["red", "green", "blue"],
+
+                "biome_tiles" : [],
+
+                "number_tokens" : [],
+
+                "kaomojis" : {
+                        "ores": "‧₊˚🗻`",
+                        "brick": "↟↟↟↟↟↟",
+                        "grain": "˚ʚ🌱₊˚",
+                        "wood": " ݁˖𓂃.𖠰.",
+                        "sheep": ":3 ^^~", 
+                        "desert": " ⛰︎ ོ ༄-"
+
+                
+},
+                "settlement_locations" : [],
+
+                "ports" : ["wood", "grain", "sheep", "ore", "brick"]
 
         }
+
+        
+        for i in range(10):
+                if (i + 2) != 7:
+                        for x in range(2):
+                                CONSTS["number_tokens"].append(i + 2)
+        CONSTS["number_tokens"].append(1)
+        CONSTS["number_tokens"].append(12)
+
+        CONSTS["settlement_locations"] = "abcdefghijklmnopqrstuvwxyz".upper()
+        CONSTS["settlement_locations"] += CONSTS["settlement_locations"].lower() + "+"
+
+        for i in range(3):
+                
+                CONSTS["biome_tiles"].append("ores")
+                CONSTS["biome_tiles"].append("brick")
+
+        for i in range(4):
+                
+                CONSTS["biome_tiles"].append("grain")
+                CONSTS["biome_tiles"].append("wood")
+                CONSTS["biome_tiles"].append("sheep")
+
+        
 
         game = {
                 "input type" : CONSTS["pre_commands"],
                 "on" : True
         }
+
 
         print(CONSTS["welcome_message"])
 
@@ -404,9 +505,6 @@ ENTER YOUR COMMAND TO BEGIN :)""",
                 elif action == "pcl":
                         print(CONSTS["commands info"])
 
-                elif action == "info":
-                        print(CONSTS["info"])
-
                 elif action == "pbc":
                         print(CONSTS["building costs"])
 
@@ -422,5 +520,4 @@ ENTER YOUR COMMAND TO BEGIN :)""",
                                 print("That command doesn't seem to exist. Do you want to check commands with 'pcl'?")
 
 if __name__== "__main__":
-        kill program
         main()
