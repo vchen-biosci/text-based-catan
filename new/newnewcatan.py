@@ -609,6 +609,10 @@ def check(text, CONSTS, game, mode):
                                         if game['roads'][text] != road:
                                                 print("Sorry, that road is already taken...")
                                                 valid = False
+
+                        for attached_settlement in road:
+                                if analyse_ownership(game, CONSTS, game['settlement_locs'][attached_settlement]) != "placeholder":
+                                        valid = False
                                 
 
                 except KeyError:
