@@ -459,6 +459,8 @@ settlement_locs["u"]["display"] + "  _ _ 3:1 port" + "\n" +
         print("Rendering your grid:")
         time.sleep(0.5)
 
+        game['roads'] = roads
+
         game["tiles"] = tiles
 
         return game
@@ -466,13 +468,20 @@ settlement_locs["u"]["display"] + "  _ _ 3:1 port" + "\n" +
 def print_board(game : dict, CONSTS : dict):
         print("________ WELCOME TO THE WORLD OF CATAN!!! WHERE WILL YOU SETTLE TODAY? ________\n")
         print(f"It's player {game['player_turn']}'s turn! Go ahead, {game[game['player_turn']]['name']} :)")
-        print('this is the stats of the game banks and stuff')
+        print(f"GAME BANK:")
+        print(f'Resources: ')
+        for resource in game['resource_bank']:
+                print(f'{resource} : {game["resource_bank"][resource]}', end="  ||  ")
+        print("\n")
+        for dev_card in game['dev_cards']:
+                print(f'{dev_card} : {game["dev_cards"][dev_card]}, end="  ||  ')
+        print("\n")
         for player in game['quick_key']:
                 print(ansi_stitching(game[player]['color'], f"Player {player} ({game[player]['name']})"), end="  ||  ")
         print("\n")
         print_grid(game)
         print(f"The robber is currently pillaging the citizens of {game['robber']} and stealing all their {game['tiles'][game['robber']]['biome']}! Poor villagers :(")
-        print("\n")
+        print("\n\n")
 
 def setup_game(game : dict, CONSTS : dict):
 
@@ -490,6 +499,7 @@ def setup_game(game : dict, CONSTS : dict):
                         print(".\n")
         time.sleep(0.5)
 
+
         game = assign_player_colours(game, CONSTS)
 
         print("\nTime to set up your game, are you excited?")
@@ -497,6 +507,7 @@ def setup_game(game : dict, CONSTS : dict):
 
         print("Initialising player cards...")
         for player in game["quick_key"]:
+
                 game[player]["resources"] = {}
                 for resource in CONSTS["resources"]:
                         game[player]["resources"][resource] = 0
@@ -505,6 +516,10 @@ def setup_game(game : dict, CONSTS : dict):
                 quick_dev_dict = dict(zip(CONSTS['dev_cards'], CONSTS["dev_card_numbers"]))
                 for dev_card in quick_dev_dict:
                         game[player]["dev_cards"][dev_card] = quick_dev_dict[dev_card]
+
+                game['construct_bank'] = {}
+
+
         time.sleep(0.5)
 
         print("Setting up the resource bank...")
@@ -521,11 +536,11 @@ def setup_game(game : dict, CONSTS : dict):
         time.sleep(0.5)
 
         print("Clearing screen in: 3", end="")
-        time.sleep(0.5)
+        time.sleep(1)
         print(", 2", end="")
-        time.sleep(0.5)
+        time.sleep(1)
         print(", 1...")
-        time.sleep(0.5)
+        time.sleep(1)
 
         print("\033[H\033[J", end="")
 
@@ -550,6 +565,50 @@ def ansi_stitching(color : list, text : str):
         colored_ver += "\x1b[0m"
 
         return colored_ver
+
+def check(text, CONSTS, game, mode):
+        if mode == 'settlements':
+                settlement = text
+
+                try:
+                        if game['settlement_locs'][settlement]['display']:
+                                valid = False
+                                
+                        else:
+                                related_roads = []
+                                for road in game['roads']:
+                                        if settlement in road:
+                                                related_roads.append(road)
+                                
+                                for x in related_roads:
+                                        x.pop(settlement)
+
+                                adjacent_settlements = related_roads
+
+                                for settlement in adjacent_settlements:
+                                        if game['settlements'][settlement] != game['settlements'][settlement]['display']:
+                                                print("It looks like you're trying to place a settlement adjacent to another settlement. You must place it at least two roads away.")
+                                                valid = False
+
+
+                except KeyError:
+                        if settlement in game['settlement_locs']:
+                                valid = True
+                        else:
+                                valid = False
+                        print("")
+
+                
+        else:
+                valid = False
+
+        try: 
+                type(valid)
+
+        except NameError:
+                valid = True
+
+        return valid
 
 def choose_colours(CONSTS):
 
@@ -629,7 +688,14 @@ def main_game(game : dict, CONSTS : dict):
         game['player_turn'] = 1
         print_board(game, CONSTS)
 
-        print("We'll go from player 1 to player 4. Please choose where to place your settlements!")
+        print(f"We'll go from player 1 to player {len(game['quick_key'])}. Please choose where to place your settlements!")
+        for i in range(2):
+                for player in game['quick_key']:
+                        valid = False
+                        while not valid:
+                                text = input(f"Player {player}, where would you like to place your settlement?")
+                                valid = check(text, CONSTS, game, 'settlement')
+                        settlement_thing = []
         return game
 
 def main():
@@ -690,7 +756,9 @@ ENTER YOUR COMMAND TO BEGIN :)""",
 },
                 "settlement_locations" : [],
 
-                "ports" : ["wood", "grain", "sheep", "ore", "brick"]
+                "ports" : ["wood", "grain", "sheep", "ore", "brick"],
+
+                "starting_constructs" : {'settlements' : 5, 'cities' : 4, 'paths' : 15}
 
         }
 
