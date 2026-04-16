@@ -745,7 +745,43 @@ def start_game(game : dict, CONSTS : dict):
         print("\033[H\033[J", end="")
 
 def analyse_ownership(game : dict, CONSTS : dict, element):
-        pass
+
+        element = element[9:]
+        counter = 0
+        for i in element:
+                if not i in [";", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0"]:
+                        cutoff = counter
+                else:
+                        counter += 1
+        element = element[:counter]
+        extracted_colors = element[:-1]
+        print(extracted_colors)
+        colors = extracted_colors.split(";")
+        color = []
+        for value in colors:
+                color.append(int(value))
+        print(color)
+
+
+
+
+
+        """colored_ver = ""
+        colored_ver += "\x1b[38;2;"
+
+        reps = 0
+        for value in color:
+                colored_ver += str(value)
+                reps += 1
+
+                if reps != 3:
+                        colored_ver += ";"
+        
+        colored_ver += "m"
+        colored_ver += text
+        colored_ver += "\x1b[0m"""
+
+        return element
 
 def main():
         CONSTS = {
@@ -849,6 +885,9 @@ ENTER YOUR COMMAND TO BEGIN :)""",
 
                 if not action in game["input type"] and action in [CONSTS["commands"], CONSTS["pre_commands"]]:
                         print("That command's not available right now! Please enter something allowed in the commands.")
+
+                elif action == "fahh":
+                        analyse_ownership({}, {}, "\x1b[38;2;142;194;21mthis text\x1b[0m")
 
                 elif action == "ru":
                         print(CONSTS["rules"])
