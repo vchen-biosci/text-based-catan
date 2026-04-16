@@ -604,14 +604,28 @@ def check(text, CONSTS, game, mode):
 
         elif mode == 'road':
                 try:
+                        game['roads'][text]
                         for road in game['roads']:
-                                if text == road:
-                                        if game['roads'][text] != road:
-                                                print("Sorry, that road is already taken...")
-                                                valid = False
+                                try:
+                                        int(game['roads'][road])
+                                        print("Sorry, that road is already taken...")
+                                        valid = False
+
+                                except ValueError:
+                                        pass
 
                         for attached_settlement in road:
-                                if analyse_ownership(game, CONSTS, game['settlement_locs'][attached_settlement]) != "placeholder":
+                                if game['settlement_locs'][attached_settlement]['display'] != attached_settlement:
+                                        player = analyse_ownership(game, CONSTS, game['settlement_locs'][attached_settlement]['display'])
+                                        if game['player_turn'] == player:
+                                                valid = True
+                                                return valid
+                                        else:
+                                                print("You don't appear to have any settlements next to that road. So, you can't build it.")
+                                                valid = False
+                                
+                                else:
+                                        print(f"You don't appear to own a settlement connected to the road. Sorry." if attached_settlement == road[1] else "")
                                         valid = False
                                 
 
@@ -703,13 +717,14 @@ def assign_player_colours(game : dict, CONSTS : dict):
         return game
 
 def main_game(game : dict, CONSTS : dict):
-        game['player_turn'] = 1
-        print_board(game, CONSTS)
+        game['player_turn'] = 1 #ok i know this looks redundant but print board requires that variable ok?
 
+        print_board(game, CONSTS)
         print(f"We'll go from player 1 to player {len(game['quick_key'])}. Please choose where to place your settlements!")
         
         for i in range(2):
                 for player in game['quick_key']:
+                        game['player_turn'] = player
                         valid = False
                         while not valid:
                                 text = input(f"Player {player}, where would you like to place your settlement?\n> ").strip()
@@ -726,7 +741,7 @@ def main_game(game : dict, CONSTS : dict):
                                 text = quick_reorder(text)
                                 valid = check(text, CONSTS, game, 'road')
                         game[player]['roads'].append(text)
-                        game['roads'][text] = ansi_stitching(game[player]['color'], text)
+                        game['roads'][text] = ansi_stitching(game[player]['color'], game['roads'][text])
                         print("\033[H\033[J", end="")
                         print_board(game, CONSTS)
 
