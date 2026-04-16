@@ -749,9 +749,7 @@ def analyse_ownership(game : dict, CONSTS : dict, element):
         element = element[9:]
         counter = 0
         for i in element:
-                if not i in [";", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0"]:
-                        cutoff = counter
-                else:
+                if i in [";", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0"]:
                         counter += 1
         element = element[:counter]
         extracted_colors = element[:-1]
@@ -762,26 +760,9 @@ def analyse_ownership(game : dict, CONSTS : dict, element):
                 color.append(int(value))
         print(color)
 
-
-
-
-
-        """colored_ver = ""
-        colored_ver += "\x1b[38;2;"
-
-        reps = 0
-        for value in color:
-                colored_ver += str(value)
-                reps += 1
-
-                if reps != 3:
-                        colored_ver += ";"
-        
-        colored_ver += "m"
-        colored_ver += text
-        colored_ver += "\x1b[0m"""
-
-        return element
+        for player in game["quick_key"]:
+                if game[player]['color'] == color:
+                        return player
 
 def main():
         CONSTS = {
