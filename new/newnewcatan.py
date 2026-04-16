@@ -1,4 +1,4 @@
-import random, os, time
+import random, time
 
 def infinite_rng(game : dict, CONSTS : dict):
         
@@ -45,24 +45,25 @@ def infinite_rng(game : dict, CONSTS : dict):
 
                                                 if len(roll_cache) != 0:
 
-                                                        most_rolled = 0
+                                                        quick_set = set(roll_cache)
+                                                        quick_list = []
+                                                        for number in quick_set:
+                                                                quick_list.append(number)
+
                                                         contenders_list = []
+                                                        mode = quick_list[0]
 
-                                                        for number in roll_cache:
-                                                                if roll_cache.count(number) > roll_cache.count(most_rolled):
-                                                                        most_rolled = number
-                                                                        contenders_list = []
+                                                        for number in quick_list:
+                                                                if roll_cache.count(number) > roll_cache.count(mode):
+                                                                        mode = number
+                                                                elif roll_cache.count(number) == roll_cache.count(mode):
+                                                                        contenders_list.append(number)
 
-                                                                elif roll_cache.count(number) == roll_cache.count(most_rolled):
-                                                                        if number == most_rolled:
-                                                                                "idk"
-                                                                        else:
-                                                                                contenders_list.append(number)
 
                                                         if contenders_list == []:
-                                                                print(f"Your mode was {most_rolled}, and you rolled it a whopping {roll_cache.count(number)} times!!")
+                                                                print(f"Your mode was {mode}, and you rolled it a whopping {roll_cache.count(number)} times!!")
                                                         else:
-                                                                print(f"Well, you don't really have ONE singular mode. You have an entire {len(contenders_list)} contenders for the throne! They are: {str(set(contenders_list))} and {most_rolled}, rolled {roll_cache.count(most_rolled)} times each!")
+                                                                print(f"Well, you don't really have ONE singular mode. You have an entire {len(contenders_list) + 1} contenders for the throne! They are: {str(set(contenders_list))[1:-1]} and {mode}, rolled {roll_cache.count(mode)} times each!")
 
                                                 else:
                                                         print("Your cache is empty! Roll some more to get started!")
