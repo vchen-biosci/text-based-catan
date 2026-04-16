@@ -460,8 +460,8 @@ settlement_locs["u"]["display"] + "  _ _ 3:1 port" + "\n" +
         time.sleep(0.5)
 
         game['roads'] = roads
-
         game["tiles"] = tiles
+        game['settlement_locs'] = settlement_locs
 
         return game
 
@@ -474,7 +474,7 @@ def print_board(game : dict, CONSTS : dict):
                 print(f'{resource} : {game["resource_bank"][resource]}', end="  ||  ")
         print("\n")
         for dev_card in game['dev_cards']:
-                print(f'{dev_card} : {game["dev_cards"][dev_card]}, end="  ||  ')
+                print(f'{dev_card} : {game["dev_cards"][dev_card]}', end="  ||  ")
         print("\n")
         for player in game['quick_key']:
                 print(ansi_stitching(game[player]['color'], f"Player {player} ({game[player]['name']})"), end="  ||  ")
@@ -516,6 +516,10 @@ def setup_game(game : dict, CONSTS : dict):
                 quick_dev_dict = dict(zip(CONSTS['dev_cards'], CONSTS["dev_card_numbers"]))
                 for dev_card in quick_dev_dict:
                         game[player]["dev_cards"][dev_card] = quick_dev_dict[dev_card]
+
+                game[player]['roads'] = []
+                game[player]['settlements'] = []
+                game[player]['cities'] = []
 
                 game['construct_bank'] = {}
 
@@ -567,11 +571,11 @@ def ansi_stitching(color : list, text : str):
         return colored_ver
 
 def check(text, CONSTS, game, mode):
-        if mode == 'settlements':
+        if mode == 'settlement':
                 settlement = text
 
                 try:
-                        if game['settlement_locs'][settlement]['display']:
+                        if game['settlement_locs'][settlement]['display'] != settlement:
                                 valid = False
                                 
                         else:
@@ -581,12 +585,15 @@ def check(text, CONSTS, game, mode):
                                                 related_roads.append(road)
                                 
                                 for x in related_roads:
-                                        x.pop(settlement)
+                                        l = ""
+                                        for i in x:
+                                                if i != settlement:
+                                                        l += i
+                                        x = l
 
                                 adjacent_settlements = related_roads
-
-                                for settlement in adjacent_settlements:
-                                        if game['settlements'][settlement] != game['settlements'][settlement]['display']:
+                                for y in adjacent_settlements:
+                                        if game['settlements'][y] != game['settlements'][y]['display']:
                                                 print("It looks like you're trying to place a settlement adjacent to another settlement. You must place it at least two roads away.")
                                                 valid = False
 
@@ -598,9 +605,6 @@ def check(text, CONSTS, game, mode):
                                 valid = False
                         print("")
 
-                
-        else:
-                valid = False
 
         try: 
                 type(valid)
@@ -693,9 +697,13 @@ def main_game(game : dict, CONSTS : dict):
                 for player in game['quick_key']:
                         valid = False
                         while not valid:
-                                text = input(f"Player {player}, where would you like to place your settlement?")
+                                text = input(f"Player {player}, where would you like to place your settlement?\n> ").strip()
                                 valid = check(text, CONSTS, game, 'settlement')
-                        settlement_thing = []
+                        game[player]['settlements'] += text
+                        game['settlement_locs'][text]['display'] = ansi_stitching(game[player]['color'], game['settlement_locs'][text]['display'])
+                        print("\033[H\033[J", end="")
+                        print_board(game, CONSTS)
+                        
         return game
 
 def main():
@@ -816,6 +824,8 @@ ENTER YOUR COMMAND TO BEGIN :)""",
                 elif action == 'start game':
                         game["input type"] = CONSTS["commands"]
                         print("Starting your game...")
+                        time.sleep(1)
+                        print("\033[H\033[J", end="")
                         game = setup_game(game, CONSTS)
                         game = main_game(game, CONSTS)
                         print("The game's over! Wanna try again? ^^")

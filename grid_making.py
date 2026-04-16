@@ -134,7 +134,6 @@ for road_type in road_types:
                 roads[road] = road_type
         counter = 0
 
-        print(roads)
 
 
 grid_part_1 = (
@@ -191,7 +190,7 @@ grid_part_1 = (
         
 )
 
-grid_mid = (
+grid_part_2 = (
         #line 20
         (" " * 17) + roads["LR"] + (" " * ((24 - len(str(tiles["S4"]["biome"])))//2)) + tiles["S4"]["biome"] + (" " * 10 if tiles["S4"]["biome"] != "desert" else " " * 9) + roads["MS"] + (" " * 14) + roads["NT"] +
         (" " * ((22 - len(str(tiles["S5"]["biome"])))//2)) + tiles["S5"]["biome"] + (" " * 9 if tiles["S5"]["biome"] != "desert" else " " * 8) + roads["OU"] + (" " * 13) + roads["PV"] +
@@ -232,7 +231,7 @@ grid_mid = (
     
 )
 
-grid_part_2 = (
+grid_part_3 = (
         #line 31 & 32
         (" " * 18) + roads["Xd"] + (" " * 10) + "S9" + (" " * 10) + roads["Ye"] + (" " * 16) + roads["Zf"] + (" " * 8) + "S10" + (" " * 9) + roads["ag"] + (" " * 15) + roads["bh"] + (" " * 8) + "S11" + (" " * 9) + roads["ci"] + "\n\n" +
         #line 33
@@ -272,7 +271,7 @@ grid_part_2 = (
         (" " * 13) + "/" + (" " * 107) + "\\" + "\n" 
         )
 
-grid_part_3 = (
+grid_part_4 = (
         #line 43
         (" " * 12) + "/" + (" " * 7) + roads['jp'] + (" " * 18) + roads['kq'] + (" " * 7) + kaomojis[tiles["S17"]["biome"]] + (" " * 7) + roads['lr'] + (" " * 16) + roads['ms'] + (" " * 6) + kaomojis[tiles["S18"]["biome"]] + (" " * 7)
         + roads['nt'] + (" " * 16) + roads['ou'] + (" " * 7) + "\\" + "\n" +
@@ -308,7 +307,7 @@ grid_part_3 = (
 
 )
 
-grid = [grid_part_1, grid_mid, grid_part_2, grid_part_3]
+grid = [grid_part_1, grid_part_2, grid_part_3, grid_part_4]
 for part in grid:
         print(part, end="")
 print("\n")
