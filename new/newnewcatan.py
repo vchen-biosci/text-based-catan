@@ -570,7 +570,6 @@ def ansi_stitching(color : list, text : str):
 def check(text, CONSTS, game, mode):
         if mode == 'settlement':
                 settlement = text
-
                 try:
                         if game['settlement_locs'][settlement]['display'] != settlement:
                                 print("This settlement is already taken, silly! Pro tip: if it has a colour, it's taken!")
@@ -593,8 +592,7 @@ def check(text, CONSTS, game, mode):
                                                 print(f"It looks like you're trying to place a settlement adjacent to another settlement, {place}. You must place it at least two roads away.")
                                                 valid = False
                                                 break
-
-
+        
                 except KeyError:
                         if settlement in game['settlement_locs']:
                                 valid = True
@@ -603,6 +601,21 @@ def check(text, CONSTS, game, mode):
                         print("")
 
 
+
+        elif mode == 'road':
+                try:
+                        for road in game['roads']:
+                                if text == road:
+                                        if game['roads'][text] != road:
+                                                print("Sorry, that road is already taken...")
+                                                valid = False
+                                
+
+                except KeyError:
+                        print("That road doesn't seem to exist, sorry!")
+                        valid = False
+                
+                
         try: 
                 type(valid)
 
@@ -697,12 +710,23 @@ def main_game(game : dict, CONSTS : dict):
                         while not valid:
                                 text = input(f"Player {player}, where would you like to place your settlement?\n> ").strip()
                                 valid = check(text, CONSTS, game, 'settlement')
-                        game[player]['settlements'] += text
+                        game[player]['settlements'].append(text)
                         print(game['settlement_locs'][text]['display'])
                         game['settlement_locs'][text]['display'] = ansi_stitching(game[player]['color'], game['settlement_locs'][text]['display'])
-                        #print("\033[H\033[J", end="")
-                        print(game['settlement_locs'][text]['display'])
+                        print("\033[H\033[J", end="")
                         print_board(game, CONSTS)
+
+                        valid = False
+                        while not valid:
+                                text = input(f"Player {player}, which road would you like to take?\n> ").strip()
+                                text = quick_reorder(text)
+                                valid = check(text, CONSTS, game, 'road')
+                        game[player]['roads'].append(text)
+                        game['roads'][text] = ansi_stitching(game[player]['color'], text)
+                        print("\033[H\033[J", end="")
+                        print_board(game, CONSTS)
+
+                        
                         
         return game
 
@@ -715,6 +739,9 @@ def start_game(game : dict, CONSTS : dict):
         game = main_game(game, CONSTS)
         print("The game's over! Wanna try again? ^^ you're getting sent back to the main starting programme now!")
         print("\033[H\033[J", end="")
+
+def analyse_ownership(game : dict, CONSTS : dict, element):
+        pass
 
 def main():
         CONSTS = {
