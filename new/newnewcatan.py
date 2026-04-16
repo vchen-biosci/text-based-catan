@@ -619,14 +619,17 @@ def check(text, CONSTS, game, mode):
                                         player = analyse_ownership(game, CONSTS, game['settlement_locs'][attached_settlement]['display'])
                                         if game['player_turn'] == player:
                                                 valid = True
-                                                return valid
+                                                existence = True
                                         else:
                                                 print("You don't appear to have any settlements next to that road. So, you can't build it.")
                                                 valid = False
                                 
-                                else:
-                                        print(f"You don't appear to own a settlement connected to the road. Sorry." if attached_settlement == road[1] else "")
-                                        valid = False
+                                else:    
+                                        try:
+                                                type(existence)
+                                        except NameError:
+                                                print("You don't appear to own a settlement connected to the road. Sorry." if attached_settlement == road[1] else "")
+                                                valid = False
                                 
 
                 except KeyError:
