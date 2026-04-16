@@ -572,6 +572,7 @@ def check(text, CONSTS, game, mode):
 
                 try:
                         if game['settlement_locs'][settlement]['display'] != settlement:
+                                print("This settlement is already taken, silly! Pro tip: if it has a colour, it's taken!")
                                 valid = False
                                 
                         else:
@@ -580,18 +581,17 @@ def check(text, CONSTS, game, mode):
                                         if settlement in road:
                                                 related_roads.append(road)
                                 
-                                for x in related_roads:
-                                        l = ""
-                                        for i in x:
-                                                if i != settlement:
-                                                        l += i
-                                        x = l
+                                related_settlements = []
+                                for road in related_roads:
+                                        for place in road:
+                                                if place != settlement:
+                                                        related_settlements.append(place)
 
-                                adjacent_settlements = related_roads
-                                for y in adjacent_settlements:
-                                        if game['settlements'][y] != game['settlements'][y]['display']:
-                                                print("It looks like you're trying to place a settlement adjacent to another settlement. You must place it at least two roads away.")
+                                for place in related_settlements:
+                                        if place != game['settlement_locs'][place]['display']:
+                                                print(f"It looks like you're trying to place a settlement adjacent to another settlement, {place}. You must place it at least two roads away.")
                                                 valid = False
+                                                break
 
 
                 except KeyError:
@@ -704,6 +704,16 @@ def main_game(game : dict, CONSTS : dict):
                         print_board(game, CONSTS)
                         
         return game
+
+def start_game(game : dict, CONSTS : dict):
+        game["input type"] = CONSTS["commands"]
+        print("Starting your game...")
+        time.sleep(1)
+        print("\033[H\033[J", end="")
+        game = setup_game(game, CONSTS)
+        game = main_game(game, CONSTS)
+        print("The game's over! Wanna try again? ^^ you're getting sent back to the main starting programme now!")
+        print("\033[H\033[J", end="")
 
 def main():
         CONSTS = {
@@ -821,14 +831,7 @@ ENTER YOUR COMMAND TO BEGIN :)""",
                         print(CONSTS["building costs"])
 
                 elif action == 'start game':
-                        game["input type"] = CONSTS["commands"]
-                        print("Starting your game...")
-                        time.sleep(1)
-                        print("\033[H\033[J", end="")
-                        game = setup_game(game, CONSTS)
-                        game = main_game(game, CONSTS)
-                        print("The game's over! Wanna try again? ^^")
-                        main()
+                        start_game(game, CONSTS)
 
                 elif action == 'end program':
                         break
