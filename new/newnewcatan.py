@@ -1,4 +1,4 @@
-import random, time
+import random, time, os
 
 def infinite_rng(game : dict, CONSTS : dict):
         
@@ -466,7 +466,6 @@ def print_board(game : dict, CONSTS : dict):
         print("________ WELCOME TO THE WORLD OF CATAN!!! WHERE WILL YOU SETTLE TODAY? ________\n")
         print(f"It's player {game['player_turn']}'s turn! Go ahead, {game[game['player_turn']]['name']} :)")
         print(f"GAME BANK:")
-        print(f'Resources: ')
         for resource in game['resource_bank']:
                 print(f'{resource} : {game["resource_bank"][resource]}', end="  ||  ")
         print("\n")
@@ -542,8 +541,7 @@ def setup_game(game : dict, CONSTS : dict):
         time.sleep(1)
         print(", 1...")
         time.sleep(1)
-
-        print("\033[H\033[J", end="")
+        os.system('cls' if os.name == 'nt' else 'clear')
 
 
         return game
@@ -567,7 +565,7 @@ def ansi_stitching(color : list, text : str):
 
         return colored_ver
 
-def check(text, CONSTS, game, mode):
+def check(text : str, CONSTS : dict, game : dict, mode : str):
         if mode == 'settlement':
                 settlement = text
                 try:
@@ -603,38 +601,9 @@ def check(text, CONSTS, game, mode):
 
 
         elif mode == 'road':
-                try:
-                        game['roads'][text]
-                        for road in game['roads']:
-                                try:
-                                        int(game['roads'][road])
-                                        print("Sorry, that road is already taken...")
-                                        valid = False
-
-                                except ValueError:
-                                        pass
-
-                        for attached_settlement in road:
-                                if game['settlement_locs'][attached_settlement]['display'] != attached_settlement:
-                                        player = analyse_ownership(game, CONSTS, game['settlement_locs'][attached_settlement]['display'])
-                                        if game['player_turn'] == player:
-                                                valid = True
-                                                existence = True
-                                        else:
-                                                print("You don't appear to have any settlements next to that road. So, you can't build it.")
-                                                valid = False
-                                
-                                else:    
-                                        try:
-                                                type(existence)
-                                        except NameError:
-                                                print("You don't appear to own a settlement connected to the road. Sorry." if attached_settlement == road[1] else "")
-                                                valid = False
-                                
-
-                except KeyError:
-                        print("That road doesn't seem to exist, sorry!")
+                if text not in game['roads']:
                         valid = False
+                        print("That road doesn't exist.")
                 
                 
         try: 
@@ -735,7 +704,7 @@ def main_game(game : dict, CONSTS : dict):
                         game[player]['settlements'].append(text)
                         print(game['settlement_locs'][text]['display'])
                         game['settlement_locs'][text]['display'] = ansi_stitching(game[player]['color'], game['settlement_locs'][text]['display'])
-                        print("\033[H\033[J", end="")
+                        os.system('cls' if os.name == 'nt' else 'clear')
                         print_board(game, CONSTS)
 
                         valid = False
@@ -745,7 +714,7 @@ def main_game(game : dict, CONSTS : dict):
                                 valid = check(text, CONSTS, game, 'road')
                         game[player]['roads'].append(text)
                         game['roads'][text] = ansi_stitching(game[player]['color'], game['roads'][text])
-                        print("\033[H\033[J", end="")
+                        os.system('cls' if os.name == 'nt' else 'clear')
                         print_board(game, CONSTS)
 
                         
@@ -756,11 +725,11 @@ def start_game(game : dict, CONSTS : dict):
         game["input type"] = CONSTS["commands"]
         print("Starting your game...")
         time.sleep(1)
-        print("\033[H\033[J", end="")
+        os.system('cls' if os.name == 'nt' else 'clear')
         game = setup_game(game, CONSTS)
         game = main_game(game, CONSTS)
         print("The game's over! Wanna try again? ^^ you're getting sent back to the main starting programme now!")
-        print("\033[H\033[J", end="")
+        os.system('cls' if os.name == 'nt' else 'clear')
 
 def analyse_ownership(game : dict, CONSTS : dict, element):
 
