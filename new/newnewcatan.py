@@ -203,12 +203,19 @@ def print_own_deck(game : dict, CONSTS : dict):
 
 def roll_die(game : dict, CONSTS : dict):
 
-        dice_1 = random.randint(1, 6)
-        dice_2 = random.randint(1, 6)
-        roll = dice_1 + dice_2
-        print(f"As everyone watches with baited breath, you roll the die. You pray for a good result. They land as follows: |{dice_1}| |{dice_2}| ... {dice_1} + {dice_2} = {roll}. You've rolled a {roll}.")
+        if game["roll_allowed"] == True:
+                dice_1 = random.randint(1, 6)
+                dice_2 = random.randint(1, 6)
+                roll = dice_1 + dice_2
+                print(f"As everyone watches with baited breath, you roll the die. You pray for a good result. They land as follows: |{dice_1}| |{dice_2}| ... {dice_1} + {dice_2} = {roll}. You've rolled a {roll}.")
+                game["roll_allowed"] = False
+                
+
+        else:
+                print("You've already rolled this turn.")
 
         return roll
+        
 
 def quick_reorder(road : str):
 
@@ -743,6 +750,36 @@ def game_stage_1(game : dict, CONSTS : dict):
                         
         return game
 
+def password_confirm(game : dict, CONSTS : dict):
+        confirm = input("What's your password?")
+        if confirm == game[game['suspect']]['password']:
+                return True
+        else:
+                return False
+
+def trade_cards(game : dict, CONSTS : dict):
+        valid = False
+        while not valid:
+                other_party = input(f"Who would you like to trade with?").strip().lower()
+
+                try:
+                        other_party = int(other_party)
+                        if other_party in game["quick_key"]:
+                                valid = True
+                
+                except TypeError:
+                        pass
+
+                for player in game["quick_key"]:
+                        if game[player]['name'] == other_party:
+                                other_party = player
+                                valid = True
+
+        valid = False
+        while not valid:
+                confirm = input(f"Player {other_party}, {game[other_party]['name']}, do you agree to this trade? Hint: you can either check your own deck or type 'Y' or 'N' to confirm.")
+                pass
+
 def evaluate_game_state(game : dict, CONSTS : dict):
         for player in game["quick_key"]:
 
@@ -763,13 +800,30 @@ def main_game(game, CONSTS):
 
         while game["mode"] == "main":
 
-                game["mode"], game = evaluate_game_state(game, CONSTS)
-                
-                action = input("> ").strip().lower()
-                try:
-                        CONSTS["commands"][action](game, CONSTS)
-                except KeyError:
-                        print("Oops, that command doesn't exist.")
+                for player in game["quick_key"]:
+                        while game["player_turn"] == player:
+
+                                game["mode"], game = evaluate_game_state(game, CONSTS)
+                                
+                                action = input("> ").strip().lower()
+
+                                if action == "end turn":
+                                        game['suspect'] = player
+                                        if password_confirm(game, CONSTS):
+                                                break
+
+                                elif action == "end turn":
+                                        game['suspect'] = player
+                                        if password_confirm(game, CONSTS):
+                                                trade_cards(game, CONSTS)
+
+                                else:
+                                        try:
+                                                CONSTS["commands"][action](game, CONSTS)
+                                        except KeyError:
+                                                print("Oops, that command doesn't exist.")
+
+                        
 
         return game
 
@@ -930,7 +984,7 @@ ENTER YOUR COMMAND TO BEGIN""",
                 elif action == 'start':
                         start_game(game, CONSTS)
 
-                elif action == 'end program':
+                elif action == 'end':
                         break
                         
                 else:
