@@ -390,13 +390,11 @@ def generate_grid(game : dict, CONSTS : dict):
         tiles = {}
         for i in range(19):
                 tiles[("S"+str(i+1))] = {}
-        time.sleep(0.5)
 
         print("Spawning your desert...")
         desert_placement = random.randint(1, 19)
         tiles[("S"+str(desert_placement))]["biome"] = "desert"
         tiles[("S"+str(desert_placement))]["number"] = 7
-        time.sleep(0.5)
         game['robber'] = "S"+str(desert_placement)
 
         print("Generating random numbers...")
@@ -413,7 +411,6 @@ def generate_grid(game : dict, CONSTS : dict):
                         random.shuffle(CONSTS["number_tokens"])
                         chosen_number = CONSTS["number_tokens"].pop()
                         tiles[("S"+str(i+1))]["number"] = chosen_number
-        time.sleep(0.5)
 
         print("Sailing to your ports...")
         settlement_locs = {}
@@ -430,7 +427,6 @@ def generate_grid(game : dict, CONSTS : dict):
                 settlement_locs[loc]["port"] = port_to_place
                 if reps % 2 == 0:
                         i += 1
-        time.sleep(0.5)
 
         print("Paving your roads...")
         counter = 0
@@ -449,14 +445,12 @@ def generate_grid(game : dict, CONSTS : dict):
                         
                         roads[road] = road_type
                 counter = 0
-        time.sleep(0.5)
 
         game['roads'] = roads
         game["tiles"] = tiles
         game['settlement_locs'] = settlement_locs
 
         print("Definining your grid...")
-        time.sleep(0.5)
 
         
 
@@ -464,7 +458,7 @@ def generate_grid(game : dict, CONSTS : dict):
 
 def print_board(game : dict, CONSTS : dict):
         print("________ WELCOME TO THE WORLD OF CATAN!!! WHERE WILL YOU SETTLE TODAY? ________\n")
-        print(f"It's player {game['player_turn']}'s turn! Go ahead, {game[game['player_turn']]['name']} :)")
+        
         print(f"GAME BANK:")
         for resource in game['resource_bank']:
                 print(f'{resource} : {game["resource_bank"][resource]}', end="  ||  ")
@@ -477,7 +471,7 @@ def print_board(game : dict, CONSTS : dict):
         print("\n")
         print_grid(game, CONSTS)
         print(f"The robber is currently pillaging the citizens of {game['robber']} and stealing all their {game['tiles'][game['robber']]['biome']}! Poor villagers :(")
-        print("\n\n")
+        print(f"It's player {game['player_turn']}'s turn! Go ahead, {game[game['player_turn']]['name']} :)")
 
 def setup_game(game : dict, CONSTS : dict):
 
@@ -525,9 +519,8 @@ def setup_game(game : dict, CONSTS : dict):
         print("Generating your grid...")
         game = generate_grid(game, CONSTS)
 
-        print("Clearing screen in 2 seconds.")
-        time.sleep(2)
-        os.system('cls' if os.name == 'nt' else 'clear')
+
+        print("\033c", end="")
 
 
         return game
@@ -681,7 +674,7 @@ def assign_player_colours(game : dict, CONSTS : dict):
 
         for player in range(game["player_number"]):
                 print(ansi_stitching(game[player + 1]["color"], f"Player {player + 1}, this is your colour."))
-                time.sleep(0.5)
+                time.sleep(0.3)
 
 
         return game
@@ -702,7 +695,7 @@ def main_game(game : dict, CONSTS : dict):
                         game[player]['settlements'].append(text)
                         print(game['settlement_locs'][text]['display'])
                         game['settlement_locs'][text]['display'] = ansi_stitching(game[player]['color'], game['settlement_locs'][text]['display'])
-                        os.system('cls' if os.name == 'nt' else 'clear')
+                        print("\033c", end="")
                         print_board(game, CONSTS)
 
                         valid = False
@@ -712,7 +705,7 @@ def main_game(game : dict, CONSTS : dict):
                                 valid = check(text, CONSTS, game, 'road')
                         game[player]['roads'].append(text)
                         game['roads'][text] = ansi_stitching(game[player]['color'], game['roads'][text])
-                        os.system('cls' if os.name == 'nt' else 'clear')
+                        print("\033c", end="")
                         print_board(game, CONSTS)
 
                         
@@ -723,11 +716,11 @@ def start_game(game : dict, CONSTS : dict):
         game["input type"] = CONSTS["commands"]
         print("Starting your game...")
         time.sleep(1)
-        os.system('cls' if os.name == 'nt' else 'clear')
+        print("\033c", end="")
         game = setup_game(game, CONSTS)
         game = main_game(game, CONSTS)
         print("The game's over! Wanna try again? ^^ you're getting sent back to the main starting programme now!")
-        os.system('cls' if os.name == 'nt' else 'clear')
+        print("\033c", end="")
 
 def analyse_ownership(game : dict, CONSTS : dict, element):
 
@@ -738,6 +731,7 @@ def analyse_ownership(game : dict, CONSTS : dict, element):
                 if i in [";", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0"]:
                         counter += 1
         colors = element[:counter - 1].split(";")
+        print(colors)
         
         color = []
         for value in colors:
