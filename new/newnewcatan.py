@@ -482,7 +482,6 @@ def print_board(game : dict, CONSTS : dict):
 def setup_game(game : dict, CONSTS : dict):
 
         print("Notice: While setting up the game, you temporarily can't use other commands.")
-        time.sleep(0.5)
 
         game = setup_player_dicts(game, CONSTS)
 
@@ -493,13 +492,9 @@ def setup_game(game : dict, CONSTS : dict):
                         print(", ", end="")
                 else:
                         print(".\n")
-        time.sleep(0.5)
 
 
         game = assign_player_colours(game, CONSTS)
-
-        print("\nTime to set up your game, are you excited?")
-        time.sleep(1)
 
         print("Initialising player cards...")
         for player in game["quick_key"]:
@@ -519,9 +514,6 @@ def setup_game(game : dict, CONSTS : dict):
 
                 game['construct_bank'] = {}
 
-
-        time.sleep(0.5)
-
         print("Setting up the resource bank...")
         game["resource_bank"] = {}
         for resource in CONSTS["resources"]:
@@ -529,18 +521,12 @@ def setup_game(game : dict, CONSTS : dict):
         game["dev_cards"] = {}
         for dev_card in quick_dev_dict:
                 game["dev_cards"][dev_card] = quick_dev_dict[dev_card]
-        time.sleep(0.5)
 
         print("Generating your grid...")
         game = generate_grid(game, CONSTS)
-        time.sleep(0.5)
 
-        print("Clearing screen in: 3", end="")
-        time.sleep(1)
-        print(", 2", end="")
-        time.sleep(1)
-        print(", 1...")
-        time.sleep(1)
+        print("Clearing screen in 2 seconds.")
+        time.sleep(2)
         os.system('cls' if os.name == 'nt' else 'clear')
 
 
@@ -566,6 +552,9 @@ def ansi_stitching(color : list, text : str):
         return colored_ver
 
 def check(text : str, CONSTS : dict, game : dict, mode : str):
+
+        valid = True 
+
         if mode == 'settlement':
                 settlement = text
                 try:
@@ -595,22 +584,31 @@ def check(text : str, CONSTS : dict, game : dict, mode : str):
                         if settlement in game['settlement_locs']:
                                 valid = True
                         else:
+                                print("That settlement doesn't exist.")
                                 valid = False
                         print("")
 
 
 
         elif mode == 'road':
+
                 if text not in game['roads']:
                         valid = False
                         print("That road doesn't exist.")
-                
-                
-        try: 
-                type(valid)
 
-        except NameError:
-                valid = True
+                else:
+                        case = []
+                        for settlement in text:
+                                if game["settlement_locs"][settlement]['display'] != settlement:
+                                        owner = analyse_ownership(game, CONSTS, game['settlement_locs'][settlement]['display'])
+                                        if game['player_turn'] == owner:
+                                                case.append(settlement)
+                        
+                        if len(case) != 0:
+                                print("Great, welcome to your new road!")
+                        else:
+                                print("You don't own any settlements next to that road, so you can't build it. Sorry.")
+                                valid = False
 
         return valid
 
@@ -662,7 +660,7 @@ Please make sure all other players are able to read this!\n""") + "> ").strip()
 def assign_player_colours(game : dict, CONSTS : dict):
 
 
-        preset_colors = [[0, 201, 184], [252, 210, 0], [252, 84, 0], [210, 0, 252]]
+        preset_colors = [[1, 201, 184], [252, 210, 1], [252, 84, 1], [210, 1, 252]]
 
         manual = ""
         while manual not in ["y", "m"]:
@@ -734,14 +732,13 @@ def start_game(game : dict, CONSTS : dict):
 def analyse_ownership(game : dict, CONSTS : dict, element):
 
         element = element[9:]
+        #142;194;21mthis text\x1b[0m
         counter = 0
         for i in element:
                 if i in [";", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0"]:
                         counter += 1
-        element = element[:counter]
-        extracted_colors = element[:-1]
-        print(extracted_colors)
-        colors = extracted_colors.split(";")
+        colors = element[:counter - 1].split(";")
+        
         color = []
         for value in colors:
                 color.append(int(value))
