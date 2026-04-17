@@ -215,7 +215,6 @@ def roll_die(game : dict, CONSTS : dict):
                 print("You've already rolled this turn.")
 
         return roll
-        
 
 def quick_reorder(road : str):
 
