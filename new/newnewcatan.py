@@ -4,8 +4,8 @@ def infinite_rng(game : dict, CONSTS : dict):
         
         
         possible_stat_commands = ["cache", "mode", "mean", "num", "?", "reset", "indie"]
-        print("Ohohoho, it seems you wish to play infinite rng, hm?")
-        print("Type 'r' to roll, type 'esc' to escape! Oh, and 'stats' if you're into that sort of thing.")
+        print("INFINITE RNG")
+        print("Type 'r' to roll, type 'esc' to escape. Use 'stats' if you're into that sort of thing. Enter '?' to access the full list of commands.")
         roll_cache = []
         cache_dice_1 = []
         cache_dice_2 = []
@@ -25,15 +25,15 @@ def infinite_rng(game : dict, CONSTS : dict):
                                 cache_dice_2.append(dice_2)
                                 print(f"The die have spoken!! |{dice_1}| |{dice_2}| ... {dice_1} + {dice_2} = {roll}! You have rolled a {roll}!!")
                         else:
-                                print("Uh oh. You're a silly bunny, aren't you? Either type 'r' or 'esc'! Oh, and 'stats' if you wanna see some cool stats. ykwim.")
+                                print("Your current input isn't valid. If you're confused on what inputs are allowed, type '?'")
 
                 elif action == "stats":
 
                         loop = True
-                        print("What stat do you want to see? (Hint: type '?' if you want to see the commands available for stats, or 'leave stats' to escape!)")
+                        print("What stat do you want to see? (Hint: type '?' if you want to see the commands available for stats, or 'leave stats' to escape.)")
 
                         if len(roll_cache) == 0:
-                                print("Warning: your cache is empty right now, so there aren't any stats for you to see. But you can proceed if you want.")
+                                print("Warning: your cache is empty right now, so there aren't any stats for you to see.")
 
                         while loop:
                                 action = input("> ").strip().lower()
@@ -63,19 +63,19 @@ def infinite_rng(game : dict, CONSTS : dict):
 
 
                                                         if contenders_list == []:
-                                                                print(f"Your mode was {mode}, and you rolled it a whopping {roll_cache.count(number)} times!!")
+                                                                print(f"Your mode was {mode}, and you rolled it a whopping {roll_cache.count(number)} times.")
                                                         else:
-                                                                print(f"Well, you don't really have ONE singular mode. You have an entire {len(contenders_list) + 1} contenders for the throne! They are: {str(set(contenders_list))[1:-1]} and {mode}, rolled {roll_cache.count(mode)} time{'s' if roll_cache.count(mode) != 1 else ''} each!")
+                                                                print(f"Well, you don't really have ONE singular mode. In fact, you have {len(contenders_list) + 1}. They are: {str(set(contenders_list))[1:-1]} and {mode}, rolled {roll_cache.count(mode)} time{'s' if roll_cache.count(mode) != 1 else ''} each.")
 
                                                 else:
-                                                        print("Your cache is empty! Roll some more to get started!")
+                                                        print("Your cache is empty; roll some more to get started.")
 
                                         elif action == "mean":
 
                                                 if len(roll_cache) != 0:
                                                         print(f"The mean of all your rolls is {sum(roll_cache) / len(roll_cache)}")
                                                 else:
-                                                        print("Your roll cache is empty. Get grinding!")
+                                                        print("Your roll cache is empty. Get grinding.")
                                         
                                         elif action == "num":
 
@@ -83,7 +83,7 @@ def infinite_rng(game : dict, CONSTS : dict):
 
                                         elif action == "reset":
 
-                                                print("Ok, tough decision!")
+                                                print("Ok, tough decision.")
                                                 print("Erasing your cache... IRREVERSIBLE BTW")
                                                 roll_cache = []
                                                 cache_dice_1 = []
@@ -91,16 +91,16 @@ def infinite_rng(game : dict, CONSTS : dict):
                                         
                                         elif action == "?":
 
-                                                print("""You currently find yourself in a totally developed and advanced gambling history analysis, capable of:
-> showcasing your ENTIRE roll history (in this session)! ('cache')
+                                                print("""You currently find yourself in a gambling history analysis, capable of:
+> showcasing your roll history (in this session) ('cache')
 > showing your most rolled number ('mode')
 > showing your mean roll ('mean')
 > showing you the number of rolls you've done in this session ('num')
 > answering your greatest ?s ('?', you're here right now)
-> allowing you to escape your dark past of terrible rolls ('reset')
-> letting you break free, omg ('leave stats')
-> showing your single die stats ('indie')
-> letting you end rng??? ('esc')\n""")
+> erasing your cache ('reset')
+> allowing you to leave stats... ('leave stats')
+> showcasing your single die stats ('indie')
+> letting you end rng ('esc').\n""")
                                                 
                                         elif action == "indie":
 
@@ -132,18 +132,18 @@ def infinite_rng(game : dict, CONSTS : dict):
 
 
                                 elif action == "leave stats":
-                                        print("Okay! Bye!")
+                                        print("Back to gambling?")
                                         loop = False
                                 
                                 elif action == "esc":
                                         rng_loop = False
 
                                 else:
-                                        print("Stick to the commands!! Type '?' if you're lost. The input loop's not even case sensitive. BEHAVE!")
+                                        print("Stick to the commands. Type '?' if you're lost.")
 
 
                 else:
-                        print("YOU'RE BEING TELEPORTED OUT OF THE MATRIX. RETURNING TO THE MAINFRAME...")
+                        print("RETURNING TO THE MAINFRAME...")
                         print("(Erasing all your gambling records...)")
                         rng_loop = False
 
@@ -151,7 +151,7 @@ def setup_player_dicts(game : dict, CONSTS : dict):
 
         while True:
                 try:
-                        player_number = int(input("How many people are playing? :)\n> ").strip()) 
+                        player_number = int(input("How many people are playing?\n> ").strip()) 
                         if player_number in [3, 4]:
                                 break
                         else: 
@@ -178,7 +178,7 @@ def setup_player_dicts(game : dict, CONSTS : dict):
                                 break
 
                         else:
-                                print("Stop stealing another player's name!! Weirdo!!")
+                                print("... That name's already owned. Choose something else.")
 
                 player_names.append(player_name)
                 game[i + 1]["name"] = player_name 
@@ -193,11 +193,10 @@ def print_own_deck(game : dict, CONSTS : dict):
 
 def roll_die(game : dict, CONSTS : dict):
 
-
         dice_1 = random.randint(1, 6)
         dice_2 = random.randint(1, 6)
         roll = dice_1 + dice_2
-        print(f"The die have spoken!! |{dice_1}| |{dice_2}| ... {dice_1} + {dice_2} = {roll}! You have rolled a {roll} :3")
+        print(f"As everyone watches with baited breath, you roll the die. You pray for a good result. They land as follows: |{dice_1}| |{dice_2}| ... {dice_1} + {dice_2} = {roll}. You've rolled a {roll}.")
 
         return roll
 
@@ -459,7 +458,7 @@ def generate_grid(game : dict, CONSTS : dict):
         return game
 
 def print_board(game : dict, CONSTS : dict):
-        print("________ WELCOME TO THE WORLD OF CATAN!!! WHERE WILL YOU SETTLE TODAY? ________\n")
+        print("________ WELCOME TO THE WORLD OF CATAN. WHERE WILL YOU SETTLE TODAY? ________\n")
         
         print(f"GAME BANK:")
         for resource in game['resource_bank']:
@@ -472,8 +471,8 @@ def print_board(game : dict, CONSTS : dict):
                 print(ansi_stitching(game[player]['color'], f"Player {player} ({game[player]['name']})"), end="  ||  ")
         print("\n")
         print_grid(game, CONSTS)
-        print(f"The robber is currently pillaging the citizens of {game['robber']} and stealing all their {game['tiles'][game['robber']]['biome']}! Poor villagers :(")
-        print(f"It's player {game['player_turn']}'s turn! Go ahead, {game[game['player_turn']]['name']} :)")
+        print(f"The robber is currently pillaging the citizens of {game['robber']} and stealing all their {game['tiles'][game['robber']]['biome']}... Resources rolled here will not be obtained.")
+        print(f"It's player {game['player_turn']}'s turn. Go ahead, {game[game['player_turn']]['name']}.")
 
 def setup_game(game : dict, CONSTS : dict):
 
@@ -554,7 +553,7 @@ def check(text : str, CONSTS : dict, game : dict, mode : str):
                 settlement = text
                 try:
                         if game['settlement_locs'][settlement]['display'] != settlement:
-                                print("This settlement is already taken, silly! Pro tip: if it has a colour, it's taken!")
+                                print("This settlement is already taken. Pro tip: if it has a colour, it's not up for grabs.")
                                 valid = False
                                 
                         else:
@@ -593,7 +592,7 @@ def check(text : str, CONSTS : dict, game : dict, mode : str):
                                                         case.append(road)
 
                         if len(case) != 0:
-                                print("Say hello to your new settlement!")
+                                print("Congratulations on owning a new settlement.")
                         else:
                                 print("You can only build next to a road that you own. Sorry.")
                                 valid = False
@@ -657,7 +656,7 @@ def choose_colours(CONSTS):
                 while not confirmed:
 
                         confirm = input(ansi_stitching(player_color, """This is what your colour looks like - are you sure you want it? Type 'Y' for yes and 'N' for no. 
-Please make sure all other players are able to read this!\n""") + "> ").strip()
+Please make sure all other players can see this color.\n""") + "> ").strip()
                         
                         if confirm == "N":
                                 player_color = []
@@ -670,6 +669,7 @@ Please make sure all other players are able to read this!\n""") + "> ").strip()
                         else:
                                 print("Please type either 'Y' or 'N'. This is case sensitive.")
 
+        print("\033c", end="")
         return player_color
 
 def assign_player_colours(game : dict, CONSTS : dict):
@@ -680,13 +680,13 @@ def assign_player_colours(game : dict, CONSTS : dict):
         manual = ""
         while manual not in ["y", "m"]:
 
-                manual = input("Would you like to use our pre-selected, super aesthetic colours or customise your own? Please be responsible!!" +
+                manual = input("Would you like to use our pre-selected colours or customise your own?" +
                         " Type 'Y' for yes and 'M' to manually select.\n> ").lower().strip()
                 
         if manual == "m":
 
                 for player in range(game["player_number"]):
-                        print(f"OKAY! PLAYER {player + 1}, YOU'RE UP!!!")
+                        print(f"Player {player + 1}, your turn to choose.")
                         game[player + 1]["color"] = choose_colours(CONSTS)
 
         else:
@@ -705,7 +705,7 @@ def game_stage_1(game : dict, CONSTS : dict):
         game['player_turn'] = 1 #ok i know this looks redundant but print board requires that variable ok?
 
         print_board(game, CONSTS)
-        print(f"We'll go from player 1 to player {len(game['quick_key'])}. Please choose where to place your settlements!")
+        print(f"We'll go from player 1 to player {len(game['quick_key'])}; you can place two settlements and two roads for free. Please choose wisely.")
         game['mode'] = "initial"
         
         for i in range(2):
@@ -723,17 +723,13 @@ def game_stage_1(game : dict, CONSTS : dict):
 
                         valid = False
                         while not valid:
-                                text = input(f"Player {player}, which road would you like to take?\n> ").strip()
+                                text = input(f"Player {player}, where are you placing your road?\n> ").strip()
                                 text = quick_reorder(text)
                                 valid = check(text, CONSTS, game, 'road')
                         game[player]['roads'].append(text)
                         game['roads'][text] = ansi_stitching(game[player]['color'], game['roads'][text])
                         print("\033c", end="")
                         print_board(game, CONSTS)
-
-        
-
-                        
                         
         return game
 
@@ -749,8 +745,6 @@ def evaluate_game_state(game : dict, CONSTS : dict):
                                         if len(game[achiever]['roads']) < len(game[player]['roads']):
                                                 game[achiever]['achievements']['longest_road'] = 0
                                                 game[player]['achievements']['longest_road'] = 1
-
-
                 
         return state, game
 
@@ -776,9 +770,9 @@ def start_game(game : dict, CONSTS : dict):
         print("\033c", end="")
         game = setup_game(game, CONSTS)
         game = game_stage_1(game, CONSTS)
-        print("Great! Your initial setup is complete, and you can start the actual game now ^^")
+        print("Great. Your initial setup is complete, so you now have access to the full range of commands. Happy playing.")
         game = main_game(game, CONSTS)
-        print("The game's over! Wanna try again? ^^ you're getting sent back to the main starting programme now!")
+        print("The game's over. You're getting sent back to the main starting programme now.")
 
 def analyse_ownership(game : dict, CONSTS : dict, element):
 
