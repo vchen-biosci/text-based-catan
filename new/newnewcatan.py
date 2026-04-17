@@ -538,9 +538,7 @@ def ansi_stitching(color : list, text : str):
                 if reps != 3:
                         colored_ver += ";"
         
-        colored_ver += "m"
-        colored_ver += text
-        colored_ver += "\x1b[0m"
+        colored_ver += "m" + text + "\x1b[0m"
 
         return colored_ver
 
@@ -724,17 +722,22 @@ def start_game(game : dict, CONSTS : dict):
 
 def analyse_ownership(game : dict, CONSTS : dict, element):
 
-        element = element[9:]
+        element = element[7:]
+        print(element)
         #142;194;21mthis text\x1b[0m
         counter = 0
         for i in element:
                 if i in [";", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0"]:
                         counter += 1
+        
+        print(element)
         colors = element[:counter - 1].split(";")
         print(colors)
         
         color = []
         for value in colors:
+                if len(value) == 0:
+                        value = "0"
                 color.append(int(value))
         print(color)
 
