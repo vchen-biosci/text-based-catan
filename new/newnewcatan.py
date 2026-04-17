@@ -583,6 +583,12 @@ def check(text : str, CONSTS : dict, game : dict, mode : str):
 
         elif mode == 'road':
 
+                try:
+                        text = quick_reorder(text)
+                except IndexError:
+                        pass
+
+
                 if text not in game['roads']:
                         valid = False
                         print("That road doesn't exist.")
@@ -718,7 +724,6 @@ def start_game(game : dict, CONSTS : dict):
         game = setup_game(game, CONSTS)
         game = main_game(game, CONSTS)
         print("The game's over! Wanna try again? ^^ you're getting sent back to the main starting programme now!")
-        print("\033c", end="")
 
 def analyse_ownership(game : dict, CONSTS : dict, element):
 
