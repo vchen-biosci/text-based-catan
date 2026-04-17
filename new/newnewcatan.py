@@ -23,7 +23,7 @@ def infinite_rng(game : dict, CONSTS : dict):
                                 roll_cache.append(roll)
                                 cache_dice_1.append(dice_1)
                                 cache_dice_2.append(dice_2)
-                                print(f"The die have spoken!! |{dice_1}| |{dice_2}| ... {dice_1} + {dice_2} = {roll}! You have rolled a {roll}!!")
+                                print(f"The die tumble to the ground. You stare at the result, in awe. |{dice_1}| |{dice_2}| ... {dice_1} + {dice_2} = {roll}. You have rolled {roll}.")
                         else:
                                 print("Your current input isn't valid. If you're confused on what inputs are allowed, type '?'")
 
@@ -125,7 +125,7 @@ def infinite_rng(game : dict, CONSTS : dict):
 
 
                                                         
-                                                        print(f"For dice number {i}, your highest roll was {highest_roll}, your mean was {mean}, and your mode was something like {set(contenders_cachelist)}, rolled a whopping {cache.count(contenders_cachelist[0])} times {('each' * (0 if len(contenders_cachelist) == 0 else 1))} !")
+                                                        print(f"For dice number {i}, your highest roll was {highest_roll}, your mean was {mean}, and your modes were {set(contenders_cachelist)}, rolled a whopping {cache.count(contenders_cachelist[0])} times {('each' * (0 if len(contenders_cachelist) == 0 else 1))}.")
                                                         i += 1
                                                         ##might end up making some sort of function and passing in parameters to run each thing. I'd use an 'if' to sort through bad commands eg calc_stats(action) if action == whole elif action == dice_1 elif action == dice_2 else printstupid idkkk i do want to do this
                                                         
@@ -155,10 +155,11 @@ def setup_player_dicts(game : dict, CONSTS : dict):
                         if player_number in [3, 4]:
                                 break
                         else: 
-                                print("You can only play with 3 or 4 people, sorry!")
+                                print("You can only play with 3 or 4 people.")
 
                 except ValueError:
                         print("Enter an integer 3 or 4 please.")
+        clear_screen()
                         
         game["player_number"] = player_number
         quick_key = []
@@ -172,16 +173,25 @@ def setup_player_dicts(game : dict, CONSTS : dict):
                 valid_name = False
                 while not valid_name:
 
-                        player_name = input(f"What do you want to be called?, player {i + 1}?\n> ").strip()
+                        player_name = input(f"Player {i + 1}, enter the name you'd like to be known by.\n> ").strip()
                         if player_name not in player_names:
-                                
                                 break
-
                         else:
                                 print("... That name's already owned. Choose something else.")
 
+                valid_password = False
+                while not valid_password:
+
+                        password = input("Please enter a password; it'll be used to check for your consent later. Keep it short but memorable, and make sure it's not a password you use for important sites.")
+                        if len(password) > 8:
+                                print("That password is way too long. Keep it below 8 characters.")
+                        else:
+                                valid_password = True
+
                 player_names.append(player_name)
+                game[i + 1]['password'] = password
                 game[i + 1]["name"] = player_name 
+                clear_screen()
         
         game["player_names"] = player_names
 
@@ -521,12 +531,12 @@ def setup_game(game : dict, CONSTS : dict):
 
         print("Generating your grid...")
         game = generate_grid(game, CONSTS)
-
-
-        print("\033c", end="")
-
+        clear_screen()
 
         return game
+
+def clear_screen():
+        print("\033c", end="")
 
 def ansi_stitching(color : list, text : str):
         
@@ -619,7 +629,7 @@ def check(text : str, CONSTS : dict, game : dict, mode : str):
                                                 case.append(settlement)
                         
                         if len(case) != 0:
-                                print("Great, welcome to your new road!")
+                                print("Congratulations on paving a new road.")
                         else:
                                 print("You don't own any settlements next to that road, so you can't build it. Sorry.")
                                 valid = False
@@ -669,7 +679,7 @@ Please make sure all other players can see this color.\n""") + "> ").strip()
                         else:
                                 print("Please type either 'Y' or 'N'. This is case sensitive.")
 
-        print("\033c", end="")
+        clear_screen()
         return player_color
 
 def assign_player_colours(game : dict, CONSTS : dict):
@@ -718,7 +728,7 @@ def game_stage_1(game : dict, CONSTS : dict):
                         game[player]['settlements'].append(text)
                         print(game['settlement_locs'][text]['display'])
                         game['settlement_locs'][text]['display'] = ansi_stitching(game[player]['color'], game['settlement_locs'][text]['display'])
-                        print("\033c", end="")
+                        clear_screen()
                         print_board(game, CONSTS)
 
                         valid = False
@@ -728,7 +738,7 @@ def game_stage_1(game : dict, CONSTS : dict):
                                 valid = check(text, CONSTS, game, 'road')
                         game[player]['roads'].append(text)
                         game['roads'][text] = ansi_stitching(game[player]['color'], game['roads'][text])
-                        print("\033c", end="")
+                        clear_screen()
                         print_board(game, CONSTS)
                         
         return game
@@ -755,7 +765,7 @@ def main_game(game, CONSTS):
 
                 game["mode"], game = evaluate_game_state(game, CONSTS)
                 
-                action = input("> ")
+                action = input("> ").strip().lower()
                 try:
                         CONSTS["commands"][action](game, CONSTS)
                 except KeyError:
@@ -767,7 +777,7 @@ def start_game(game : dict, CONSTS : dict):
         game["input type"] = CONSTS["commands"]
         print("Starting your game...")
         time.sleep(1)
-        print("\033c", end="")
+        clear_screen()
         game = setup_game(game, CONSTS)
         game = game_stage_1(game, CONSTS)
         print("Great. Your initial setup is complete, so you now have access to the full range of commands. Happy playing.")
@@ -802,7 +812,7 @@ def analyse_ownership(game : dict, CONSTS : dict, element):
 def main():
         CONSTS = {
 
-                "rules": """Dear players, this is the link to the official Catan Almanac! 
+                "rules": """This is the link to the official Catan Almanac:
 https://www.catan.com/sites/default/files/2024-01/Almanac%20CATAN-3D.pdf
 If the link doesn't work, please paste it into your browser.""",
 
@@ -813,10 +823,10 @@ If the link doesn't work, please paste it into your browser.""",
                 "dev_card_numbers": [14, 2, 2, 2, 5],
 
                 "ports": ["wood", "grain", "cow", "ore", "brick"],
-                "welcome_message": """WELCOME TO MY TEXT-BASED CATAN!
+                "welcome_message": """WELCOME TO MY TEXT-BASED CATAN.
 Before we start, make sure \x1b[38;2;142;194;21mthis text\x1b[0m is green!
 CREDITS: Vivienne, CATAN game studio
-ENTER YOUR COMMAND TO BEGIN :)""",
+ENTER YOUR COMMAND TO BEGIN""",
 
                 "pre_commands" : {
                         "rng": infinite_rng
@@ -900,7 +910,7 @@ ENTER YOUR COMMAND TO BEGIN :)""",
                 action = input("> ").strip().lower()
 
                 if not action in game["input type"] and action in [CONSTS["commands"], CONSTS["pre_commands"]]:
-                        print("That command's not available right now! Please enter something allowed in the commands.")
+                        print("That command's not available right now. Please enter something allowed in the commands.")
 
                 elif action == "fahh":
                         analyse_ownership({}, {}, "\x1b[38;2;142;194;21mthis text\x1b[0m")
@@ -917,7 +927,7 @@ ENTER YOUR COMMAND TO BEGIN :)""",
                 elif action == "pbc":
                         print(CONSTS["building costs"])
 
-                elif action == 'start game':
+                elif action == 'start':
                         start_game(game, CONSTS)
 
                 elif action == 'end program':
