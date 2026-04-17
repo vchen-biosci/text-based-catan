@@ -59,11 +59,13 @@ def infinite_rng(game : dict, CONSTS : dict):
                                                                 elif roll_cache.count(number) == roll_cache.count(mode):
                                                                         contenders_list.append(number)
 
+                                                        contenders_list.remove(mode)
+
 
                                                         if contenders_list == []:
                                                                 print(f"Your mode was {mode}, and you rolled it a whopping {roll_cache.count(number)} times!!")
                                                         else:
-                                                                print(f"Well, you don't really have ONE singular mode. You have an entire {len(contenders_list) + 1} contenders for the throne! They are: {str(set(contenders_list))[1:-1]} and {mode}, rolled {roll_cache.count(mode)} times each!")
+                                                                print(f"Well, you don't really have ONE singular mode. You have an entire {len(contenders_list) + 1} contenders for the throne! They are: {str(set(contenders_list))[1:-1]} and {mode}, rolled {roll_cache.count(mode)} time{'s' if roll_cache.count(mode) != 1 else ''} each!")
 
                                                 else:
                                                         print("Your cache is empty! Roll some more to get started!")
@@ -506,7 +508,9 @@ def setup_game(game : dict, CONSTS : dict):
                 game[player]['settlements'] = []
                 game[player]['cities'] = []
 
-                game['construct_bank'] = {}
+                game[player]['construct_bank'] = {"settlements": 5, "cities": 4, "roads": 15}
+                game[player]['achievements'] = {"longest road" : 0, "largest army" : 0}
+                game[player]['knights_recruited'] = 0
 
         print("Setting up the resource bank...")
         game["resource_bank"] = {}
@@ -735,15 +739,27 @@ def game_stage_1(game : dict, CONSTS : dict):
 
 def evaluate_game_state(game : dict, CONSTS : dict):
         for player in game["quick_key"]:
+
                 if game[player]['victory_points'] == 10:
-                        return "ended"
+                        state = "ended"
+                
+                if len(game[player]['roads']) >= 5:
+                        for achiever in game["quick_key"]:
+                                if game[achiever]['achievements']["longest_road"] == 1:
+                                        if len(game[achiever]['roads']) < len(game[player]['roads']):
+                                                game[achiever]['achievements']['longest_road'] = 0
+                                                game[player]['achievements']['longest_road'] = 1
+
+
+                
+        return state, game
 
 def main_game(game, CONSTS):
         game["mode"] = "main"
 
         while game["mode"] == "main":
 
-                game["mode"] = evaluate_game_state(game, CONSTS)
+                game["mode"], game = evaluate_game_state(game, CONSTS)
                 
                 action = input("> ")
                 try:
@@ -752,7 +768,6 @@ def main_game(game, CONSTS):
                         print("Oops, that command doesn't exist.")
 
         return game
-
 
 def start_game(game : dict, CONSTS : dict):
         game["input type"] = CONSTS["commands"]
