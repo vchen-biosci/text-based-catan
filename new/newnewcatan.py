@@ -697,7 +697,7 @@ def assign_player_colours(game : dict, CONSTS : dict):
 
         return game
 
-def main_game(game : dict, CONSTS : dict):
+def game_stage_1(game : dict, CONSTS : dict):
         game['player_turn'] = 1 #ok i know this looks redundant but print board requires that variable ok?
 
         print_board(game, CONSTS)
@@ -727,9 +727,32 @@ def main_game(game : dict, CONSTS : dict):
                         print("\033c", end="")
                         print_board(game, CONSTS)
 
+        
+
                         
                         
         return game
+
+def evaluate_game_state(game : dict, CONSTS : dict):
+        for player in game["quick_key"]:
+                if game[player]['victory_points'] == 10:
+                        return "ended"
+
+def main_game(game, CONSTS):
+        game["mode"] = "main"
+
+        while game["mode"] == "main":
+
+                game["mode"] = evaluate_game_state(game, CONSTS)
+                
+                action = input("> ")
+                try:
+                        CONSTS["commands"][action](game, CONSTS)
+                except KeyError:
+                        print("Oops, that command doesn't exist.")
+
+        return game
+
 
 def start_game(game : dict, CONSTS : dict):
         game["input type"] = CONSTS["commands"]
@@ -737,6 +760,8 @@ def start_game(game : dict, CONSTS : dict):
         time.sleep(1)
         print("\033c", end="")
         game = setup_game(game, CONSTS)
+        game = game_stage_1(game, CONSTS)
+        print("Great! Your initial setup is complete, and you can start the actual game now ^^")
         game = main_game(game, CONSTS)
         print("The game's over! Wanna try again? ^^ you're getting sent back to the main starting programme now!")
 
