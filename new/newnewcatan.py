@@ -567,7 +567,7 @@ def check(text : str, CONSTS : dict, game : dict, mode : str):
 
                                 for place in related_settlements:
                                         if place != game['settlement_locs'][place]['display']:
-                                                print(f"It looks like you're trying to place a settlement adjacent to another settlement, {place}. You must place it at least two roads away.")
+                                                print(f"It looks like you're trying to place a settlement adjacent to another settlement, 'location {place}'. You must place it at least two roads away.")
                                                 valid = False
                                                 break
         
@@ -579,6 +579,20 @@ def check(text : str, CONSTS : dict, game : dict, mode : str):
                                 valid = False
                         print("")
 
+                if game["mode"] != "setup":
+                        case = []
+                        for road in game['roads']:
+                                if settlement in road:
+                                        if game['road'][road] != road:
+                                                owner = analyse_ownership(game, CONSTS, settlement)
+                                                if owner == game["player_turn"]:
+                                                        case.append(road)
+
+                        if len(case) != 0:
+                                print("Say hello to your new settlement!")
+                        else:
+                                print("You can only build next to a road that you own. Sorry.")
+                                valid = False
 
 
         elif mode == 'road':
@@ -688,6 +702,7 @@ def main_game(game : dict, CONSTS : dict):
 
         print_board(game, CONSTS)
         print(f"We'll go from player 1 to player {len(game['quick_key'])}. Please choose where to place your settlements!")
+        game['mode'] = "initial"
         
         for i in range(2):
                 for player in game['quick_key']:
