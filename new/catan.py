@@ -540,21 +540,20 @@ def trade(game : dict, CONSTS : dict):
                 loop = True
                 while loop:
                         reciever = input("Which player would you like to trade with?\n> ")
-                        if reciever == "cancel":
+                        try:
+                                reciever = int(reciever)
                                 loop = False
-                        else:
-                                try:
-                                        reciever = int(reciever)
 
-                                except TypeError:
-                                        for player in game["quick_key"]:
-                                                if reciever == game[player]['name']:
-                                                        reciever = player
+                        except ValueError:
+                                for player in game["quick_key"]:
+                                        if reciever == game[player]['name']:
+                                                reciever = player
 
                         if not reciever in game["quick_key"]:
                                 print("That's not a player! If you don't want to trade anymore, type 'cancel'.")
 
                 print("Make sure only you can see the screen. Please type your password to confirm your privacy.")
+                game['suspect'] = game['player_turn']
                 confidential = False
                 while not confidential:
                         correct = password_confirm(game, CONSTS)
@@ -575,12 +574,13 @@ def trade(game : dict, CONSTS : dict):
                         while not valid_number:
                                 number = input(f"How many {item} would you like to trade?\n> ")
                                 try:
+                                        number = int(number)
                                         if game[game['player_turn']]['resources'][item] < number:
                                                 print(f"You have {number - game[game['player_turn']]['resources'][item]} too few {item}.")
                                         else:
                                                 resources_to_trade[item] = number
                                                 
-                                except TypeError:
+                                except ValueError:
                                         print("Please enter arabic numerals.")
                         
                         done = ""
@@ -588,11 +588,21 @@ def trade(game : dict, CONSTS : dict):
                                 print(f"Your current trade offer to player {reciever} is:")
                                 for resource, number in resources_to_trade.items():
                                         print(f"{resource}: {number}")
-                                more = input("Are you done inputting your trades? You can type in the same resource to revise information. Please type 'y' or 'n' to confirm.\n> ").strip().lower()
+                                more = input("Are you done inputting your offer? You can type in the same resource to revise information. Please type 'y' or 'n' to confirm.\n> ").strip().lower()
                                 if more == "y":
-                                        finished = True            
+                                        finished = True
+                               
                 
                 print(f"Hand the laptop over to player {reciever}. Player {reciever}, make sure only you can see the screen, then enter your password.\n> ")
+                confidential = False
+                while not confidential:
+                        correct = password_confirm(game, CONSTS)
+                        confidential = True if correct == True else False
+                print(f"This is the trade that player {game['player_turn']} is making to you:")
+                for resource, number in resources_to_trade.items():
+                        print(f"{resource}: {number}")
+                
+
 
                 
 
@@ -888,6 +898,9 @@ def main_game(game, CONSTS):
 
                                 elif action == "build":
                                         build(game, CONSTS)
+                                
+                                elif action == "trade":
+                                        trade(game, CONSTS)
 
                                 else:
                                         try:
