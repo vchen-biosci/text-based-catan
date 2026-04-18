@@ -539,22 +539,62 @@ def trade(game : dict, CONSTS : dict):
         elif choice in ["2", "player"]:
                 loop = True
                 while loop:
-                        tradee = input("Which player would you like to trade with?\n> ")
-                        if tradee == "cancel":
+                        reciever = input("Which player would you like to trade with?\n> ")
+                        if reciever == "cancel":
                                 loop = False
                         else:
                                 try:
-                                        tradee = int(tradee)
+                                        reciever = int(reciever)
 
                                 except TypeError:
                                         for player in game["quick_key"]:
-                                                if tradee == game[player]['name']:
-                                                        tradee = player
+                                                if reciever == game[player]['name']:
+                                                        reciever = player
 
-                        if not tradee in game["quick_key"]:
+                        if not reciever in game["quick_key"]:
                                 print("That's not a player! If you don't want to trade anymore, type 'cancel'.")
-                        else:
-                                loop = False
+
+                print("Make sure only you can see the screen. Please type your password to confirm your privacy.")
+                confidential = False
+                while not confidential:
+                        correct = password_confirm(game, CONSTS)
+                        confidential = True if correct == True else False
+                
+                resources_to_trade = {}
+                finished = False
+                while not finished:
+                        valid = False
+                        while not valid:
+                                item = input("Which resource would you like to trade?\n> ").strip().lower()
+                                if item in CONSTS['resources']:
+                                        valid = True
+                        
+                        print("This is your deck: ")
+                        print_own_deck(game, CONSTS)
+                        valid_number = False
+                        while not valid_number:
+                                number = input(f"How many {item} would you like to trade?\n> ")
+                                try:
+                                        if game[game['player_turn']]['resources'][item] < number:
+                                                print(f"You have {number - game[game['player_turn']]['resources'][item]} too few {item}.")
+                                        else:
+                                                resources_to_trade[item] = number
+                                                
+                                except TypeError:
+                                        print("Please enter arabic numerals.")
+                        
+                        done = ""
+                        while not done in ["y", "n"]:
+                                print(f"Your current trade offer to player {reciever} is:")
+                                for resource, number in resources_to_trade.items():
+                                        print(f"{resource}: {number}")
+                                more = input("Are you done inputting your trades? You can type in the same resource to revise information. Please type 'y' or 'n' to confirm.\n> ").strip().lower()
+                                if more == "y":
+                                        finished = True            
+                
+                print(f"Hand the laptop over to player {reciever}. Player {reciever}, make sure only you can see the screen, then enter your password.\n> ")
+
+                
 
 def clear_screen():
         print("\033c", end="")
