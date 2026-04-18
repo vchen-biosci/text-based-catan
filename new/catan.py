@@ -175,6 +175,8 @@ def setup_player_dicts(game : dict, CONSTS : dict):
                         player_name = input(f"Player {player}, enter the name you'd like to be known by.\n> ").strip()
                         if player_name in player_names:
                                 print("... That name's already owned. Choose something else.")
+                        elif player_name.isdigit():
+                                print("Sorry, you're not allowed a name consisting of only numbers, as this will cause problems later.")
                         else:
                                 valid_name = True
                 game[player]["name"] = player_name 
@@ -528,6 +530,31 @@ def setup_game(game : dict, CONSTS : dict):
         clear_screen()
 
         return game
+
+def trade(game : dict, CONSTS : dict):
+        choice = input("Would you like to trade at 1. a port, or 2. with a player?\n> ").strip().lower()
+        if choice in ["1", "port"]:
+                "check player's settlements and see if they're linked to ports"
+
+        elif choice in ["2", "player"]:
+                loop = True
+                while loop:
+                        tradee = input("Which player would you like to trade with?\n> ")
+                        if tradee == "cancel":
+                                loop = False
+                        else:
+                                try:
+                                        tradee = int(tradee)
+
+                                except TypeError:
+                                        for player in game["quick_key"]:
+                                                if tradee == game[player]['name']:
+                                                        tradee = player
+
+                        if not tradee in game["quick_key"]:
+                                print("That's not a player! If you don't want to trade anymore, type 'cancel'.")
+                        else:
+                                loop = False
 
 def clear_screen():
         print("\033c", end="")
