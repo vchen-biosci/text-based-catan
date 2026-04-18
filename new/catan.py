@@ -181,7 +181,7 @@ def setup_player_dicts(game : dict, CONSTS : dict):
 
                 valid_password = False
                 while not valid_password:
-                        password = input("Please enter a password; it'll be used to check for your consent later. Keep it short but memorable, and make sure it's not a password you use for important sites.")
+                        password = input("Please enter a password; it'll be used to check for your consent later. Keep it short but memorable, and make sure it's not a password you use for important sites.\n> ")
                         if len(password) > 7:
                                 print("That password is way too long. Keep it to 7 or below characters.")
                         else:
@@ -406,7 +406,7 @@ def generate_grid(game : dict, CONSTS : dict):
         print("Spawning your desert...")
         desert_placement = random.randint(1, 19)
         tiles[("S"+str(desert_placement))]["biome"] = "desert"
-        tiles[("S"+str(desert_placement))]["number"] = "N/A"
+        tiles[("S"+str(desert_placement))]["number"] = "NA"
         game['robber'] = "S"+str(desert_placement)
 
         print("Generating random numbers...")
@@ -474,8 +474,7 @@ def print_board(game : dict, CONSTS : dict):
                 print(ansi_stitching(game[player]['color'], f"Player {player} ({game[player]['name']})"), end="  ||  ")
         print("\n")
         print_grid(game, CONSTS)
-        print(f"The robber is currently pillaging the citizens of {game['robber']} and stealing all their {game['tiles'][game['robber']]['biome']}... Resources rolled here will not be obtained.")
-        print(ansi_stitching(game[game['player_turn']]['color'], f"It's player {game['player_turn']}'s turn. Go ahead, {game[game['player_turn']]['name']}."))
+        print(f"The robber is currently pillaging the citizens of {game['robber']} and stealing all their {game['tiles'][game['robber']]['biome']}...")
 
 def setup_game(game : dict, CONSTS : dict):
 
@@ -492,8 +491,6 @@ def setup_game(game : dict, CONSTS : dict):
                 else:
                         print(game['player_names'][player], end=", ")
                         
-
-
         game = assign_player_colours(game, CONSTS)
 
         print("Initialising player cards...")
@@ -515,6 +512,7 @@ def setup_game(game : dict, CONSTS : dict):
                 game[player]['construct_bank'] = {"settlements": 5, "cities": 4, "roads": 15}
                 game[player]['achievements'] = {"longest road" : 0, "largest army" : 0}
                 game[player]['knights_recruited'] = 0
+                game[player]['VPs'] = 0
 
         print("Setting up the resource bank...")
         game["resource_bank"] = {}
@@ -584,7 +582,6 @@ def check(text : str, CONSTS : dict, game : dict, mode : str):
                         else:
                                 print("That settlement doesn't exist.")
                                 valid = False
-                        print("")
 
                 if game["mode"] != "initial":
                         case = []
@@ -726,11 +723,10 @@ def game_stage_1(game : dict, CONSTS : dict):
 
                         valid = False
                         while not valid:
-                                text = input(ansi_stitching(game[player]['color'], f"Player {player}, where are you placing your road?\n> ")).strip()
-                                text = quick_reorder(text)
+                                text = input(ansi_stitching(game[player]['color'], f"Player {player}, where are you placing your road?") + "\n> ").strip()
                                 valid = check(text, CONSTS, game, 'road')
                         game[player]['roads'].append(text)
-                        game['roads'][text] = ansi_stitching(game[player]['color'], game['roads'][text])
+                        game['roads'][quick_reorder(text)] = ansi_stitching(game[player]['color'], game['roads'][quick_reorder(text)])
                         clear_screen()
                         print_board(game, CONSTS)
                         
@@ -741,6 +737,7 @@ def password_confirm(game : dict, CONSTS : dict):
         if confirm == game[game['suspect']]['password']:
                 return True
         else:
+                print("That's not your password.")
                 return False
 
 def trade_cards(game : dict, CONSTS : dict):
@@ -769,7 +766,9 @@ def trade_cards(game : dict, CONSTS : dict):
 def evaluate_game_state(game : dict, CONSTS : dict):
         for player in game["quick_key"]:
 
-                if game[player]['victory_points'] == 10:
+                state = "on"
+
+                if game[player]['VPs'] == 10:
                         state = "ended"
                 
                 if len(game[player]['roads']) >= 5:
@@ -793,7 +792,7 @@ def main_game(game, CONSTS):
                         while game["player_turn"] == player:
 
                                 game["mode"], game = evaluate_game_state(game, CONSTS)
-                                action = input("> ").strip().lower()
+                                action = input(ansi_stitching(game[player]['color'], f"Player {player}, what's your move?") + "\n> ").strip().lower()
 
                                 if action == "end turn":
                                         game['suspect'] = player
