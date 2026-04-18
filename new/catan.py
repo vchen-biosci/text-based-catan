@@ -607,12 +607,18 @@ def check(text : str, CONSTS : dict, game : dict, mode : str):
                 except IndexError:
                         pass
 
-
                 if text not in game['roads']:
                         valid = False
                         print("That road doesn't exist.")
 
                 else:
+                        #look through each road, check if the road has been modified...
+                        
+                        owner = analyse_ownership(game, CONSTS, game["roads"][text])
+                        if owner != game['player_turn'] and len(game["roads"][text]) > 5:
+                                print("That road already belongs to someone else.")
+                                valid = False      
+                                        
                         case = []
                         for settlement in text:
                                 if game["settlement_locs"][settlement]['display'] != settlement:
@@ -626,7 +632,7 @@ def check(text : str, CONSTS : dict, game : dict, mode : str):
                                                 if game['player_turn'] == owner:
                                                         case.append(road)
                         
-                        if len(case) != 0:
+                        if valid != False and len(case) != 0:
                                 print("Congratulations on paving a new road.")
                         else:
                                 print("You don't own any settlements/roads next to that road, so you can't build it. Sorry.")
