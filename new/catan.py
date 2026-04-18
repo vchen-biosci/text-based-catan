@@ -406,7 +406,7 @@ def generate_grid(game : dict, CONSTS : dict):
         print("Spawning your desert...")
         desert_placement = random.randint(1, 19)
         tiles[("S"+str(desert_placement))]["biome"] = "desert"
-        tiles[("S"+str(desert_placement))]["number"] = 7
+        tiles[("S"+str(desert_placement))]["number"] = "N/A"
         game['robber'] = "S"+str(desert_placement)
 
         print("Generating random numbers...")
@@ -475,7 +475,7 @@ def print_board(game : dict, CONSTS : dict):
         print("\n")
         print_grid(game, CONSTS)
         print(f"The robber is currently pillaging the citizens of {game['robber']} and stealing all their {game['tiles'][game['robber']]['biome']}... Resources rolled here will not be obtained.")
-        print(f"It's player {game['player_turn']}'s turn. Go ahead, {game[game['player_turn']]['name']}.")
+        print(ansi_stitching(game[game['player_turn']]['color'], f"It's player {game['player_turn']}'s turn. Go ahead, {game[game['player_turn']]['name']}."))
 
 def setup_game(game : dict, CONSTS : dict):
 
@@ -586,17 +586,17 @@ def check(text : str, CONSTS : dict, game : dict, mode : str):
                                 valid = False
                         print("")
 
-                if game["mode"] != "setup":
+                if game["mode"] != "initial":
                         case = []
                         for road in game['roads']:
                                 if settlement in road:
-                                        if game['road'][road] != road:
+                                        if game['roads'][road] != road:
                                                 owner = analyse_ownership(game, CONSTS, settlement)
                                                 if owner == game["player_turn"]:
                                                         case.append(road)
 
                         if len(case) != 0:
-                                print("Congratulations on owning a new settlement.")
+                                print("Congratulations on obtaining a new settlement.")
                         else:
                                 print("You can only build next to a road that you own. Sorry.")
                                 valid = False
@@ -716,7 +716,7 @@ def game_stage_1(game : dict, CONSTS : dict):
                         game['player_turn'] = player
                         valid = False
                         while not valid:
-                                text = input(f"Player {player}, where would you like to place your settlement?\n> ").strip()
+                                text = input(ansi_stitching(game[player]['color'], f"Player {player}, where would you like to place your settlement?") + "\n> ").strip()
                                 valid = check(text, CONSTS, game, 'settlement')
                         game[player]['settlements'].append(text)
                         print(game['settlement_locs'][text]['display'])
@@ -726,7 +726,7 @@ def game_stage_1(game : dict, CONSTS : dict):
 
                         valid = False
                         while not valid:
-                                text = input(f"Player {player}, where are you placing your road?\n> ").strip()
+                                text = input(ansi_stitching(game[player]['color'], f"Player {player}, where are you placing your road?\n> ")).strip()
                                 text = quick_reorder(text)
                                 valid = check(text, CONSTS, game, 'road')
                         game[player]['roads'].append(text)
@@ -832,23 +832,17 @@ def start_game(game : dict, CONSTS : dict):
 def analyse_ownership(game : dict, CONSTS : dict, element):
 
         element = element[7:]
-        print(element)
-        #142;194;21mthis text\x1b[0m
         counter = 0
         for i in element:
                 if i in [";", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0"]:
                         counter += 1
-        
-        print(element)
+
         colors = element[:counter - 1].split(";")
-        print(colors)
-        
         color = []
         for value in colors:
                 if len(value) == 0:
                         value = "0"
                 color.append(int(value))
-        print(color)
 
         for player in game["quick_key"]:
                 if game[player]['color'] == color:
@@ -886,8 +880,6 @@ ENTER YOUR COMMAND TO BEGIN""",
 
                 "commands info" : """These are the commands available to you and what they mean""",
 
-                "building costs" : "building costs are:",
-
                 "colors" : ["red", "green", "blue"],
 
                 "biomes" : [],
@@ -907,14 +899,18 @@ ENTER YOUR COMMAND TO BEGIN""",
                         "wood": " ݁˖𓂃.𖠰.",
                         "sheep": ":3 ^^~", 
                         "desert": " ⛰︎ ོ ༄-"
-
-                
 },
                 "settlement_locations" : [],
 
                 "ports" : ["wood", "grain", "sheep", "ore", "brick"],
 
-                "starting_constructs" : {'settlements' : 5, 'cities' : 4, 'paths' : 15}
+                "starting_constructs" : {'settlements' : 5, 'cities' : 4, 'paths' : 15},
+
+                "building costs" : """---BUILDING COSTS---
+ Road: Wood (1), Brick (1)
+ Settlement: Wood (1), Brick (1), Grain (1), Sheep (1)
+ City: Ores (3), Grain (2)
+ Development cards: Ores (1), Grain (1), Sheep (1)"""
 
         }
 
