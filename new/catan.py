@@ -880,7 +880,7 @@ ENTER YOUR COMMAND TO BEGIN""",
 },
 
                 "commands" : { 
-                        "pod": print_own_deck, 
+                        "deck": print_own_deck, 
                         "roll": roll_die,
 },
 
