@@ -23,7 +23,7 @@ def infinite_rng(game : dict, CONSTS : dict):
                                 roll_cache.append(roll)
                                 cache_dice_1.append(dice_1)
                                 cache_dice_2.append(dice_2)
-                                print(f"The die tumble to the ground. You stare at the result, in awe. |{dice_1}| |{dice_2}| ... {dice_1} + {dice_2} = {roll}. You have rolled {roll}.")
+                                print(f"Time seems to stop, just momentarily, as the die tumble to the ground. You stare at the result, in awe. |{dice_1}| |{dice_2}| ... {dice_1} + {dice_2} = {roll}. You have rolled {roll}.")
                         else:
                                 print("Your current input isn't valid. If you're confused on what inputs are allowed, type '?'")
 
@@ -59,7 +59,8 @@ def infinite_rng(game : dict, CONSTS : dict):
                                                                 elif roll_cache.count(number) == roll_cache.count(mode):
                                                                         contenders_list.append(number)
 
-                                                        contenders_list.remove(mode)
+                                                        if mode in contenders_list:
+                                                                contenders_list.remove(mode)
 
 
                                                         if contenders_list == []:
@@ -618,11 +619,17 @@ def check(text : str, CONSTS : dict, game : dict, mode : str):
                                         owner = analyse_ownership(game, CONSTS, game['settlement_locs'][settlement]['display'])
                                         if game['player_turn'] == owner:
                                                 case.append(settlement)
+
+                                for road in game['roads']:
+                                        if settlement in road:
+                                                owner = analyse_ownership(game, CONSTS, game['roads'][road])
+                                                if game['player_turn'] == owner:
+                                                        case.append(road)
                         
                         if len(case) != 0:
                                 print("Congratulations on paving a new road.")
                         else:
-                                print("You don't own any settlements next to that road, so you can't build it. Sorry.")
+                                print("You don't own any settlements/roads next to that road, so you can't build it. Sorry.")
                                 valid = False
 
         return valid
@@ -729,6 +736,8 @@ def game_stage_1(game : dict, CONSTS : dict):
                         game['roads'][quick_reorder(text)] = ansi_stitching(game[player]['color'], game['roads'][quick_reorder(text)])
                         clear_screen()
                         print_board(game, CONSTS)
+
+        game['player_turn'] = 1
                         
         return game
 
