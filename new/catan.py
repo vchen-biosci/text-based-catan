@@ -149,12 +149,11 @@ def infinite_rng(game : dict, CONSTS : dict):
 
 def setup_player_dicts(game : dict, CONSTS : dict):
 
-        while True:
+        player_number = 0
+        while not player_number in [3, 4]:
                 try:
                         player_number = int(input("How many people are playing?\n> ").strip()) 
-                        if player_number in [3, 4]:
-                                break
-                        else: 
+                        if not player_number in [3, 4]:
                                 print("You can only play with 3 or 4 people.")
 
                 except ValueError:
@@ -162,39 +161,36 @@ def setup_player_dicts(game : dict, CONSTS : dict):
         clear_screen()
                         
         game["player_number"] = player_number
-        quick_key = []
+        game["quick_key"] = []
         for player in range(player_number):
-                quick_key.append(player + 1)
-        game["quick_key"] = quick_key
+                game["quick_key"].append(player + 1)
 
         player_names = []
-        for i in range(player_number):
-                game[i + 1] = {}
+        for player in game["quick_key"]:
+                game[player] = {}
+
                 valid_name = False
                 while not valid_name:
-
-                        player_name = input(f"Player {i + 1}, enter the name you'd like to be known by.\n> ").strip()
-                        if player_name not in player_names:
-                                break
-                        else:
+                        player_name = input(f"Player {player}, enter the name you'd like to be known by.\n> ").strip()
+                        if player_name in player_names:
                                 print("... That name's already owned. Choose something else.")
+                        else:
+                                valid_name = True
+                game[player]["name"] = player_name 
+                player_names.append(player_name)
 
                 valid_password = False
                 while not valid_password:
-
                         password = input("Please enter a password; it'll be used to check for your consent later. Keep it short but memorable, and make sure it's not a password you use for important sites.")
-                        if len(password) > 8:
-                                print("That password is way too long. Keep it below 8 characters.")
+                        if len(password) > 7:
+                                print("That password is way too long. Keep it to 7 or below characters.")
                         else:
                                 valid_password = True
-
-                player_names.append(player_name)
-                game[i + 1]['password'] = password
-                game[i + 1]["name"] = player_name 
+                game[player]['password'] = password
+                
                 clear_screen()
         
         game["player_names"] = player_names
-
 
         return game
 
@@ -210,7 +206,6 @@ def roll_die(game : dict, CONSTS : dict):
                 print(f"As everyone watches with baited breath, you roll the die. You pray for a good result. They land as follows: |{dice_1}| |{dice_2}| ... {dice_1} + {dice_2} = {roll}. You've rolled a {roll}.")
                 game["roll_allowed"] = False
                 
-
         else:
                 print("You've already rolled this turn.")
 
@@ -416,10 +411,8 @@ def generate_grid(game : dict, CONSTS : dict):
 
         print("Generating random numbers...")
         for i in range(19):
-
                 try:
                         tiles[("S"+str(i+1))]["biome"]
-                
                 except KeyError:
                         random.shuffle(CONSTS["biomes"])
                         chosen_biome = CONSTS["biomes"].pop()
@@ -451,25 +444,19 @@ def generate_grid(game : dict, CONSTS : dict):
         roads = {}
         for road_type in CONSTS["road_types"]:
                 for i in range(len(quick_dict[road_type])//2):
-
-                        road = ""
-                        road += quick_dict[road_type][counter]
+                        
+                        road = quick_dict[road_type][counter]
                         counter += 1
                         road += quick_dict[road_type][counter]
                         counter += 1
 
                         road = quick_reorder(road)
-                        
                         roads[road] = road_type
                 counter = 0
 
         game['roads'] = roads
         game["tiles"] = tiles
         game['settlement_locs'] = settlement_locs
-
-        print("Definining your grid...")
-
-        
 
         return game
 
@@ -498,11 +485,13 @@ def setup_game(game : dict, CONSTS : dict):
 
         print("Okay; your names are: ")
         for player in range(game['player_number']):
-                print(game['player_names'][player], end="")
-                if player != 3:
-                        print(", ", end="")
+                if player == game['quick_key'][-2]:
+                        print(game['player_names'][player], end=".\n")
+                elif player == game['quick_key'][-3]:
+                        print(game['player_names'][player], end=", and ")
                 else:
-                        print(".\n")
+                        print(game['player_names'][player], end=", ")
+                        
 
 
         game = assign_player_colours(game, CONSTS)
@@ -546,15 +535,14 @@ def clear_screen():
 
 def ansi_stitching(color : list, text : str):
         
-        colored_ver = ""
-        colored_ver += "\x1b[38;2;"
+        colored_ver = "\x1b[38;2;"
 
         reps = 0
         for value in color:
                 colored_ver += str(value)
-                reps += 1
 
-                if reps != 3:
+                reps += 1
+                if reps < 3:
                         colored_ver += ";"
         
         colored_ver += "m" + text + "\x1b[0m"
@@ -690,7 +678,6 @@ Please make sure all other players can see this color.\n""") + "> ").strip()
 
 def assign_player_colours(game : dict, CONSTS : dict):
 
-
         preset_colors = [[1, 201, 184], [252, 210, 1], [252, 84, 1], [210, 1, 252]]
 
         manual = ""
@@ -794,6 +781,9 @@ def evaluate_game_state(game : dict, CONSTS : dict):
                 
         return state, game
 
+def build(game : dict, CONSTS : dict):
+        pass
+
 def main_game(game, CONSTS):
         game["mode"] = "main"
 
@@ -803,7 +793,6 @@ def main_game(game, CONSTS):
                         while game["player_turn"] == player:
 
                                 game["mode"], game = evaluate_game_state(game, CONSTS)
-                                
                                 action = input("> ").strip().lower()
 
                                 if action == "end turn":
@@ -815,6 +804,9 @@ def main_game(game, CONSTS):
                                         game['suspect'] = player
                                         if password_confirm(game, CONSTS):
                                                 trade_cards(game, CONSTS)
+
+                                elif action == "build":
+                                        build(game, CONSTS)
 
                                 else:
                                         try:
