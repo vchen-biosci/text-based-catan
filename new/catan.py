@@ -603,7 +603,42 @@ def trade(game : dict, CONSTS : dict):
                         print(f"{resource}: {number}")
                 
 
-
+def build_trade(game : dict, CONSTS : dict) -> dict:
+        resources_to_trade = {}
+        finished = False
+        while not finished:
+                valid = False
+                while not valid:
+                        item = input("Which resource would you like to trade?\n> ").strip().lower()
+                        if item in CONSTS['resources']:
+                                valid = True
+                                
+                
+                print("This is your deck: ")
+                print_own_deck(game, CONSTS)
+                valid_number = False
+                while not valid_number:
+                        number = input(f"How many {item} would you like to trade?\n> ")
+                        try:
+                                number = int(number)
+                                if game[game['player_turn']]['resources'][item] < number:
+                                        print(f"You have {number - game[game['player_turn']]['resources'][item]} too few {item}.")
+                                else:
+                                        resources_to_trade[item] = number
+                                        
+                        except ValueError:
+                                print("Please enter arabic numerals.")
+                
+                done = ""
+                while not done in ["y", "n"]:
+                        print(f"Your current trade offer to player {reciever} is:")
+                        for resource, number in resources_to_trade.items():
+                                print(f"{resource}: {number}")
+                        more = input("Are you done inputting your offer? You can type in the same resource to revise information. Please type 'y' or 'n' to confirm.\n> ").strip().lower()
+                        if more == "y":
+                                finished = True
+                
+                return {}
                 
 
 def clear_screen():
