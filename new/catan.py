@@ -539,18 +539,21 @@ def trade(game : dict, CONSTS : dict):
         elif choice in ["2", "player"]:
                 loop = True
                 while loop:
-                        reciever = input("Which player would you like to trade with?\n> ")
+                        receiver = input("Which player would you like to trade with?\n> ")
                         try:
-                                reciever = int(reciever)
-                                loop = False
+                                receiver = int(receiver)
 
                         except ValueError:
                                 for player in game["quick_key"]:
-                                        if reciever == game[player]['name']:
-                                                reciever = player
+                                        if receiver == game[player]['name']:
+                                                receiver = player
 
-                        if not reciever in game["quick_key"]:
+                        if not receiver in game["quick_key"]:
                                 print("That's not a player! If you don't want to trade anymore, type 'cancel'.")
+                        elif receiver == game['player_turn']:
+                                print("That's YOU! What are you trying to do, waste time?")
+                        else:
+                                loop = False
 
                 print("Make sure only you can see the screen. Please type your password to confirm your privacy.")
                 game['suspect'] = game['player_turn']
@@ -559,86 +562,83 @@ def trade(game : dict, CONSTS : dict):
                         correct = password_confirm(game, CONSTS)
                         confidential = True if correct == True else False
                 
-                resources_to_trade = {}
-                finished = False
-                while not finished:
-                        valid = False
-                        while not valid:
-                                item = input("Which resource would you like to trade?\n> ").strip().lower()
-                                if item in CONSTS['resources']:
-                                        valid = True
-                        
-                        print("This is your deck: ")
-                        print_own_deck(game, CONSTS)
-                        valid_number = False
-                        while not valid_number:
-                                number = input(f"How many {item} would you like to trade?\n> ")
-                                try:
-                                        number = int(number)
-                                        if game[game['player_turn']]['resources'][item] < number:
-                                                print(f"You have {number - game[game['player_turn']]['resources'][item]} too few {item}.")
-                                        else:
-                                                resources_to_trade[item] = number
-                                                
-                                except ValueError:
-                                        print("Please enter arabic numerals.")
-                        
-                        done = ""
-                        while not done in ["y", "n"]:
-                                print(f"Your current trade offer to player {reciever} is:")
-                                for resource, number in resources_to_trade.items():
-                                        print(f"{resource}: {number}")
-                                more = input("Are you done inputting your offer? You can type in the same resource to revise information. Please type 'y' or 'n' to confirm.\n> ").strip().lower()
-                                if more == "y":
-                                        finished = True
-                               
+                resources_to_offer = build_trade(game, CONSTS, receiver, "offer")
+                resources_to_receive = build_trade(game, CONSTS, receiver, "receive")
                 
-                print(f"Hand the laptop over to player {reciever}. Player {reciever}, make sure only you can see the screen, then enter your password.\n> ")
+                clear_screen()
+                print(f"Hand the laptop over to player {receiver}. Player {receiver}, make sure only you can see the screen, then enter your password.\n> ")
                 confidential = False
                 while not confidential:
                         correct = password_confirm(game, CONSTS)
                         confidential = True if correct == True else False
-                print(f"This is the trade that player {game['player_turn']} is making to you:")
-                for resource, number in resources_to_trade.items():
-                        print(f"{resource}: {number}")
                 
+                print(f"This is the trade that player {game['player_turn']} is making to you:")
+                print("YOU WILL RECEIVE:")
+                for resource, number in resources_to_offer.items():
+                        print(f"{resource}: {number}")
+                        print("\n")
+                print("YOU WILL HAND OVER:")
+                for resource, number in resources_to_receive.items():
+                        print(f"{resource}: {number}")
+                        print("\n")
+                        
+                valid_input = False
+                while not valid_input:
+                        accept = input("Do you accept the trade? Please type 'y' or 'n' to confirm.\n> ").strip().lower()
+                        if accept == "y":
+                                valid_input = True
+                                transfer_resources()
+                        elif accept == "n":
+                                valid_input = True
+                                clear_screen()
+                                print(f"Hand the laptop back to player {game['player_turn']} now.")
+                        else:
+                                print("Type either y or n please.")
+                        
+                
+def transfer_resources():
+        pass
 
-def build_trade(game : dict, CONSTS : dict) -> dict:
+def build_trade(game : dict, CONSTS : dict, receiver : int, mode):
+        print_own_deck(game, CONSTS)
         resources_to_trade = {}
         finished = False
         while not finished:
                 valid = False
                 while not valid:
-                        item = input("Which resource would you like to trade?\n> ").strip().lower()
+                        item = input(f"Which resource would you like to {'trade' if mode == 'offer' else 'receive'}?\n> ").strip().lower()
                         if item in CONSTS['resources']:
                                 valid = True
                                 
-                
-                print("This is your deck: ")
-                print_own_deck(game, CONSTS)
                 valid_number = False
                 while not valid_number:
-                        number = input(f"How many {item} would you like to trade?\n> ")
+                        number = input(f"How many {item} would you like to {'trade' if mode == 'offer' else 'receive'}?\n> ")
                         try:
                                 number = int(number)
-                                if game[game['player_turn']]['resources'][item] < number:
+                                if game[game['player_turn']]['resources'][item] < number and mode == "offer":
                                         print(f"You have {number - game[game['player_turn']]['resources'][item]} too few {item}.")
                                 else:
                                         resources_to_trade[item] = number
+                                        valid_number = True
                                         
                         except ValueError:
                                 print("Please enter arabic numerals.")
                 
-                done = ""
-                while not done in ["y", "n"]:
-                        print(f"Your current trade offer to player {reciever} is:")
+                valid_input = False
+                while not valid_input:
+                        print(f"You are making an offer to player {receiver}, and currently {'demanding' if mode == 'receive' else 'offering'}:")
                         for resource, number in resources_to_trade.items():
                                 print(f"{resource}: {number}")
                         more = input("Are you done inputting your offer? You can type in the same resource to revise information. Please type 'y' or 'n' to confirm.\n> ").strip().lower()
                         if more == "y":
                                 finished = True
+                                valid_input = True
+                        elif more == "n":
+                                valid_input = True
+                        else:
+                                print("Type either y or n please.")
                 
-                return {}
+        return resources_to_trade
                 
 
 def clear_screen():
