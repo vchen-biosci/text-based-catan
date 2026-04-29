@@ -179,6 +179,7 @@ def setup_player_dicts(game : dict, CONSTS : dict):
                                 print("Sorry, you're not allowed a name consisting of only numbers, as this will cause problems later.")
                         else:
                                 valid_name = True
+                                
                 game[player]["name"] = player_name 
                 player_names.append(player_name)
 
@@ -231,127 +232,137 @@ def print_grid(game : dict, CONSTS : dict):
 #line 3
 (" " * 64) + "/        \\" + "\n" +
 #line 4
-(" " * 20) + "sea" + (" " * 38) + game['settlement_locs']["A"]["display"] + " " + (game['roads']["AB"] + " ") * 4 + game['settlement_locs']["B"]["display"] + (" " * 38) + "sea" + "\n" +
+(" " * 20) + "sea" + (" " * 38) + game['settlement_locs']["A"]["display"] + " " + (game['roads']["AB"]["display"] + " ") * 4 + game['settlement_locs']["B"]["display"] + (" " * 38) + "sea" + "\n" +
 #line 5
-(" " * 61) + game['roads']["AD"] + "              " + game['roads']["BE"] + "\n" +
+(" " * 61) + game['roads']["AD"]["display"] + "              " + game['roads']["BE"]['display'] + "\n" +
 #line 6 & 7
-(" " * 60) + game['roads']["AD"] + "                " + game['roads']["BE"] + "\n\n" +
+(" " * 60) + game['roads']["AD"]['display'] + "                " + game['roads']["BE"]['display'] + "\n\n" +
 #line 8
-(" " * 35) + ("2:1 grain port") + (" " * 9) + game['roads']["AD"] + (" " * 7) + CONSTS['kaomojis'][game['tiles']["S1"]["biome"]] + (" "* 7) + game['roads']["BE"] + (" " * 16) + "3:1 port" + "\n" +
+(" " * 35) + ("2:1 grain port") + (" " * 9) + game['roads']["AD"]['display'] + (" " * 7) + CONSTS['kaomojis'][game['tiles']["S1"]["biome"]] + (" "* 7) + game['roads']["BE"]['display'] + (" " * 16) + "3:1 port" + "\n" +
 #line 9
-(" " * 36) + "|    " + "\\" + "   " + (game['roads']["CD"] + " ") * 4 + game['roads']["AD"] + (" " * 10) + str(game['tiles']["S1"]["number"]) + (" " * 11 if len(str(game['tiles']["S1"]["number"])) == 1 else " " * 10) + game['roads']["BE"] + " " + (game['roads']["EF"] + " ") * 4 + "   /  |\n" +
+(" " * 36) + "|    " + "\\" + "   " + (game['roads']["CD"]['display'] + " ") * 4 + game['roads']["AD"]['display'] + (" " * 10) + str(game['tiles']["S1"]["number"]) 
++ (" " * 11 if len(str(game['tiles']["S1"]["number"])) == 1 else " " * 10) + game['roads']["BE"]['display'] + " " + (game['roads']["EF"]['display'] + " ") * 4 + "   /  |\n" +
 #line 10
-(" " * 36) + "|" + (" " * 3) + game['settlement_locs']["C"]["display"] + " " + game['roads']["CG"] + (" " * 11) + game['settlement_locs']["D"]["display"] + "  " + game['roads']["DH"] 
-+ (" " * ((22 - len(str(game['tiles']["S1"]["biome"])))//2)) + game['tiles']["S1"]["biome"] + 
+(" " * 36) + "|" + (" " * 3) + game['settlement_locs']["C"]["display"] + " " + game['roads']["CG"]['display'] + (" " * 11) + game['settlement_locs']["D"]["display"] + "  " + game['roads']["DH"]['display']
++ (" " * ((22 - len(str(game['tiles']["S1"]["biome"])))//2)) + game['tiles']["S1"]["biome"] +
 (" " * (((22-len(str(game['tiles']["S1"]["biome"])))//2)+ (1 if len(str(game['tiles']["S1"]["biome"]))%2 != 0 else 0)))
-+ game['roads']["EI"] + " " + game['settlement_locs']["E"]["display"] + (" " * 8) + game['settlement_locs']["F"]["display"] + "  " + game['roads']["FJ"] + "     |\n" +
++ game['roads']["EI"]['display'] + " " + game['settlement_locs']["E"]["display"] + (" " * 8) + game['settlement_locs']["F"]["display"] + "  " + game['roads']["FJ"]['display'] + "     |\n" +
 #line 11
-(" " * 36) + "|" + "    " + game['roads']["CG"] +  (" " * 16) + game['roads']["DH"] + (" " * 9) + "S1" + (" " * 9) + game['roads']["EI"] + (" " * 15) + game['roads']["FJ"] + "    |" + "\n" +
+(" " * 36) + "|" + "    " + game['roads']["CG"]['display'] +  (" " * 16) + game['roads']["DH"]['display'] + (" " * 9) + "S1" + (" " * 9) + game['roads']["EI"]['display'] + (" " * 15) + 
+game['roads']["FJ"]['display'] + "    |" + "\n" +
 #line 12
 (" " * 36) + "|" + (" " * 63) + "|" + "\n" +
 #line 13
-(" " * 36) + "|" + "  " + game['roads']["CG"] + (" " * 7) + CONSTS['kaomojis'][game['tiles']["S2"]["biome"]] + (" " * 7) + game['roads']["DH"] 
-+ (" " * 16) + game['roads']["EI"] + " "  + (" " * 6) + (CONSTS['kaomojis'][game['tiles']["S3"]["biome"]]) 
-+ (" " * 6) + game['roads']["FJ"] +"  |\n" +
+(" " * 36) + "|" + "  " + game['roads']["CG"]['display'] + (" " * 7) + CONSTS['kaomojis'][game['tiles']["S2"]["biome"]] + (" " * 7) + game['roads']["DH"]['display'] 
++ (" " * 16) + game['roads']["EI"]['display'] + " "  + (" " * 6) + (CONSTS['kaomojis'][game['tiles']["S3"]["biome"]]) 
++ (" " * 6) + game['roads']["FJ"]['display'] +"  |\n" +
 #line 14
-(" " * 21) + game['settlement_locs']["$"]["display"] + " " + (game['roads'][quick_reorder("G$")] + " ") * 4 + game['settlement_locs']["G"]["display"] + "  " + game['roads']["CG"] + (" " * 10) + str(game['tiles']["S2"]["number"]) + 
-(" " * 9 if len(str(game['tiles']["S2"]["number"])) == 1 else " " * 8) + game['settlement_locs']["H"]["display"] + " " + game['roads']["DH"] + " " + (game['roads']["HI"] + " ") * 4 + " " + game['roads']["EI"] + " " + game['settlement_locs']["I"]["display"] +
-(" " * 8) + str(game['tiles']["S3"]["number"]) + (" " * 8 if len(str(game['tiles']["S3"]["number"])) == 1 else " " * 7) + game['settlement_locs']["J"]["display"] + " " + game['roads']["FJ"] + " | " + (game['roads']["JK"] + " ") * 4 
+(" " * 21) + game['settlement_locs']["$"]["display"] + " " + (game['roads'][quick_reorder("G$")]['display'] + " ") * 4 + game['settlement_locs']["G"]["display"] + "  " + game['roads']["CG"]['display'] + (" " * 10) + str(game['tiles']["S2"]["number"]) + 
+(" " * 9 if len(str(game['tiles']["S2"]["number"])) == 1 else " " * 8) + game['settlement_locs']["H"]["display"] + " " + game['roads']["DH"]['display'] + " " + (game['roads']["HI"]['display'] + " ") * 4 + " " + game['roads']["EI"]['display'] + " " + game['settlement_locs']["I"]["display"] +
+(" " * 8) + str(game['tiles']["S3"]["number"]) + (" " * 8 if len(str(game['tiles']["S3"]["number"])) == 1 else " " * 7) + game['settlement_locs']["J"]["display"] + " " + game['roads']["FJ"]['display'] + " | " + (game['roads']["JK"]['display'] + " ") * 4 
 + game['settlement_locs']["K"]["display"] + "\n" +
 #line 15
-(" " * 21) + game['roads'][quick_reorder("L$")] + (" " * 16) + game['roads']["GM"] + (" " * ((22 - len(str(game['tiles']["S2"]["biome"])))//2)) + game['tiles']["S2"]["biome"] + (" " * 9 if game['tiles']["S2"]["biome"] != "desert" else " " * 8)
-+ game['roads']["HN"] + (" " * 14) + game['roads']["IO"] + (" " * ((21 - len(str(game['tiles']["S3"]["biome"])))//2)) + game['tiles']["S3"]["biome"] + (" " * ( (21 - len(game['tiles']["S3"]["biome"])) //2   ) ) + 
-(" " * (1 if len(game['tiles']["S3"]["biome"]) % 2 != 1 else 0)) + game['roads']["JP"] + (" " * 14) + game['roads']["KQ"] + "\n" +
+(" " * 21) + game['roads'][quick_reorder("L$")]['display'] + (" " * 16) + game['roads']["GM"]['display'] + (" " * ((22 - len(str(game['tiles']["S2"]["biome"])))//2)) + game['tiles']["S2"]["biome"] + (" " * 9 if game['tiles']["S2"]["biome"] != "desert" else " " * 8)
++ game['roads']["HN"]['display'] + (" " * 14) + game['roads']["IO"]['display'] + (" " * ((21 - len(str(game['tiles']["S3"]["biome"])))//2)) + game['tiles']["S3"]["biome"] + (" " * ( (21 - len(game['tiles']["S3"]["biome"])) //2   ) ) + 
+(" " * (1 if len(game['tiles']["S3"]["biome"]) % 2 != 1 else 0)) + game['roads']["JP"]['display'] + (" " * 14) + game['roads']["KQ"]['display'] + "\n" +
 #line 16 & 17 
-(" " * 20) + game['roads'][quick_reorder("L$")] + (" " * 18) + game['roads']["GM"] + (" " * 9) + "S2" + (" " * 9) + game['roads']["HN"] + (" " * 16) + game['roads']["IO"] + (" " * 8) + "S3" + (" " * 9) + game['roads']["JP"] + (" " * 16) + game['roads']["KQ"] + "\n\n" +
+(" " * 20) + game['roads'][quick_reorder("L$")]['display'] + (" " * 18) + game['roads']["GM"]['display'] + (" " * 9) + "S2" + (" " * 9) + game['roads']["HN"]['display'] + (" " * 16) + game['roads']["IO"]['display'] + (" " * 8) + "S3" + (" " * 9) + game['roads']["JP"]['display'] + 
+(" " * 16) + game['roads']["KQ"]['display'] + "\n\n" +
 #line 18
-(" " * 18) + game['roads'][quick_reorder("L$")] + (" " * 8) + CONSTS['kaomojis'][game['tiles']["S4"]["biome"]] + (" " * 8) + game['roads']["GM"] + (" " * 16) + game['roads']["HN"] + (" " * 7) + CONSTS['kaomojis'][game['tiles']["S5"]["biome"]] + (" " * 7) + game['roads']["IO"]
-+ (" " * 15) + game['roads']["JP"] + (" " * 7) + CONSTS['kaomojis'][game['tiles']["S6"]["biome"]] + (" " * 7) + game['roads']["KQ"] + "\n" + 
+(" " * 18) + game['roads'][quick_reorder("L$")]['display'] + (" " * 8) + CONSTS['kaomojis'][game['tiles']["S4"]["biome"]] + (" " * 8) + game['roads']["GM"]['display'] + (" " * 16) + game['roads']["HN"]['display'] + (" " * 7) + 
+CONSTS['kaomojis'][game['tiles']["S5"]["biome"]] + (" " * 7) + game['roads']["IO"]['display']
++ (" " * 15) + game['roads']["JP"]['display'] + (" " * 7) + CONSTS['kaomojis'][game['tiles']["S6"]["biome"]] + (" " * 7) + game['roads']["KQ"]['display'] + "\n" + 
 #line 19
-(" " * 15) + game['settlement_locs']["L"]["display"] + " " + game['roads'][quick_reorder("L$")] + (" " * 11) + str(game['tiles']["S4"]["number"]) + (" " * (10 if len(str(game['tiles']["S4"]["number"])) == 1 else 9)) + game['settlement_locs']["M"]["display"] +
-" " + game['roads']["GM"] + "  " + (game['roads']["MN"] + " ") * 4 + game['roads']["HN"] + game['settlement_locs']["N"]["display"] + (" " * 9) + str(game['tiles']["S5"]["number"]) + (" " * 9 if len(str(game['tiles']["S5"]["number"])) == 1 else " " * 8) + game['settlement_locs']["O"]["display"] +
-" " + game['roads']["IO"] + " " + (game['roads']["OP"] + " ") * 4 + game['roads']["JP"] + " " + game['settlement_locs']["P"]["display"] + (" " * 8) + str(game['tiles']["S6"]["number"]) + (" " * 11 if len(str(game['tiles']["S6"]["number"])) == 1 else " " * 10) + game['roads']["KQ"]
+(" " * 15) + game['settlement_locs']["L"]["display"] + " " + game['roads'][quick_reorder("L$")]['display'] + (" " * 11) + str(game['tiles']["S4"]["number"]) + (" " * (10 if len(str(game['tiles']["S4"]["number"])) == 1 else 9)) + game['settlement_locs']["M"]["display"] +
+" " + game['roads']["GM"]['display'] + "  " + (game['roads']["MN"]['display'] + " ") * 4 + game['roads']["HN"]['display'] + game['settlement_locs']["N"]["display"] + (" " * 9) + str(game['tiles']["S5"]["number"]) + (" " * 9 if len(str(game['tiles']["S5"]["number"])) == 1 else " " * 8) + game['settlement_locs']["O"]["display"] +
+" " + game['roads']["IO"]['display'] + " " + (game['roads']["OP"]['display'] + " ") * 4 + game['roads']["JP"]['display'] + " " + game['settlement_locs']["P"]["display"] + (" " * 8) + str(game['tiles']["S6"]["number"]) + (" " * 11 if len(str(game['tiles']["S6"]["number"])) == 1 else " " * 10) + game['roads']["KQ"]['display']
 + " " + game['settlement_locs']["Q"]["display"] + "\n"
-        
-        
 )
 
         grid_part_2 = (
 #line 20
-(" " * 17) + game['roads']["LR"] + (" " * ((24 - len(str(game['tiles']["S4"]["biome"])))//2)) + game['tiles']["S4"]["biome"] + (" " * 10 if game['tiles']["S4"]["biome"] != "desert" else " " * 9) + game['roads']["MS"] + (" " * 14) + game['roads']["NT"] +
-(" " * ((22 - len(str(game['tiles']["S5"]["biome"])))//2)) + game['tiles']["S5"]["biome"] + (" " * 9 if game['tiles']["S5"]["biome"] != "desert" else " " * 8) + game['roads']["OU"] + (" " * 13) + game['roads']["PV"] +
-(" " * ((22 - len(str(game['tiles']["S6"]["biome"])))//2)) + game['tiles']["S6"]["biome"] + (" " * 9 if game['tiles']["S6"]["biome"] != "desert" else " " * 8) + game['roads']["QW"] + "\n" +
+(" " * 17) + game['roads']["LR"]['display'] + (" " * ((24 - len(str(game['tiles']["S4"]["biome"])))//2)) + game['tiles']["S4"]["biome"] + (" " * 10 if game['tiles']["S4"]["biome"] != "desert" else " " * 9) + game['roads']["MS"]['display'] + (" " * 14) + game['roads']["NT"]['display'] +
+(" " * ((22 - len(str(game['tiles']["S5"]["biome"])))//2)) + game['tiles']["S5"]["biome"] + (" " * 9 if game['tiles']["S5"]["biome"] != "desert" else " " * 8) + game['roads']["OU"]['display'] + (" " * 13) + game['roads']["PV"]['display'] +
+(" " * ((22 - len(str(game['tiles']["S6"]["biome"])))//2)) + game['tiles']["S6"]["biome"] + (" " * 9 if game['tiles']["S6"]["biome"] != "desert" else " " * 8) + game['roads']["QW"]['display'] + "\n" +
 #line 21 & 22
-(" " * 18) + game['roads']["LR"] + (" " * 10) + "S4" + (" " * 10) + game['roads']["MS"] + (" " * 16) + game['roads']["NT"] + (" " * 9) + "S5" + (" " * 9) + game['roads']["OU"] + (" " * 15) + game['roads']["PV"] + (" " * 9) + "S6" + (" " * 9) + game['roads']["QW"] + "\n\n" +
+(" " * 18) + game['roads']["LR"]['display'] + (" " * 10) + "S4" + (" " * 10) + game['roads']["MS"]['display'] + (" " * 16) + game['roads']["NT"]['display'] + (" " * 9) + "S5" + (" " * 9) + game['roads']["OU"]['display'] + (" " * 15) + game['roads']["PV"]['display'] 
++ (" " * 9) + "S6" + (" " * 9) + game['roads']["QW"]['display'] + "\n\n" +
 #line 23
-(" " * 20) + game['roads']["LR"] + (" " * 18) + game['roads']["MS"] + (" " * 7) + CONSTS['kaomojis'][game['tiles']["S7"]["biome"]] + (" " * 7) + game['roads']["NT"] + (" " * 16) + game['roads']["OU"] + (" " * 7) + CONSTS['kaomojis'][game['tiles']["S8"]["biome"]]  + (" " * 6) + game['roads']["PV"] +
-(" " * 16) + game['roads']["QW"] + "\n" +
+(" " * 20) + game['roads']["LR"]['display'] + (" " * 18) + game['roads']["MS"]['display'] + (" " * 7) + CONSTS['kaomojis'][game['tiles']["S7"]["biome"]] + (" " * 7) + game['roads']["NT"]['display'] + (" " * 16) + game['roads']["OU"]['display'] + (" " * 7) + CONSTS['kaomojis'][game['tiles']["S8"]["biome"]]  + (" " * 6) + game['roads']["PV"]['display'] +
+(" " * 16) + game['roads']["QW"]['display'] + "\n" +
 #line 24
-(" " * 3) + "2:1 wood port - " + game['settlement_locs']["R"]["display"] + " " + game['roads']["LR"] + "  " + (game['roads']["RS"] + " ") * 4 + game['settlement_locs']["S"]["display"] + " " + game['roads']["MS"] + (" " * 10) + str(game['tiles']["S7"]["number"]) + 
-(" " * 8 if len(str(game['tiles']["S7"]["number"])) == 1 else " " * 7) + game['settlement_locs']["T"]["display"] + "  " + game['roads']["NT"] + "  " + (game['roads']["TU"] + " ") * 4 + game['roads']["OU"] + " " + game['settlement_locs']["U"]["display"] +
-(" " * 8) + str(game['tiles']["S8"]["number"]) + (" " * 8 if len(str(game['tiles']["S8"]["number"])) == 1 else " " * 7) + game['settlement_locs']["V"]["display"] + " " + game['roads']["PV"] + " " + (game['roads']["VW"] + " ") * 4 + " " + game['roads']["QW"] + 
+(" " * 3) + "2:1 wood port - " + game['settlement_locs']["R"]["display"] + " " + game['roads']["LR"]['display'] + "  " + (game['roads']["RS"]['display'] + " ") * 4 + game['settlement_locs']["S"]["display"] + " " + game['roads']["MS"]['display'] + (" " * 10) + str(game['tiles']["S7"]["number"]) + 
+(" " * 8 if len(str(game['tiles']["S7"]["number"])) == 1 else " " * 7) + game['settlement_locs']["T"]["display"] + "  " + game['roads']["NT"]['display'] + "  " + (game['roads']["TU"]['display'] + " ") * 4 + game['roads']["OU"]['display'] + " " + game['settlement_locs']["U"]["display"] +
+(" " * 8) + str(game['tiles']["S8"]["number"]) + (" " * 8 if len(str(game['tiles']["S8"]["number"])) == 1 else " " * 7) + game['settlement_locs']["V"]["display"] + " " + game['roads']["PV"]['display'] + " " + (game['roads']["VW"]['display'] + " ") * 4 + " " + game['roads']["QW"]['display'] + 
 game['settlement_locs']["W"]["display"] +  " _ _ _  2:1 sheep port" + "\n" +
 #line 25
-(" " * 8) + "\\" + (" " * 12) + game['roads']["RX"] + (" " * 16) + game['roads']["SY"] + (" " * ((22 - len(str(game['tiles']["S7"]["biome"])))//2)) + game['tiles']["S7"]["biome"] + 
-(" " * (((22-len(str(game['tiles']["S7"]["biome"])))//2) + (1 if len(str(game['tiles']["S7"]["biome"]))%2 != 0 else 0))) + game['roads']["TZ"] + (" " * 14) + game['roads']["Ua"] +
+(" " * 8) + "\\" + (" " * 12) + game['roads']["RX"]['display'] + (" " * 16) + game['roads']["SY"]['display'] + (" " * ((22 - len(str(game['tiles']["S7"]["biome"])))//2)) + game['tiles']["S7"]["biome"] + 
+(" " * (((22-len(str(game['tiles']["S7"]["biome"])))//2) + (1 if len(str(game['tiles']["S7"]["biome"]))%2 != 0 else 0))) + game['roads']["TZ"]['display'] + (" " * 14) + game['roads']["Ua"]['display'] +
 (" " * ((21 - len(str(game['tiles']["S8"]["biome"])))//2)) + game['tiles']["S8"]["biome"] + 
-(" " * (((21-len(str(game['tiles']["S8"]["biome"])))//2) + (1 if len(str(game['tiles']["S8"]["biome"]))%2 != 1 else 0))) + game['roads']["Vb"] + (" " * 14) + game['roads']["Wc"] + "         /\n" +
+(" " * (((21-len(str(game['tiles']["S8"]["biome"])))//2) + (1 if len(str(game['tiles']["S8"]["biome"]))%2 != 1 else 0))) + game['roads']["Vb"]['display'] + (" " * 14) + game['roads']["Wc"]['display'] + "         /\n" +
 #line 26
-(" " * 9) + "\\" + (" " * 10) + game['roads']["RX"] + (" " * 18) + game['roads']["SY"] + (" " * 9) + "S7" + (" " * 9) + game['roads']["TZ"] + (" " * 16) + game['roads']["Ua"] + (" " * 8) + "S8" + (" " * 9) + game['roads']["Vb"] + (" " * 16) + game['roads']["Wc"] + "       /" + "\n" +
+(" " * 9) + "\\" + (" " * 10) + game['roads']["RX"]['display'] + (" " * 18) + game['roads']["SY"]['display'] + (" " * 9) + "S7" + (" " * 9) + game['roads']["TZ"]['display'] + (" " * 16) + game['roads']["Ua"]['display'] + (" " * 8) + "S8" + (" " * 9) + 
+game['roads']["Vb"]['display'] + (" " * 16) + game['roads']["Wc"]['display'] + "       /" + "\n" +
 #line 27
 (" " * 10) + "\\" + (" " * 110) + "/" + "\n" +
 #line 28
-(" " * 11) + "\\" + (" " * 6) + game['roads']["RX"] + (" " * 8) + CONSTS['kaomojis'][game['tiles']["S9"]["biome"]] + (" " * 8) + game['roads']["SY"] + (" " * 16) + game['roads']["TZ"] + (" " * 6) + CONSTS['kaomojis'][game['tiles']["S10"]["biome"]] + (" " * 8) + game['roads']["Ua"]
-+ (" " * 15) + game['roads']["Vb"] + (" " * 7) + CONSTS['kaomojis'][game['tiles']["S11"]["biome"]] + (" " * 7) + game['roads']["Wc"] + "   /" + "\n" +
+(" " * 11) + "\\" + (" " * 6) + game['roads']["RX"]['display'] + (" " * 8) + CONSTS['kaomojis'][game['tiles']["S9"]["biome"]] + (" " * 8) + game['roads']["SY"]['display'] + (" " * 16) + 
+game['roads']["TZ"]['display'] + (" " * 6) + CONSTS['kaomojis'][game['tiles']["S10"]["biome"]] + (" " * 8) + game['roads']["Ua"]['display']
++ (" " * 15) + game['roads']["Vb"]['display'] + (" " * 7) + CONSTS['kaomojis'][game['tiles']["S11"]["biome"]] + (" " * 7) + game['roads']["Wc"]['display'] + "   /" + "\n" +
 #line 29
-(" " * 12) + "\\  " + game['settlement_locs']["X"]["display"] + " " + game['roads']["RX"] + (" " * 12) + str(game['tiles']["S9"]["number"]) + (" " * 9 if len(str(game['tiles']["S9"]["number"])) == 1 else " " * 8) 
-+ game['settlement_locs']["Y"]["display"] + " " + game['roads']["SY"] + " " + (game['roads']["YZ"] + " ") * 4 + game['settlement_locs']["Z"]["display"] + game['roads']["TZ"] + (" " * 10) + str(game['tiles']["S10"]["number"]) + 
-(" " * 9 if len(str(game['tiles']["S10"]["number"])) == 1 else " " * 8) + game['settlement_locs']["a"]["display"] + " " + game['roads']["Ua"] + (" " + game['roads']["ab"]) * 4 + game['settlement_locs']["b"]["display"] + game['roads']["Vb"] +
-(" " * 10) + str(game['tiles']["S11"]["number"]) + (" " * 11 if len(str(game['tiles']["S11"]["number"])) == 1 else " " * 10) + game['roads']["Wc"] + " " + game['settlement_locs']["c"]["display"] + "\n" +
+(" " * 12) + "\\  " + game['settlement_locs']["X"]["display"] + " " + game['roads']["RX"]['display'] + (" " * 12) + str(game['tiles']["S9"]["number"]) + 
+(" " * 9 if len(str(game['tiles']["S9"]["number"])) == 1 else " " * 8) 
++ game['settlement_locs']["Y"]["display"] + " " + game['roads']["SY"]['display'] + " " + (game['roads']["YZ"]['display'] + " ") * 4 + game['settlement_locs']["Z"]["display"] + 
+game['roads']["TZ"]['display'] + (" " * 10) + str(game['tiles']["S10"]["number"]) + (" " * 9 if len(str(game['tiles']["S10"]["number"])) == 1 else " " * 8) + 
+game['settlement_locs']["a"]["display"] + " " + game['roads']["Ua"]['display'] + (" " + game['roads']["ab"]['display']) * 4 + game['settlement_locs']["b"]["display"] + game['roads']["Vb"]['display'] +
+(" " * 10) + str(game['tiles']["S11"]["number"]) + (" " * 11 if len(str(game['tiles']["S11"]["number"])) == 1 else " " * 10) + game['roads']["Wc"]['display'] + " " + game['settlement_locs']["c"]["display"] + "\n" +
 #line 30
-(" " * 17) + game['roads']["Xd"] + (" " * ((24 - len(str(game['tiles']["S9"]["biome"])))//2)) + game['tiles']["S9"]["biome"] + (" " * (((24-len(str(game['tiles']["S9"]["biome"])))//2) + (1 if len(str(game['tiles']["S9"]["biome"]))%2 != 0 else 0))) 
-+ game['roads']["Ye"] + (" " * 14) + game['roads']["Zf"] + (" " * ((22 - len(str(game['tiles']["S10"]["biome"])))//2)) + game['tiles']["S10"]["biome"] + 
-(" " * (((22-len(str(game['tiles']["S10"]["biome"])))//2) + (1 if len(str(game['tiles']["S10"]["biome"]))%2 != 0 else 0))) + game['roads']["ag"] + (" " * 13) + game['roads']["bh"] +
+(" " * 17) + game['roads']["Xd"]['display'] + (" " * ((24 - len(str(game['tiles']["S9"]["biome"])))//2)) + game['tiles']["S9"]["biome"] + (" " * (((24-len(str(game['tiles']["S9"]["biome"])))//2) + (1 if len(str(game['tiles']["S9"]["biome"]))%2 != 0 else 0))) 
++ game['roads']["Ye"]['display'] + (" " * 14) + game['roads']["Zf"]['display'] + (" " * ((22 - len(str(game['tiles']["S10"]["biome"])))//2)) + game['tiles']["S10"]["biome"] + 
+(" " * (((22-len(str(game['tiles']["S10"]["biome"])))//2) + (1 if len(str(game['tiles']["S10"]["biome"]))%2 != 0 else 0))) + game['roads']["ag"]['display'] + (" " * 13) + game['roads']["bh"]['display'] +
 (" " * ((22 - len(str(game['tiles']["S11"]["biome"])))//2)) + game['tiles']["S11"]["biome"] + 
-(" " * (((22-len(str(game['tiles']["S11"]["biome"])))//2) + (1 if len(str(game['tiles']["S11"]["biome"]))%2 != 0 else 0))) + game['roads']["ci"] + "\n"
+(" " * (((22-len(str(game['tiles']["S11"]["biome"])))//2) + (1 if len(str(game['tiles']["S11"]["biome"]))%2 != 0 else 0))) + game['roads']["ci"]['display'] + "\n"
         
         )
 
         grid_part_3 = (
 #line 31 & 32
-(" " * 18) + game['roads']["Xd"] + (" " * 10) + "S9" + (" " * 10) + game['roads']["Ye"] + (" " * 16) + game['roads']["Zf"] + (" " * 8) + "S10" + (" " * 9) + game['roads']["ag"] + (" " * 15) + game['roads']["bh"] + (" " * 8) + "S11" + (" " * 9) + game['roads']["ci"] + "\n\n" +
+(" " * 18) + game['roads']["Xd"]['display'] + (" " * 10) + "S9" + (" " * 10) + game['roads']["Ye"]['display'] + (" " * 16) + game['roads']["Zf"]['display'] + (" " * 8) + "S10" + (" " * 9) + game['roads']["ag"]['display'] + (" " * 15) + game['roads']["bh"]['display'] + (" " * 8) + "S11" + (" " * 9) + game['roads']["ci"]['display'] + "\n\n" +
 #line 33
-(" " * 20) + game['roads']["Xd"] + (" " * 18) + game['roads']["Ye"] + (" " * 7) + CONSTS['kaomojis'][game['tiles']["S12"]["biome"]] + (" " * 7) + game['roads']["Zf"] + (" " * 16) + game['roads']["ag"] + (" " * 6) + CONSTS['kaomojis'][game['tiles']["S13"]["biome"]] + (" " * 7) + game['roads']["bh"] + (" " * 16) + game['roads']["ci"] 
+(" " * 20) + game['roads']["Xd"]['display'] + (" " * 18) + game['roads']["Ye"]['display'] + (" " * 7) + CONSTS['kaomojis'][game['tiles']["S12"]["biome"]] + (" " * 7) + game['roads']["Zf"]['display'] + (" " * 16) + game['roads']["ag"]['display'] + (" " * 6) + CONSTS['kaomojis'][game['tiles']["S13"]["biome"]] + (" " * 7) + 
+game['roads']["bh"]['display'] + (" " * 16) + game['roads']["ci"]['display']
 + "\n" +
 #line 34
-(" " * 19) + game['settlement_locs']["d"]["display"] + " " + game['roads']["Xd"] + "  " + (game['roads']["de"] + " ") * 4 + game['settlement_locs']["e"]["display"] + " " + game['roads']["Ye"] + (" " * 10) + 
-str(game['tiles']["S12"]["number"]) + (" " * 9 if len(str(game['tiles']["S12"]["number"])) == 1 else " " * 8) + game['settlement_locs']["f"]["display"] + " " + game['roads']["Zf"] + " " + (game['roads']["fg"] + " ") * 4 + game['settlement_locs']["g"]["display"] + game['roads']["ag"] +
-(" " * 10) + str(game['tiles']["S13"]["number"]) + (" " * 8 if len(str(game['tiles']["S13"]["number"])) == 1 else " " * 7) + game['settlement_locs']["h"]["display"] + " " + game['roads']["bh"] + " " + (game['roads']["hi"] + " ") * 4 + " " + game['roads']["ci"] + " " 
+(" " * 19) + game['settlement_locs']["d"]["display"] + " " + game['roads']["Xd"]['display'] + "  " + (game['roads']["de"]['display'] + " ") * 4 + game['settlement_locs']["e"]["display"] + " " + game['roads']["Ye"]['display'] + (" " * 10) + 
+str(game['tiles']["S12"]["number"]) + (" " * 9 if len(str(game['tiles']["S12"]["number"])) == 1 else " " * 8) + game['settlement_locs']["f"]["display"] + " " + game['roads']["Zf"]['display'] + " " + (game['roads']["fg"]['display'] + " ") * 4 + game['settlement_locs']["g"]["display"] + game['roads']["ag"]['display'] +
+(" " * 10) + str(game['tiles']["S13"]["number"]) + (" " * 8 if len(str(game['tiles']["S13"]["number"])) == 1 else " " * 7) + game['settlement_locs']["h"]["display"] + " " + game['roads']["bh"]['display'] + " " + (game['roads']["hi"]['display'] + " ") * 4 + " " + game['roads']["ci"]['display'] + " " 
 + game['settlement_locs']["i"]["display"] + "\n" +
 #line 35
-(" " * 21) + game['roads']["dj"] + (" " * 16) + game['roads']["ek"] + (" " * ((23 - len(str(game['tiles']["S12"]["biome"])))//2)) + game['tiles']["S12"]["biome"] + 
-(" " * (((21-len(str(game['tiles']["S12"]["biome"])))//2) + (1 if len(str(game['tiles']["S12"]["biome"]))%2 != 1 else 0))) + game['roads']["fl"] + (" " * 14) + game['roads']["gm"]
+(" " * 21) + game['roads']["dj"]['display'] + (" " * 16) + game['roads']["ek"]['display'] + (" " * ((23 - len(str(game['tiles']["S12"]["biome"])))//2)) + game['tiles']["S12"]["biome"] + 
+(" " * (((21-len(str(game['tiles']["S12"]["biome"])))//2) + (1 if len(str(game['tiles']["S12"]["biome"]))%2 != 1 else 0))) + game['roads']["fl"]['display'] + (" " * 14) + game['roads']["gm"]['display']
 + (" " * ((21 - len(str(game['tiles']["S13"]["biome"])))//2)) + game['tiles']["S13"]["biome"] + 
-(" " * (((21-len(str(game['tiles']["S13"]["biome"])))//2) + (1 if len(str(game['tiles']["S13"]["biome"]))%2 != 1 else 0))) + game['roads']["hn"] + (" " * 14) + game['roads']["io"] + "\n" +
+(" " * (((21-len(str(game['tiles']["S13"]["biome"])))//2) + (1 if len(str(game['tiles']["S13"]["biome"]))%2 != 1 else 0))) + game['roads']["hn"]['display'] + (" " * 14) + game['roads']["io"]['display'] + "\n" +
 #line 36 & 37
-(" " * 20) + game['roads']["dj"] + (" " * 18) + game['roads']['ek'] + (" " * 8) + "S12" + (" " * 9) + game['roads']['fl'] + (" " * 16) + game['roads']['gm'] + (" " * 8) + "S13" + (" " * 8) + game['roads']['hn'] + (" " * 16) + game['roads']['io'] + "\n\n" +
+(" " * 20) + game['roads']["dj"]['display'] + (" " * 18) + game['roads']['ek']['display'] + (" " * 8) + "S12" + (" " * 9) + game['roads']['fl']['display'] + (" " * 16) + game['roads']['gm']['display'] + (" " * 8) + "S13" + (" " * 8) + game['roads']['hn']['display'] + (" " * 16) + game['roads']['io']['display'] + "\n\n" +
 #line 38 
-(" " * 18) + game['roads']['dj'] + (" " * 8) + CONSTS['kaomojis'][game['tiles']["S14"]["biome"]] + (" " * 8) + game['roads']['ek'] + (" " * 16) + game['roads']['fl'] + (" " * 7) + CONSTS['kaomojis'][game['tiles']["S15"]["biome"]] + (" " * 7) + game['roads']['gm'] + (" " * 15) + game['roads']['hn'] + (" " * 7) + CONSTS['kaomojis'][game['tiles']["S16"]["biome"]] + (" " * 7)
-+ game['roads']['io'] + "\n" +
+(" " * 18) + game['roads']['dj']['display'] + (" " * 8) + CONSTS['kaomojis'][game['tiles']["S14"]["biome"]] + (" " * 8) + game['roads']['ek']['display'] + (" " * 16) + game['roads']['fl']['display'] + 
+(" " * 7) + CONSTS['kaomojis'][game['tiles']["S15"]["biome"]] + (" " * 7) + game['roads']['gm']['display'] + (" " * 15) + game['roads']['hn']['display'] + (" " * 7) + CONSTS['kaomojis'][game['tiles']["S16"]["biome"]] + (" " * 7)
++ game['roads']['io']['display'] + "\n" +
 #line 39
-(" " * 15) + game['settlement_locs']["j"]["display"] + " " + game['roads']['dj'] + (" " * 11) + str(game['tiles']["S14"]["number"]) + (" " * 10 if len(str(game['tiles']["S14"]["number"])) == 1 else " " * 9) + game['settlement_locs']["k"]["display"]
-+ " " + game['roads']['ek'] + " " + (game['roads']["kl"] + " ") * 4 + game['settlement_locs']["l"]["display"] + game['roads']['fl'] + (" " * 10) + str(game['tiles']["S15"]["number"]) + (" " * 9 if len(str(game['tiles']["S15"]["number"])) == 1 else " " * 8)
-+ game['settlement_locs']["m"]["display"] + " " + game['roads']['gm'] + " " + (game['roads']["mn"] + " ") * 4 + game['roads']['hn'] + game['settlement_locs']["n"]["display"] + (" " * 9) + str(game['tiles']["S16"]["number"]) + 
-(" " * 11 if len(str(game['tiles']["S16"]["number"])) == 1 else " " * 10) + game['roads']['io'] + " " + game['settlement_locs']["o"]["display"] + "\n" +
+(" " * 15) + game['settlement_locs']["j"]["display"] + " " + game['roads']['dj']['display'] + (" " * 11) + str(game['tiles']["S14"]["number"]) + (" " * 10 if len(str(game['tiles']["S14"]["number"])) == 1 else " " * 9) + game['settlement_locs']["k"]["display"]
++ " " + game['roads']['ek']['display'] + " " + (game['roads']["kl"]['display'] + " ") * 4 + game['settlement_locs']["l"]["display"] + game['roads']['fl']['display'] + (" " * 10) + str(game['tiles']["S15"]["number"]) + (" " * 9 if len(str(game['tiles']["S15"]["number"])) == 1 else " " * 8)
++ game['settlement_locs']["m"]["display"] + " " + game['roads']['gm']['display'] + " " + (game['roads']["mn"]['display'] + " ") * 4 + game['roads']['hn']['display'] + game['settlement_locs']["n"]["display"] + (" " * 9) + str(game['tiles']["S16"]["number"]) + 
+(" " * 11 if len(str(game['tiles']["S16"]["number"])) == 1 else " " * 10) + game['roads']['io']['display'] + " " + game['settlement_locs']["o"]["display"] + "\n" +
 #line 40
-(" " * 17) + game['roads']['jp'] + (" " * ((24 - len(str(game['tiles']["S14"]["biome"])))//2)) + game['tiles']["S14"]["biome"] +
-(" " * (((24-len(str(game['tiles']["S14"]["biome"])))//2) + (1 if len(str(game['tiles']["S14"]["biome"]))%2 != 0 else 0))) + game['roads']['kq'] + (" " * 14) + game['roads']['lr'] +
+(" " * 17) + game['roads']['jp']['display'] + (" " * ((24 - len(str(game['tiles']["S14"]["biome"])))//2)) + game['tiles']["S14"]["biome"] +
+(" " * (((24-len(str(game['tiles']["S14"]["biome"])))//2) + (1 if len(str(game['tiles']["S14"]["biome"]))%2 != 0 else 0))) + game['roads']['kq']['display'] + (" " * 14) + game['roads']['lr']['display'] +
 (" " * ((22 - len(str(game['tiles']["S15"]["biome"])))//2)) + game['tiles']["S15"]["biome"] + 
-(" " * (((22-len(str(game['tiles']["S15"]["biome"])))//2) + (1 if len(str(game['tiles']["S15"]["biome"]))%2 != 0 else 0))) + game['roads']['ms'] + (" " * 13) + game['roads']['nt'] +
+(" " * (((22-len(str(game['tiles']["S15"]["biome"])))//2) + (1 if len(str(game['tiles']["S15"]["biome"]))%2 != 0 else 0))) + game['roads']['ms']['display'] + (" " * 13) + game['roads']['nt']['display'] +
 (" " * ((22 - len(str(game['tiles']["S16"]["biome"])))//2)) + game['tiles']["S16"]["biome"] + 
-(" " * (((22 - len(str(game['tiles']["S16"]["biome"])))//2) + (1 if len(str(game['tiles']["S16"]["biome"]))%2 != 0 else 0))) + game['roads']['ou'] + "\n" +
+(" " * (((22 - len(str(game['tiles']["S16"]["biome"])))//2) + (1 if len(str(game['tiles']["S16"]["biome"]))%2 != 0 else 0))) + game['roads']['ou']['display'] + "\n" +
 #line 41 
-(" " * 14) + "/" + (" " * 3) + game['roads']['jp'] + (" " * 9) + "S14"  + (" " * 10) + game['roads']['kq'] + (" " * 16) + game['roads']['lr'] + (" " * 8) + "S15" + (" " * 9) + game['roads']['ms'] + (" " * 15) + game['roads']['nt'] + (" " * 8) + "S16" + (" " * 9) + game['roads']['ou'] + 
+(" " * 14) + "/" + (" " * 3) + game['roads']['jp']['display'] + (" " * 9) + "S14"  + (" " * 10) + game['roads']['kq']['display'] + (" " * 16) + game['roads']['lr']['display'] + (" " * 8) + "S15" + (" " * 9) + game['roads']['ms']['display'] 
++ (" " * 15) + game['roads']['nt']['display'] + (" " * 8) + "S16" + (" " * 9) + game['roads']['ou']['display'] + 
 (" " * 3) + "\\" + "\n" +
 #line 42
 (" " * 13) + "/" + (" " * 107) + "\\" + "\n" 
@@ -359,37 +370,45 @@ str(game['tiles']["S12"]["number"]) + (" " * 9 if len(str(game['tiles']["S12"]["
 
         grid_part_4 = (
 #line 43
-(" " * 12) + "/" + (" " * 7) + game['roads']['jp'] + (" " * 18) + game['roads']['kq'] + (" " * 7) + CONSTS['kaomojis'][game['tiles']["S17"]["biome"]] + (" " * 7) + game['roads']['lr'] + (" " * 16) + game['roads']['ms'] + (" " * 6) + CONSTS['kaomojis'][game['tiles']["S18"]["biome"]] + (" " * 7)
-+ game['roads']['nt'] + (" " * 16) + game['roads']['ou'] + (" " * 7) + "\\" + "\n" +
+(" " * 12) + "/" + (" " * 7) + game['roads']['jp']['display'] + (" " * 18) + game['roads']['kq']['display'] + (" " * 7) + CONSTS['kaomojis'][game['tiles']["S17"]["biome"]] + 
+(" " * 7) + game['roads']['lr']['display'] + (" " * 16) + game['roads']['ms']['display'] + (" " * 6) + CONSTS['kaomojis'][game['tiles']["S18"]["biome"]] + (" " * 7)
++ game['roads']['nt']['display'] + (" " * 16) + game['roads']['ou']['display'] + (" " * 7) + "\\" + "\n" +
 #line 44
-" 2:1 brick port _  " + game['settlement_locs']["p"]["display"] + " " + game['roads']['jp'] + " " + (game['roads']["pq"] + " ") * 4 + " " + game['settlement_locs']["q"]["display"] + " " + game['roads']['kq'] + (" " * 11) + str(game['tiles']["S17"]["number"]) +
-(" " * 8 if len(str(game['tiles']["S17"]["number"])) == 1 else " " * 7) + game['settlement_locs']["r"]["display"] + " " + game['roads']['lr'] + " " + (game['roads']["rs"] + " ") * 4 + game['settlement_locs']["s"]["display"] + game['roads']['ms'] + (" " * 10) + 
-str(game['tiles']["S18"]["number"]) + (" " * 8 if len(str(game['tiles']["S18"]["number"])) == 1 else " " * 7) + game['settlement_locs']["t"]["display"] + " " + game['roads']['nt'] + " " + (game['roads']["tu"] + " ") * 4 + " " + game['roads']['ou'] +
+" 2:1 brick port _  " + game['settlement_locs']["p"]["display"] + " " + game['roads']['jp']['display'] + " " + (game['roads']["pq"]['display'] + " ") * 4 + " " 
++ game['settlement_locs']["q"]["display"] + " " + game['roads']['kq']['display'] + (" " * 11) + str(game['tiles']["S17"]["number"]) +
+(" " * 8 if len(str(game['tiles']["S17"]["number"])) == 1 else " " * 7) + game['settlement_locs']["r"]["display"] + " " + game['roads']['lr']['display'] + " " + 
+(game['roads']["rs"]['display'] + " ") * 4 + game['settlement_locs']["s"]["display"] + game['roads']['ms']['display'] + (" " * 10) + 
+str(game['tiles']["S18"]["number"]) + (" " * 8 if len(str(game['tiles']["S18"]["number"])) == 1 else " " * 7) + game['settlement_locs']["t"]["display"] + " " + game['roads']['nt']['display'] + 
+" " + (game['roads']["tu"]['display'] + " ") * 4 + " " + game['roads']['ou']['display'] +
 game['settlement_locs']["u"]["display"] + "  _ _ 3:1 port" + "\n" +
 #line 45
-(" " * 38) + game['roads']['qv'] + (" " * ((22 - len(str(game['tiles']["S17"]["biome"])))//2)) + game['tiles']["S17"]["biome"] + 
-(" " * (((22 - len(str(game['tiles']["S17"]["biome"])))//2) + (1 if len(str(game['tiles']["S17"]["biome"]))%2 != 0 else 0))) + game['roads']['rw'] + (" " * 14) + game['roads']['sx'] +
-(" " * ((21 - len(str(game['tiles']["S18"]["biome"])))//2)) + game['tiles']["S18"]["biome"] + 
-(" " * (((21 - len(str(game['tiles']["S18"]["biome"])))//2) + (1 if len(str(game['tiles']["S18"]["biome"]))%2 != 1 else 0))) + game['roads']['ty'] + "\n" +
+(" " * 38) + game['roads']['qv']['display'] + (" " * ((22 - len(str(game['tiles']["S17"]["biome"])))//2)) + game['tiles']["S17"]["biome"] + 
+(" " * (((22 - len(str(game['tiles']["S17"]["biome"])))//2) + (1 if len(str(game['tiles']["S17"]["biome"]))%2 != 0 else 0))) + game['roads']['rw']['display'] + (" " * 14) + game['roads']['sx']['display'] +
+(" " * ((21 - len(str(game['tiles']["S18"]["biome"])))//2)) + game['tiles']["S18"]["biome"] + (" " * (((21 - len(str(game['tiles']["S18"]["biome"])))//2) 
++ (1 if len(str(game['tiles']["S18"]["biome"]))%2 != 1 else 0))) + game['roads']['ty']['display'] + "\n" +
 #line 46 & 47
-(" " * 39) + game['roads']['qv'] + (" " * 8)  + "S17" + (" " * 9) + game['roads']['rw'] + (" " * 16) + game['roads']['sx'] + (" " * 8) + "S18" + (" " * 8) + game['roads']['ty'] + "\n\n" +
+(" " * 39) + game['roads']['qv']['display'] + (" " * 8)  + "S17" + (" " * 9) + game['roads']['rw']['display'] + (" " * 16) + game['roads']['sx']['display'] + 
+(" " * 8) + "S18" + (" " * 8) + game['roads']['ty']['display'] + "\n\n" +
 #line 48
-(" " * 41) + game['roads']['qv'] + (" " * 16) + game['roads']['rw'] + (" " * 7) + CONSTS['kaomojis'][game['tiles']["S19"]["biome"]] + (" " * 7) + game['roads']['sx'] + (" " * 15) + game['roads']['ty'] + "\n" +
+(" " * 41) + game['roads']['qv']['display'] + (" " * 16) + game['roads']['rw']['display'] + (" " * 7) + CONSTS['kaomojis'][game['tiles']["S19"]["biome"]] + (" " * 7) + 
+game['roads']['sx']['display'] + (" " * 15) + game['roads']['ty']['display'] + "\n" +
 #line 49
-(" " * 42) + game['roads']['qv'] + game['settlement_locs']["v"]["display"] + " " + (game['roads']["vw"] + " ") * 4 + game['settlement_locs']["w"]["display"] + (" " * 10) + str(game['tiles']["S19"]["number"]) +
-(" " * 9 if len(str(game['tiles']["S19"]["number"])) == 1 else " " * 8) + game['settlement_locs']["x"]["display"] + " " + game['roads']['sx'] + " " + (game['roads']["xy"] + " ") * 4 + game['roads']['ty'] + " " 
+(" " * 42) + game['roads']['qv']['display'] + game['settlement_locs']["v"]["display"] + " " + (game['roads']["vw"]['display'] + " ") * 4 + game['settlement_locs']["w"]["display"] + 
+(" " * 10) + str(game['tiles']["S19"]["number"]) + (" " * 9 if len(str(game['tiles']["S19"]["number"])) == 1 else " " * 8) + game['settlement_locs']["x"]["display"] + " " + 
+game['roads']['sx']['display'] + " " + (game['roads']["xy"]['display'] + " ") * 4 + game['roads']['ty']['display'] + " " 
 + game['settlement_locs']["y"]["display"] + "\n" +
 #line 50
-(" " * 58) + game['roads']['wz'] +(" " * ((21 - len(str(game['tiles']["S19"]["biome"])))//2)) + game['tiles']["S19"]["biome"] + 
-(" " * (((21 - len(str(game['tiles']["S19"]["biome"])))//2) + (1 if len(str(game['tiles']["S19"]["biome"]))%2 != 1 else 0))) + game['roads'][quick_reorder("x+")] + "\n" +
+(" " * 58) + game['roads']['wz']['display'] +(" " * ((21 - len(str(game['tiles']["S19"]["biome"])))//2)) + game['tiles']["S19"]["biome"] + 
+(" " * (((21 - len(str(game['tiles']["S19"]["biome"])))//2) + (1 if len(str(game['tiles']["S19"]["biome"]))%2 != 1 else 0))) + game['roads'][quick_reorder("x+")]['display'] + "\n" +
 #line 51
-(" " * 44) + "\\" + (" " * 11) + "/  " + game['roads']['wz'] + (" " * 8) + "S19" + (" " * 8) + game['roads'][quick_reorder("x+")] + "  \\          /" + "\n" +
+(" " * 44) + "\\" + (" " * 11) + "/  " + game['roads']['wz']['display'] + (" " * 8) + "S19" + (" " * 8) + game['roads'][quick_reorder("x+")]['display'] + "  \\          /" + "\n" +
 #line 52
 (" " * 45) + "\\         /" + (" " * 27) + "\\" + "        " + "/" + "\n" +
 #line 53
-(" " * 46) + "\\       /      " + game['roads']['wz'] + "               " + game['roads'][quick_reorder("x+")] + "      " + "\\" + "      " + "/" + "\n" +
+(" " * 46) + "\\       /      " + game['roads']['wz']['display'] + "               " + game['roads'][quick_reorder("x+")]['display'] + "      " + "\\" + "      " + "/" + "\n" +
 #line 54
-(" " * 45) + "2:1 ore port     " + game['roads']['wz'] + game['settlement_locs']["z"]["display"] + " " + (game['roads']["+z"] + " ") * 4 + game['settlement_locs']["+"]["display"] + "      3:1 port"
+(" " * 45) + "2:1 ore port     " + game['roads']['wz']['display'] + game['settlement_locs']["z"]["display"] + " " + (game['roads']["+z"]['display'] + " ") * 4 + game['settlement_locs']["+"]["display"] 
++ "      3:1 port"
 
         )
 
@@ -430,6 +449,7 @@ def generate_grid(game : dict, CONSTS : dict):
         for letter in CONSTS["settlement_locations"]:
                 settlement_locs[letter] = {"display": letter}
                 settlement_locs[letter]["port"] = ""
+                settlement_locs[letter]["owner"] = 0
         for loc in "ABFJouxy":
                 settlement_locs[loc]["port"] = {"3:1 port"}
         i = 0
@@ -454,10 +474,12 @@ def generate_grid(game : dict, CONSTS : dict):
                         counter += 1
 
                         road = quick_reorder(road)
-                        roads[road] = road_type
+                        roads[road] = {'display' : road_type, 'owner' : 0}
                 counter = 0
+                
 
         game['roads'] = roads
+                
         game["tiles"] = tiles
         game['settlement_locs'] = settlement_locs
 
@@ -511,7 +533,6 @@ def setup_game(game : dict, CONSTS : dict):
                 game[player]['roads'] = []
                 game[player]['settlements'] = []
                 game[player]['cities'] = []
-
                 game[player]['construct_bank'] = {"settlements": 5, "cities": 4, "roads": 15}
                 game[player]['achievements'] = {"longest road" : 0, "largest army" : 0}
                 game[player]['knights_recruited'] = 0
@@ -531,79 +552,29 @@ def setup_game(game : dict, CONSTS : dict):
 
         return game
 
+def trade_port(game, CONSTS):
+        pass
+
+def trade_player(game, CONSTS):
+        pass
+
 def trade(game : dict, CONSTS : dict):
         choice = input("Would you like to trade at 1. a port, or 2. with a player?\n> ").strip().lower()
         if choice in ["1", "port"]:
-                "check player's settlements and see if they're linked to ports"
+                trade_port(game, CONSTS)
 
         elif choice in ["2", "player"]:
-                loop = True
-                while loop:
-                        receiver = input("Which player would you like to trade with?\n> ")
-                        try:
-                                receiver = int(receiver)
-
-                        except ValueError:
-                                for player in game["quick_key"]:
-                                        if receiver == game[player]['name']:
-                                                receiver = player
-
-                        if not receiver in game["quick_key"]:
-                                print("That's not a player! If you don't want to trade anymore, type 'cancel'.")
-                        elif receiver == game['player_turn']:
-                                print("That's YOU! What are you trying to do, waste time?")
-                        else:
-                                loop = False
-
-                print("Make sure only you can see the screen. Please type your password to confirm your privacy.")
-                game['suspect'] = game['player_turn']
-                confidential = False
-                while not confidential:
-                        correct = password_confirm(game, CONSTS)
-                        confidential = True if correct == True else False
-                
-                resources_to_offer = build_trade(game, CONSTS, receiver, "offer")
-                resources_to_receive = build_trade(game, CONSTS, receiver, "receive")
-                
-                clear_screen()
-                print(f"Hand the laptop over to player {receiver}. Player {receiver}, make sure only you can see the screen, then enter your password.\n> ")
-                confidential = False
-                while not confidential:
-                        correct = password_confirm(game, CONSTS)
-                        confidential = True if correct == True else False
-                
-                print(f"This is the trade that player {game['player_turn']} is making to you:")
-                print("YOU WILL RECEIVE:")
-                for resource, number in resources_to_offer.items():
-                        print(f"{resource}: {number}")
-                        print("\n")
-                print("YOU WILL HAND OVER:")
-                for resource, number in resources_to_receive.items():
-                        print(f"{resource}: {number}")
-                        print("\n")
-                        
-                valid_input = False
-                while not valid_input:
-                        accept = input("Do you accept the trade? Please type 'y' or 'n' to confirm.\n> ").strip().lower()
-                        if accept == "y":
-                                valid_input = True
-                                transfer_resources()
-                        elif accept == "n":
-                                valid_input = True
-                                clear_screen()
-                                print(f"Hand the laptop back to player {game['player_turn']} now.")
-                        else:
-                                print("Type either y or n please.")
-                        
+                trade_player(game, CONSTS)                      
                 
 def transfer_resources():
         pass
 
-def build_trade(game : dict, CONSTS : dict, receiver : int, mode):
+def build_trade(game : dict, CONSTS : dict, receiver, mode : str):
         print_own_deck(game, CONSTS)
         resources_to_trade = {}
         finished = False
         while not finished:
+                
                 valid = False
                 while not valid:
                         item = input(f"Which resource would you like to {'trade' if mode == 'offer' else 'receive'}?\n> ").strip().lower()
@@ -637,9 +608,8 @@ def build_trade(game : dict, CONSTS : dict, receiver : int, mode):
                                 valid_input = True
                         else:
                                 print("Type either y or n please.")
-                
-        return resources_to_trade
-                
+                                
+        return resources_to_trade             
 
 def clear_screen():
         print("\033c", end="")
@@ -667,7 +637,7 @@ def check(text : str, CONSTS : dict, game : dict, mode : str):
         if mode == 'settlement':
                 settlement = text
                 try:
-                        if game['settlement_locs'][settlement]['display'] != settlement:
+                        if game['settlement_locs'][settlement]['owner'] != 0:
                                 print("This settlement is already taken. Pro tip: if it has a colour, it's not up for grabs.")
                                 valid = False
                                 
@@ -684,7 +654,7 @@ def check(text : str, CONSTS : dict, game : dict, mode : str):
                                                         related_settlements.append(place)
 
                                 for place in related_settlements:
-                                        if place != game['settlement_locs'][place]['display']:
+                                        if game['settlement_locs'][place]['owner'] != 0:
                                                 print(f"It looks like you're trying to place a settlement adjacent to another settlement, 'location {place}'. You must place it at least two roads away.")
                                                 valid = False
                                                 break
@@ -700,8 +670,8 @@ def check(text : str, CONSTS : dict, game : dict, mode : str):
                         case = []
                         for road in game['roads']:
                                 if settlement in road:
-                                        if game['roads'][road] != road:
-                                                owner = analyse_ownership(game, CONSTS, settlement)
+                                        if game['roads'][road]['owner'] != 0:
+                                                owner = game['roads'][road]['owner']
                                                 if owner == game["player_turn"]:
                                                         case.append(road)
 
@@ -724,23 +694,21 @@ def check(text : str, CONSTS : dict, game : dict, mode : str):
                         print("That road doesn't exist.")
 
                 else:
-                        #look through each road, check if the road has been modified...
                         
-                        owner = analyse_ownership(game, CONSTS, game["roads"][text])
-                        if owner != game['player_turn'] and len(game["roads"][text]) > 5:
+                        owner = game["roads"][text]['owner']
+                        if owner != game['player_turn'] and game["roads"][text]['owner'] != 0:
                                 print("That road already belongs to someone else.")
-                                valid = False      
-                                        
+                                valid = False         
                         case = []
                         for settlement in text:
-                                if game["settlement_locs"][settlement]['display'] != settlement:
-                                        owner = analyse_ownership(game, CONSTS, game['settlement_locs'][settlement]['display'])
+                                if game["settlement_locs"][settlement]['owner'] != 0:
+                                        owner = game['settlement_locs'][settlement]['owner']
                                         if game['player_turn'] == owner:
                                                 case.append(settlement)
 
                                 for road in game['roads']:
                                         if settlement in road:
-                                                owner = analyse_ownership(game, CONSTS, game['roads'][road])
+                                                owner = game['settlement_locs'][settlement]['owner']
                                                 if game['player_turn'] == owner:
                                                         case.append(road)
                         
@@ -827,7 +795,7 @@ def assign_player_colours(game : dict, CONSTS : dict):
         return game
 
 def game_stage_1(game : dict, CONSTS : dict):
-        game['player_turn'] = 1 #ok i know this looks redundant but print board requires that variable ok?
+        game['player_turn'] = 1 #ok i know this looks redundant but print board requires that variable
 
         print_board(game, CONSTS)
         print(f"We'll go from player 1 to player {len(game['quick_key'])}; you can place two settlements and two roads for free. Please choose wisely.")
@@ -843,6 +811,7 @@ def game_stage_1(game : dict, CONSTS : dict):
                         game[player]['settlements'].append(text)
                         print(game['settlement_locs'][text]['display'])
                         game['settlement_locs'][text]['display'] = ansi_stitching(game[player]['color'], game['settlement_locs'][text]['display'])
+                        game['settlement_locs'][text]['owner'] = player
                         clear_screen()
                         print_board(game, CONSTS)
 
@@ -851,7 +820,7 @@ def game_stage_1(game : dict, CONSTS : dict):
                                 text = input(ansi_stitching(game[player]['color'], f"Player {player}, where are you placing your road?") + "\n> ").strip()
                                 valid = check(text, CONSTS, game, 'road')
                         game[player]['roads'].append(text)
-                        game['roads'][quick_reorder(text)] = ansi_stitching(game[player]['color'], game['roads'][quick_reorder(text)])
+                        game['roads'][quick_reorder(text)]['display'] = ansi_stitching(game[player]['color'], game['roads'][quick_reorder(text)]['display'])
                         clear_screen()
                         print_board(game, CONSTS)
 
@@ -914,9 +883,10 @@ def main_game(game, CONSTS):
         game["mode"] = "main"
 
         while game["mode"] == "main":
+                turn = True
 
                 for player in game["quick_key"]:
-                        while game["player_turn"] == player:
+                        while turn:
 
                                 game["mode"], game = evaluate_game_state(game, CONSTS)
                                 action = input(ansi_stitching(game[player]['color'], f"Player {player}, what's your move?") + "\n> ").strip().lower()
@@ -927,9 +897,7 @@ def main_game(game, CONSTS):
                                                 break
 
                                 elif action == "end turn":
-                                        game['suspect'] = player
-                                        if password_confirm(game, CONSTS):
-                                                trade_cards(game, CONSTS)
+                                        turn = False
 
                                 elif action == "build":
                                         build(game, CONSTS)
@@ -941,9 +909,7 @@ def main_game(game, CONSTS):
                                         try:
                                                 CONSTS["commands"][action](game, CONSTS)
                                         except KeyError:
-                                                print("Oops, that command doesn't exist.")
-
-                        
+                                                print("Oops, that command doesn't exist.")             
 
         return game
 
@@ -1039,7 +1005,9 @@ ENTER YOUR COMMAND TO BEGIN""",
  Road: Wood (1), Brick (1)
  Settlement: Wood (1), Brick (1), Grain (1), Sheep (1)
  City: Ores (3), Grain (2)
- Development cards: Ores (1), Grain (1), Sheep (1)"""
+ Development cards: Ores (1), Grain (1), Sheep (1)""",
+ 
+                "guide": """To play Catan, you should likely look at the """
 
         }
 
