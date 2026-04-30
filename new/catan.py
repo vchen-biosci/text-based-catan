@@ -559,14 +559,24 @@ def trade_player(game, CONSTS):
         pass
 
 def trade(game : dict, CONSTS : dict):
-        choice = input("Would you like to trade at 1. a port, or 2. with a player?\n> ").strip().lower()
-        if choice in ["1", "port"]:
-                trade_port(game, CONSTS)
+        valid = False
+        while not valid:
+                choice = input("Would you like to trade at 1. a port, or 2. with a player?\n> ").strip().lower()
+                if choice in ["1", "port"]:
+                        trade_port(game, CONSTS)
+                        valid = True
 
-        elif choice in ["2", "player"]:
-                trade_player(game, CONSTS)                      
+                elif choice in ["2", "player"]:
+                        trade_player(game, CONSTS)
+                        valid = True
+                        
+                elif choice == "cancel":
+                        valid = True
                 
-def transfer_resources():
+                else:
+                        print("Please type in a valid response! If you don't want to anymore, type 'X' or 'cancel!'")                  
+                
+def transfer_resources(game : dict, CONSTS : dict):
         pass
 
 def build_trade(game : dict, CONSTS : dict, receiver, mode : str):
