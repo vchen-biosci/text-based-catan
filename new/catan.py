@@ -3,7 +3,7 @@ import random, time, os
 def clear_screen():
         print("\033c", end="")
 
-def ansi_stitching(color : list, text : str):
+def ansi_stitching(color : list, text : str) -> str:
         
         colored_ver = "\x1b[38;2;"
 
@@ -69,16 +69,25 @@ def get_player_password() -> str:
         
         return password
 
-def setup_player_dicts(quick_key : list):
+def setup_player_dicts(quick_key : list) -> dict:
+        resources = ["ores", "grain", "wood", "brick", "sheep"]
         player_names = []
         player_dicts = create_player_dicts(quick_key)
         for player in quick_key:
                 name = get_player_name(player, player_names)
                 player_names.append(name)
                 player_dicts[player]['name'] = name
-                
                 player_dicts[player]['password'] = get_player_password()
                 
+                player_dicts[player]["resources"] = {}
+                for resource in resources:
+                        player_dicts[player]["resources"][resource] = 0
+                player_dicts[player]["dev_cards"] = {}
+                quick_dict = dict(zip(["knight", "year of plenty", "road building", "monopoly", "VPs"], [14, 2, 2, 2, 5]))
+                for dev_card in quick_dict:
+                        player_dicts[player]["dev_cards"][dev_card] = quick_dict[dev_card]
+                        
+                player_dicts = add_keys(player_dicts, quick_key)
                 clear_screen()
                 
         print_names(player_names, quick_key)
@@ -93,12 +102,25 @@ def print_names(player_names, quick_key):
                         print(player_names[player - 1], end=", and ")
                 else:
                         print(player_names[player - 1], end=", ")
-                        
-def initialise_game():
+
+def add_keys(player_dicts, quick_key):
+        for player in quick_key:
+                player_dicts[player]['roads'] = []
+                player_dicts[player]['settlements'] = []
+                player_dicts[player]['cities'] = []
+                player_dicts[player]['construct_bank'] = {"settlements": 5, "cities": 4, "roads": 15}
+                player_dicts[player]['achievements'] = {"longest road" : 0, "largest army" : 0}
+                player_dicts[player]['knights_recruited'] = 0
+                player_dicts[player]['VPs'] = 0
+        return player_dicts
+               
+def initialise_player_dicts():
         player_number = get_player_number()
         quick_key = create_player_key(player_number)
         player_dicts = setup_player_dicts(quick_key)
-        assign_player_colours(quick_key)
+        player_colors = assign_player_colors(quick_key)
+        for player, color in zip(player_dicts, player_colors):
+                player_dicts[player]["color"] = color
         
         return quick_key, player_number, player_dicts
 
@@ -107,9 +129,8 @@ def print_rules():
 https://www.catan.com/sites/default/files/2024-01/Almanac%20CATAN-3D.pdf
 If the link doesn't work, please paste it into your browser.""")
 
-def choose_colour():
+def choose_color() -> list:
         player_color = []
-
         satisfied = False
         while not satisfied:
                 for color in ["red", "blue", "green"]:                  
@@ -128,55 +149,74 @@ def choose_colour():
                                         
                 confirmed = False
                 while not confirmed:
-                        confirm = input(ansi_stitching(player_color, """This is what your colour looks like - are you sure you want it? 
+                        confirm = input(ansi_stitching(player_color, """This is what your color looks like - are you sure you want it? 
 Type 'Y' for yes and 'N' for no. 
 Please make sure all other players can see this color.\n""") + "> ").strip()
-                        
                         if confirm == "N":
                                 player_color = []
                                 confirmed = True
-                        
                         elif confirm == "Y":
                                 satisfied = True
                                 confirmed = True
-                                
                         else:
                                 print("Please type either 'Y' or 'N'. This is case sensitive.")
 
         clear_screen()
         return player_color
 
-def assign_player_colours(quick_key : list):
+def assign_player_colors(quick_key : list) -> list:
         preset_colors = [[1, 201, 184], [252, 210, 1], [252, 84, 1], [210, 1, 252]]
-        player_colours = []
+        player_colors = []
         for player in quick_key:
                 action = ""
                 while not action in ["y", "n"]:
-                        action = input("Would you like to customise your own colour? (If not, you'll get a premade one!)" + 
+                        action = input("Would you like to customise your own color? (If not, you'll get a premade one!)" + 
                                        " Type 'Y' for yes and 'N' for no.").strip().lower()
                         if action == "y":
-                                player_colours.append(choose_colour())
+                                player_colors.append(choose_color())
                         elif action == "n":
-                                print(ansi_stitching(preset_colors[player - 1], "This is your assigned colour!"))
-                                player_colours.append(preset_colors[player - 1])
+                                print(ansi_stitching(preset_colors[player - 1], "This is your assigned color!"))
+                                player_colors.append(preset_colors[player - 1])
                                 time.sleep(0.3)
                         else:
                                 print("Sorry, please either type 'y' or 'n'.")
                 clear_screen()
                                 
-        print_player_colors(quick_key, player_colours)
-                
+        print_player_colors(quick_key, player_colors)
+        
+        return player_colors           
                                 
-def print_player_colors(quick_key, player_colours):
+def print_player_colors(quick_key, player_colors):
         for player in quick_key:
-                print(ansi_stitching(player_colours[player - 1], f"Player {player}, this is your colour."))
+                print(ansi_stitching(player_colors[player - 1], f"Player {player}, this is your color."))
                 time.sleep(0.3)
+
+def initialise_resource_cards():
+        
+        resources = {}
+        for resource in ["ores", "grain", "wood", "brick", "sheep"]:
+                resources[resource] = 19
+        dev_bank = {}
+        dev_cards = ["knight", "year of plenty", "road building", "monopoly", "VPs"]
+        dev_values = [14, 2, 2, 2, 5]
+        for dev_card, value in zip(dev_cards, dev_values):
+                dev_bank[dev_card] = value
+        
+        return resources, dev_bank
                 
+def make_bank_heh():
+        game_bank = {}
+        resources, dev_bank = initialise_resource_cards()
+        game_bank['resources'] = resources
+        game_bank['dev_cards'] = dev_bank
+        
 def main():
-        print("Starting your game...")
+        
+        print("Starting your player_dicts...")
         time.sleep(1)
         clear_screen()
-        quick_key, player_number, player_dicts = initialise_game()
+        quick_key, player_number, player_dicts = initialise_player_dicts()
+        game_bank = make_bank_heh()
 
 if __name__ == "__main__":
         main()
