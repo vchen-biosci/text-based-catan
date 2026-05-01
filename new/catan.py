@@ -754,8 +754,7 @@ def check(text : str, CONSTS : dict, game : dict, mode : str):
                         valid = False
                         print("That road doesn't exist.")
 
-                else:
-                        
+                else:      
                         owner = game["roads"][text]['owner']
                         if owner != game['player_turn'] and game["roads"][text]['owner'] != 0:
                                 print("That road already belongs to someone else.")
@@ -771,6 +770,11 @@ def check(text : str, CONSTS : dict, game : dict, mode : str):
                                         if settlement in road:
                                                 owner = game['settlement_locs'][settlement]['owner']
                                                 if game['player_turn'] == owner:
+                                                        case.append(road)
+                                                        
+                                for road in game[game["player_turn"]]["roads"]:
+                                        for char in road:
+                                                if char in text:
                                                         case.append(road)
                         
                         if valid != False and len(case) != 0:
