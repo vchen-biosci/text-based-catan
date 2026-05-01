@@ -38,7 +38,7 @@ def create_player_key(player_number : int) -> list:
                 
         return quick_key
 
-def get_player_name(player, player_names) -> str:
+def get_player_name(player : int, player_names : list) -> str:
         valid_name = False
         while not valid_name:
                 player_name = input(f"Player {player}, enter the name you'd like to be known by.\n> ").strip()
@@ -103,7 +103,7 @@ def print_names(player_names, quick_key):
                 else:
                         print(player_names[player - 1], end=", ")
 
-def add_keys(player_dicts, quick_key):
+def add_keys(player_dicts, quick_key) -> dict:
         for player in quick_key:
                 player_dicts[player]['roads'] = []
                 player_dicts[player]['settlements'] = []
@@ -191,7 +191,7 @@ def print_player_colors(quick_key, player_colors):
                 print(ansi_stitching(player_colors[player - 1], f"Player {player}, this is your color."))
                 time.sleep(0.3)
 
-def initialise_resource_cards():
+def initialise_resource_cards() -> tuple[dict, dict]:
         
         resources = {}
         for resource in ["ores", "grain", "wood", "brick", "sheep"]:
@@ -204,15 +204,68 @@ def initialise_resource_cards():
         
         return resources, dev_bank
                 
-def make_bank_heh():
+def make_bank_heh() -> dict:
         game_bank = {}
         resources, dev_bank = initialise_resource_cards()
         game_bank['resources'] = resources
         game_bank['dev_cards'] = dev_bank
         
+        return game_bank
+
+def create_tiles() -> dict:
+        print("Setting up your tiles...")
+        tiles = {}
+        for i in range(19):
+                tiles[("S"+str(i+1))] = {}
+                
+        return tiles
+
+def place_desert(tiles : dict) -> tuple[dict, str]:
+        print("Spawning your desert...")
+        desert_placement = random.randint(1, 19)
+        tiles[("S"+str(desert_placement))]["biome"] = "desert"
+        tiles[("S"+str(desert_placement))]["number"] = "NA"
+        robber = "S"+str(desert_placement)
+        
+        return tiles, robber
+        
+def generate_grid():
+        tiles = create_tiles()
+        tiles, robber = place_desert(tiles)
+        
+def more_stuff(tiles : dict):
+        
+        for i in range(19):
+                try:
+                        tiles[("S"+str(i+1))]["biome"]
+                except KeyError:
+                        random.shuffle(biomes)
+                        chosen_biome = biomes.pop()
+                        tiles[("S"+str(i+1))]["biome"] = chosen_biome
+
+                        random.shuffle(CONSTS["number_tokens"])
+                        chosen_number = CONSTS["number_tokens"].pop()
+                        tiles[("S"+str(i+1))]["number"] = chosen_number
+                
+                tiles["S"+str(i+1)]["attached_settlements"] = CONSTS["S"+str(i+1)]
+
+def make_biomes() -> list:
+        biomes = []
+        for i in range(3):
+                biomes.append("ores")
+                biomes.append("brick")
+
+        for i in range(4):
+                biomes.append("grain")
+                biomes.append("wood")
+                biomes.append("sheep")
+        
+        return biomes
+        
 def main():
         
-        print("Starting your player_dicts...")
+                
+        print("Starting your game...")
         time.sleep(1)
         clear_screen()
         quick_key, player_number, player_dicts = initialise_player_dicts()
