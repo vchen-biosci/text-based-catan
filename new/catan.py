@@ -202,6 +202,8 @@ def print_own_deck(game : dict, CONSTS : dict):
         print("this is ur deck")
 
 def roll_die(game : dict, CONSTS : dict):
+        
+        
 
         if game["roll_allowed"] == True:
                 dice_1 = random.randint(1, 6)
@@ -209,11 +211,18 @@ def roll_die(game : dict, CONSTS : dict):
                 roll = dice_1 + dice_2
                 print(f"As everyone watches with baited breath, you roll the die. You pray for a good result. They land as follows: |{dice_1}| |{dice_2}| ... {dice_1} + {dice_2} = {roll}. You've rolled a {roll}.")
                 game["roll_allowed"] = False
+                for player in game["quick_key"]:
+                        for settlement in game[player]["settlements"]:
+                                for tile in game["tiles"]:
+                                        if settlement in game["tiles"][tile]["attached_settlements"]:
+                                                if roll == game["tiles"][tile]["number"]:
+                                                        print(f"Player {player} has obtained {game['tiles'][tile]['biome']} from their settlement {settlement}")
                 
         else:
                 print("You've already rolled this turn.")
-
-        return roll
+                
+        game["roll_allowed"] = False
+        return game
 
 def quick_reorder(road : str):
 
@@ -443,6 +452,8 @@ def generate_grid(game : dict, CONSTS : dict):
                         random.shuffle(CONSTS["number_tokens"])
                         chosen_number = CONSTS["number_tokens"].pop()
                         tiles[("S"+str(i+1))]["number"] = chosen_number
+                
+                tiles["S"+str(i+1)]["attached_settlements"] = CONSTS["S"+str(i+1)]
 
         print("Sailing to your ports...")
         settlement_locs = {}
@@ -596,8 +607,7 @@ def trade_player(game, CONSTS):
                         print("Sorry, please put the player number in instead of the player name. It needs to be a single integer!")
         
         if wants_to_trade == "True":
-                print("calling the function to set up that trade here.")
-                        
+                print("calling the function to set up that trade here.")         
 
 def trade(game : dict, CONSTS : dict):
         valid = False
@@ -937,6 +947,7 @@ def main_game(game, CONSTS):
                 turn = True
 
                 for player in game["quick_key"]:
+                        game["roll_allowed"] = True
                         while turn:
 
                                 game["mode"], game = evaluate_game_state(game, CONSTS)
@@ -955,6 +966,9 @@ def main_game(game, CONSTS):
                                 
                                 elif action == "trade":
                                         trade(game, CONSTS)
+                                        
+                                elif action == "roll":
+                                        game = roll_die(game, CONSTS)
 
                                 else:
                                         try:
@@ -1058,7 +1072,34 @@ ENTER YOUR COMMAND TO BEGIN""",
  City: Ores (3), Grain (2)
  Development cards: Ores (1), Grain (1), Sheep (1)""",
  
-                "guide": """To play Catan, you should likely look at the """
+                "guide": """To play Catan, you should look at the 'rules' to check how it's generally played . 
+In terms of this game's grid, some things are done differently. 
+The grid is made with ASCII art. Instead of stating the biome names on each hex, the resources obtained from each are stated in their place.
+Each hex is labeled with 'S1', 'S2', and so on and so forth. You do NOT place your settlements on the hexes. You place them on their verteces.
+For instance, on the S1 hex, you can place your settlements on A, B, E, I, H, and D.
+As for placing down roads, you name the two settlements that, by placing a road, you will connect. EG, you could place a road on KQ; between K and Q.
+You must have a settlement linked to the road that you're trying to build in order to place it, or it will be invalid.
+                """,
+                
+                "S1": ["A", "B", "E", "I", "H", "D"],
+                "S2": ["C", "D", "H", "N", "M", "G"],
+                "S3": ["E", "F", "J", "P", "O", "I"],
+                "S4": ["$", "G", "M", "S", "R", "L"],
+                "S5": ["H", "I", "O", "U", "T", "N"],
+                "S6": ["J", "K", "Q", "W", "V", "P"],
+                "S7": ["M", "N", "T", "Z", "Y", "S"],
+                "S8": ["O", "P", "V", "b", "a", "U"],
+                "S9": ["R", "S", "Y", "e", "d", "X"],
+                "S10": ["T", "U", "a", "g", "f", "Z"],
+                "S11": ["V", "W", "c", "i", "h", "b"],
+                "S12": ["Y", "Z", "f", "l", "k", "e"],
+                "S13": ["a", "b", "h", "n", "m", "g"],
+                "S14": ["d", "e", "k", "q", "p", "j"],
+                "S15": ["f", "g", "m", "s", "r", "l"],
+                "S16": ["h", "i", "o", "u", "t", "n"],
+                "S17": ["k", "l", "r", "w", "v", "q"],
+                "S18": ["m", "n", "t", "y", "x", "s"],
+                "S19": ["r", "s", "x", "+", "z", "w"]
 
         }
 
@@ -1121,6 +1162,9 @@ ENTER YOUR COMMAND TO BEGIN""",
 
                 elif action == 'end':
                         break
+                
+                elif action == 'guide':
+                        print(CONSTS['guide'])
                         
                 else:
                         try:
