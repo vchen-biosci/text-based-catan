@@ -575,10 +575,29 @@ def trade_port(game, CONSTS):
                                 print(port, end=" ")
                         print("\n")
         
-        print("Here we'll call the function for you to trade ur stuff")
+        if ports == True:
+                print("Here we'll call the function for you to trade ur stuff")
 
 def trade_player(game, CONSTS):
-        pass
+        valid = False
+        while not valid:
+                action = input("Which player would you like to trade with? (Hint: 'x' or 'cancel' to end loop)\n> ").strip().lower()
+                if action in ["cancel", "x"]:
+                        wants_to_trade = False
+                        valid = True
+                try:
+                        action = int(action)
+                        if not action in game["quick_key"]:
+                                print("That's not an existing player. If you want to exit, please type 'x' or 'cancel'.")
+                        else:
+                                wants_to_trade = True
+                                valid = True
+                except TypeError:
+                        print("Sorry, please put the player number in instead of the player name. It needs to be a single integer!")
+        
+        if wants_to_trade == "True":
+                print("calling the function to set up that trade here.")
+                        
 
 def trade(game : dict, CONSTS : dict):
         valid = False
