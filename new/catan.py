@@ -202,9 +202,6 @@ def print_own_deck(game : dict, CONSTS : dict):
         print("this is ur deck")
 
 def roll_die(game : dict, CONSTS : dict):
-        
-        
-
         if game["roll_allowed"] == True:
                 dice_1 = random.randint(1, 6)
                 dice_2 = random.randint(1, 6)
@@ -216,7 +213,7 @@ def roll_die(game : dict, CONSTS : dict):
                                 for tile in game["tiles"]:
                                         if settlement in game["tiles"][tile]["attached_settlements"]:
                                                 if roll == game["tiles"][tile]["number"]:
-                                                        print(f"Player {player} has obtained {game['tiles'][tile]['biome']} from their settlement {settlement}")
+                                                        print(f"P{player} has obtained {game['tiles'][tile]['biome']} from settlement {settlement}.")
                 
         else:
                 print("You've already rolled this turn.")
@@ -600,6 +597,8 @@ def trade_player(game, CONSTS):
                         action = int(action)
                         if not action in game["quick_key"]:
                                 print("That's not an existing player. If you want to exit, please type 'x' or 'cancel'.")
+                        elif action == game["player_turn"]:
+                                print("You're trying to trade with... yourself?")
                         else:
                                 wants_to_trade = True
                                 valid = True
@@ -1028,7 +1027,7 @@ If the link doesn't work, please paste it into your browser.""",
                 "ports": ["wood", "grain", "cow", "ore", "brick"],
                 "welcome_message": """WELCOME TO MY TEXT-BASED CATAN.
 Before we start, make sure \x1b[38;2;142;194;21mthis text\x1b[0m is green!
-CREDITS: Vivienne, CATAN game studio
+CREDITS: Vivienne, CATAN game studio. To start the game, type 'start', or type 'rng' to gamble!
 ENTER YOUR COMMAND TO BEGIN""",
 
                 "pre_commands" : {
