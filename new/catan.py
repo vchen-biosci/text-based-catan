@@ -204,7 +204,7 @@ def initialise_resource_cards() -> tuple[dict, dict]:
         
         return resources, dev_bank
                 
-def make_bank_heh() -> dict:
+def make_bank() -> dict:
         game_bank = {}
         resources, dev_bank = initialise_resource_cards()
         game_bank['resources'] = resources
@@ -229,12 +229,17 @@ def place_desert(tiles : dict) -> tuple[dict, str]:
         
         return tiles, robber
         
-def generate_grid():
+def generate_grid(biomes : list, number_tokens : list, associated_settlements : dict):
+        settlement_locations = "abcdefghijklmnopqrstuvwxyz".upper()
+        settlement_locations += settlement_locations.lower() + "+" + "$"
+        
         tiles = create_tiles()
         tiles, robber = place_desert(tiles)
+        tiles = assign_tile_variables(tiles, biomes, number_tokens, associated_settlements)
+        settlement_locs = assign_ports(settlement_locations)
         
-def more_stuff(tiles : dict):
-        
+def assign_tile_variables(tiles : dict, biomes : list, number_tokens : list, associated_settlements):
+         
         for i in range(19):
                 try:
                         tiles[("S"+str(i+1))]["biome"]
@@ -243,12 +248,35 @@ def more_stuff(tiles : dict):
                         chosen_biome = biomes.pop()
                         tiles[("S"+str(i+1))]["biome"] = chosen_biome
 
-                        random.shuffle(CONSTS["number_tokens"])
-                        chosen_number = CONSTS["number_tokens"].pop()
+                        random.shuffle(number_tokens)
+                        chosen_number = number_tokens.pop()
                         tiles[("S"+str(i+1))]["number"] = chosen_number
                 
-                tiles["S"+str(i+1)]["attached_settlements"] = CONSTS["S"+str(i+1)]
+                tiles["S"+str(i+1)]["attached_settlements"] = associated_settlements["S"+str(i+1)]
+        
+        return tiles
 
+def assign_ports(settlement_locations : str) -> dict:
+        
+        ports = ["wood", "grain", "sheep", "ore", "brick"]
+        settlement_locs = {}
+        for letter in settlement_locations:
+                settlement_locs[letter] = {"display": letter}
+                settlement_locs[letter]["port"] = ""
+                settlement_locs[letter]["owner"] = 0
+        for loc in "ABFJouxy":
+                settlement_locs[loc]["port"] = "3:1 port"
+        i = 0
+        reps = 0
+        for loc in "RQCGWcvwjp":
+                reps += 1
+                port_to_place = f"2:1 {ports[i]} port"
+                settlement_locs[loc]["port"] = port_to_place
+                if reps % 2 == 0:
+                        i += 1
+        
+        return settlement_locs
+                        
 def make_biomes() -> list:
         biomes = []
         for i in range(3):
@@ -261,15 +289,50 @@ def make_biomes() -> list:
                 biomes.append("sheep")
         
         return biomes
+
+def make_token_list() -> list:
+        number_tokens = []
+        for i in range(10):
+                if (i + 2) != 7:
+                        for x in range(2):
+                                number_tokens.append(i + 2)
+        number_tokens.append(1)
+        number_tokens.append(12)
         
+        return number_tokens
+
 def main():
         
-                
+        associated_settlements = {
+        "S1": ["A", "B", "E", "I", "H", "D"],
+        "S2": ["C", "D", "H", "N", "M", "G"],
+        "S3": ["E", "F", "J", "P", "O", "I"],
+        "S4": ["$", "G", "M", "S", "R", "L"],
+        "S5": ["H", "I", "O", "U", "T", "N"],
+        "S6": ["J", "K", "Q", "W", "V", "P"],
+        "S7": ["M", "N", "T", "Z", "Y", "S"],
+        "S8": ["O", "P", "V", "b", "a", "U"],
+        "S9": ["R", "S", "Y", "e", "d", "X"],
+        "S10": ["T", "U", "a", "g", "f", "Z"],
+        "S11": ["V", "W", "c", "i", "h", "b"],
+        "S12": ["Y", "Z", "f", "l", "k", "e"],
+        "S13": ["a", "b", "h", "n", "m", "g"],
+        "S14": ["d", "e", "k", "q", "p", "j"],
+        "S15": ["f", "g", "m", "s", "r", "l"],
+        "S16": ["h", "i", "o", "u", "t", "n"],
+        "S17": ["k", "l", "r", "w", "v", "q"],
+        "S18": ["m", "n", "t", "y", "x", "s"],
+        "S19": ["r", "s", "x", "+", "z", "w"]
+        }
+        number_tokens = make_token_list()
+        biomes = make_biomes() 
+        
         print("Starting your game...")
         time.sleep(1)
         clear_screen()
         quick_key, player_number, player_dicts = initialise_player_dicts()
-        game_bank = make_bank_heh()
+        game_bank = make_bank()#get the cleverly named vriable? hahahahahahhaa WERE making bank tiday YES US
+        generate_grid(biomes, number_tokens, associated_settlements)
 
 if __name__ == "__main__":
         main()
