@@ -451,7 +451,7 @@ def generate_grid(game : dict, CONSTS : dict):
                 settlement_locs[letter]["port"] = ""
                 settlement_locs[letter]["owner"] = 0
         for loc in "ABFJouxy":
-                settlement_locs[loc]["port"] = {"3:1 port"}
+                settlement_locs[loc]["port"] = "3:1 port"
         i = 0
         reps = 0
         for loc in "RQCGWcvwjp":
@@ -553,7 +553,29 @@ def setup_game(game : dict, CONSTS : dict):
         return game
 
 def trade_port(game, CONSTS):
-        pass
+        player_ports = []
+        for settlement in game[game["player_turn"]]["settlements"]:
+                if game["settlement_locs"][settlement]["port"] != "":
+                        player_ports.append(game["settlement_locs"][settlement]["port"])
+                        
+        if player_ports == []:
+                print("It seems like you don't have any ports accessible for trade right now. Kindly build a settlement next to the sea.")
+                ports = False
+        else:
+                ports = True
+        
+        valid = False
+        while not valid and ports == True:
+                action = input("Which port would you like to select? (Hint: type 'check' to see what ports are available.)\n> ").strip().lower()
+                if action in player_ports:
+                        valid = True
+                elif action == 'check':
+                        print(f"Your port{'s are: ' if len(player_ports) != 1 else ' is: '}")
+                        for port in player_ports:
+                                print(port, end=" ")
+                        print("\n")
+        
+        print("Here we'll call the function for you to trade ur stuff")
 
 def trade_player(game, CONSTS):
         pass
@@ -570,11 +592,11 @@ def trade(game : dict, CONSTS : dict):
                         trade_player(game, CONSTS)
                         valid = True
                         
-                elif choice == "cancel":
+                elif choice in ["cancel", "x"]:
                         valid = True
                 
                 else:
-                        print("Please type in a valid response! If you don't want to anymore, type 'X' or 'cancel!'")                  
+                        print("Please type in a valid response! If you don't want to anymore, type 'X' or 'cancel'!")                  
                 
 def transfer_resources(game : dict, CONSTS : dict):
         pass
