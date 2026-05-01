@@ -1,5 +1,12 @@
 import random, time, os
 
+def quick_reorder(road : str):
+
+        if road[0] > road[1]:
+                road = road[1] + road[0]
+
+        return road
+
 def clear_screen():
         print("\033c", end="")
 
@@ -229,14 +236,39 @@ def place_desert(tiles : dict) -> tuple[dict, str]:
         
         return tiles, robber
         
-def generate_grid(biomes : list, number_tokens : list, associated_settlements : dict):
+def generate_grid(biomes : list, number_tokens : list, associated_settlements : dict) -> tuple[dict, str, dict, dict]:
         settlement_locations = "abcdefghijklmnopqrstuvwxyz".upper()
         settlement_locations += settlement_locations.lower() + "+" + "$"
         
         tiles = create_tiles()
         tiles, robber = place_desert(tiles)
         tiles = assign_tile_variables(tiles, biomes, number_tokens, associated_settlements)
+        
         settlement_locs = assign_ports(settlement_locations)
+        roads = create_roads()
+        
+        return tiles, robber, settlement_locs, roads
+        
+def create_roads() -> dict:
+        print("Paving your roads...")
+        counter = 0
+        quick_dict = dict(zip(["__", "/", "\\"], ["ABCDEF$GHIJKMNOPRSTUVWYZabdefghiklmnpqrstuvwxyz+", 
+                        "ADCG$LRXMSHNEIJPQWVbcihnoutyx+rwmsflagOUTZYedjkq",
+                        "BEFJDHIOGMLRSYNTXdekjpqvwzsxntiobhWcKQPVUaZfgmlr"]))
+        roads = {}
+        for road_type in ["__", "/", "\\"]:
+                for i in range(len(quick_dict[road_type])//2):
+                        
+                        road = quick_dict[road_type][counter]
+                        counter += 1
+                        road += quick_dict[road_type][counter]
+                        counter += 1
+
+                        road = quick_reorder(road)
+                        roads[road] = {'display' : road_type, 'owner' : 0}
+                counter = 0
+                
+        return roads
         
 def assign_tile_variables(tiles : dict, biomes : list, number_tokens : list, associated_settlements):
          
@@ -301,8 +333,345 @@ def make_token_list() -> list:
         
         return number_tokens
 
-def main():
+def print_board(game_bank : dict, quick_key : list, player_dicts : dict, robber : str, tiles : dict, settlement_locs : dict, roads : dict, kaomojis : dict):
+        print("________ WELCOME TO THE WORLD OF CATAN. WHERE WILL YOU SETTLE TODAY? ________\n")
+        print(f"GAME BANK:")
+        for resource in game_bank["resource_bank"]:
+                print(f'{resource} : {game_bank["resource_bank"][resource]}', end="  ||  ")
+        print("\n")
+        for dev_card in game_bank['dev_cards']:
+                print(f'{dev_card} : {game_bank["dev_cards"][dev_card]}', end="  ||  ")
+        print("\n")
+        for player in quick_key:
+                print(ansi_stitching(player_dicts[player]['color'], f"Player {player} ({player_dicts[player]['name']})"), end="  ||  ")
+        print("\n")
+        print_grid(settlement_locs, roads, tiles, kaomojis)
+        print(f"The robber is currently pillaging the citizens of {robber} and stealing all their {tiles[robber]['biome']}...")
         
+def old_thing(game_bank, quick_key, player_dicts, robber, tiles, settlement_locs, roads, kaomojis):
+        player_turn = 1 
+
+        print_board(game_bank, quick_key, player_dicts, robber, tiles, settlement_locs, roads, kaomojis)
+        print(f"We'll go from player 1 to player {len(quick_key)}; you can place two settlements and two roads for free. Please choose wisely.")
+        for i in range(2):
+                for player in quick_key:
+                        player_turn = player
+                        valid = False
+                        while not valid:
+                                text = input(ansi_stitching(player_dicts[player]['color'], f"Player {player}, where would you like to place your settlement?") + "\n> ").strip()
+                                valid = check(text, CONSTS, game, 'settlement')
+                        game[player]['settlements'].append(text)
+                        print(game['settlement_locs'][text]['display'])
+                        game['settlement_locs'][text]['display'] = ansi_stitching(game[player]['color'], game['settlement_locs'][text]['display'])
+                        game['settlement_locs'][text]['owner'] = player
+                        clear_screen()
+                        print_board(game, CONSTS)
+
+                        valid = False
+                        while not valid:
+                                text = input(ansi_stitching(game[player]['color'], f"Player {player}, where are you placing your road?") + "\n> ").strip()
+                                valid = check(text, CONSTS, game, 'road')
+                        game[player]['roads'].append(text)
+                        game['roads'][quick_reorder(text)]['display'] = ansi_stitching(game[player]['color'], game['roads'][quick_reorder(text)]['display'])
+                        clear_screen()
+                        print_board(game, CONSTS)
+
+        game['player_turn'] = 1
+                        
+        return game
+
+def print_grid(settlement_locs : dict, roads : dict, tiles : dict, kaomojis : dict):
+
+        grid_part_1 = (
+#line 1
+(" " * 65) + "3: 1 port" + "\n" +
+#line 2
+(" " * 65) + "/      \\" + "\n" +
+#line 3
+(" " * 64) + "/        \\" + "\n" +
+#line 4
+(" " * 20) + "sea" + (" " * 38) + settlement_locs["A"]["display"] + " " + (roads["AB"]["display"] + " ") * 4 + settlement_locs["B"]["display"] + (" " * 38) + "sea" + "\n" +
+#line 5
+(" " * 61) + roads["AD"]["display"] + "              " + roads["BE"]['display'] + "\n" +
+#line 6 & 7
+(" " * 60) + roads["AD"]['display'] + "                " + roads["BE"]['display'] + "\n\n" +
+#line 8
+(" " * 35) + ("2:1 grain port") + (" " * 9) + roads["AD"]['display'] + (" " * 7) + kaomojis[tiles["S1"]["biome"]] + (" "* 7) + roads["BE"]['display'] + (" " * 16) + "3:1 port" + "\n" +
+#line 9
+(" " * 36) + "|    " + "\\" + "   " + (roads["CD"]['display'] + " ") * 4 + roads["AD"]['display'] + (" " * 10) + str(tiles["S1"]["number"]) 
++ (" " * 11 if len(str(tiles["S1"]["number"])) == 1 else " " * 10) + roads["BE"]['display'] + " " + (roads["EF"]['display'] + " ") * 4 + "   /  |\n" +
+#line 10
+(" " * 36) + "|" + (" " * 3) + settlement_locs["C"]["display"] + " " + roads["CG"]['display'] + (" " * 11) + settlement_locs["D"]["display"] + "  " + roads["DH"]['display']
++ (" " * ((22 - len(str(tiles["S1"]["biome"])))//2)) + tiles["S1"]["biome"] +
+(" " * (((22-len(str(tiles["S1"]["biome"])))//2)+ (1 if len(str(tiles["S1"]["biome"]))%2 != 0 else 0)))
++ roads["EI"]['display'] + " " + settlement_locs["E"]["display"] + (" " * 8) + settlement_locs["F"]["display"] + "  " + roads["FJ"]['display'] + "     |\n" +
+#line 11
+(" " * 36) + "|" + "    " + roads["CG"]['display'] +  (" " * 16) + roads["DH"]['display'] + (" " * 9) + "S1" + (" " * 9) + roads["EI"]['display'] + (" " * 15) + 
+roads["FJ"]['display'] + "    |" + "\n" +
+#line 12
+(" " * 36) + "|" + (" " * 63) + "|" + "\n" +
+#line 13
+(" " * 36) + "|" + "  " + roads["CG"]['display'] + (" " * 7) + kaomojis[tiles["S2"]["biome"]] + (" " * 7) + roads["DH"]['display'] 
++ (" " * 16) + roads["EI"]['display'] + " "  + (" " * 6) + (kaomojis[tiles["S3"]["biome"]]) 
++ (" " * 6) + roads["FJ"]['display'] +"  |\n" +
+#line 14
+(" " * 21) + settlement_locs["$"]["display"] + " " + (roads[quick_reorder("G$")]['display'] + " ") * 4 + settlement_locs["G"]["display"] + "  " + roads["CG"]['display'] + (" " * 10) + str(tiles["S2"]["number"]) + 
+(" " * 9 if len(str(tiles["S2"]["number"])) == 1 else " " * 8) + settlement_locs["H"]["display"] + " " + roads["DH"]['display'] + " " + (roads["HI"]['display'] + " ") * 4 + " " + roads["EI"]['display'] + " " + settlement_locs["I"]["display"] +
+(" " * 8) + str(tiles["S3"]["number"]) + (" " * 8 if len(str(tiles["S3"]["number"])) == 1 else " " * 7) + settlement_locs["J"]["display"] + " " + roads["FJ"]['display'] + " | " + (roads["JK"]['display'] + " ") * 4 
++ settlement_locs["K"]["display"] + "\n" +
+#line 15
+(" " * 21) + roads[quick_reorder("L$")]['display'] + (" " * 16) + roads["GM"]['display'] + (" " * ((22 - len(str(tiles["S2"]["biome"])))//2)) + tiles["S2"]["biome"] + (" " * 9 if tiles["S2"]["biome"] != "desert" else " " * 8)
++ roads["HN"]['display'] + (" " * 14) + roads["IO"]['display'] + (" " * ((21 - len(str(tiles["S3"]["biome"])))//2)) + tiles["S3"]["biome"] + (" " * ( (21 - len(tiles["S3"]["biome"])) //2   ) ) + 
+(" " * (1 if len(tiles["S3"]["biome"]) % 2 != 1 else 0)) + roads["JP"]['display'] + (" " * 14) + roads["KQ"]['display'] + "\n" +
+#line 16 & 17 
+(" " * 20) + roads[quick_reorder("L$")]['display'] + (" " * 18) + roads["GM"]['display'] + (" " * 9) + "S2" + (" " * 9) + roads["HN"]['display'] + (" " * 16) + roads["IO"]['display'] + (" " * 8) + "S3" + (" " * 9) + roads["JP"]['display'] + 
+(" " * 16) + roads["KQ"]['display'] + "\n\n" +
+#line 18
+(" " * 18) + roads[quick_reorder("L$")]['display'] + (" " * 8) + kaomojis[tiles["S4"]["biome"]] + (" " * 8) + roads["GM"]['display'] + (" " * 16) + roads["HN"]['display'] + (" " * 7) + 
+kaomojis[tiles["S5"]["biome"]] + (" " * 7) + roads["IO"]['display']
++ (" " * 15) + roads["JP"]['display'] + (" " * 7) + kaomojis[tiles["S6"]["biome"]] + (" " * 7) + roads["KQ"]['display'] + "\n" + 
+#line 19
+(" " * 15) + settlement_locs["L"]["display"] + " " + roads[quick_reorder("L$")]['display'] + (" " * 11) + str(tiles["S4"]["number"]) + (" " * (10 if len(str(tiles["S4"]["number"])) == 1 else 9)) + settlement_locs["M"]["display"] +
+" " + roads["GM"]['display'] + "  " + (roads["MN"]['display'] + " ") * 4 + roads["HN"]['display'] + settlement_locs["N"]["display"] + (" " * 9) + str(tiles["S5"]["number"]) + (" " * 9 if len(str(tiles["S5"]["number"])) == 1 else " " * 8) + settlement_locs["O"]["display"] +
+" " + roads["IO"]['display'] + " " + (roads["OP"]['display'] + " ") * 4 + roads["JP"]['display'] + " " + settlement_locs["P"]["display"] + (" " * 8) + str(tiles["S6"]["number"]) + (" " * 11 if len(str(tiles["S6"]["number"])) == 1 else " " * 10) + roads["KQ"]['display']
++ " " + settlement_locs["Q"]["display"] + "\n"
+)
+
+        grid_part_2 = (
+#line 20
+(" " * 17) + roads["LR"]['display'] + (" " * ((24 - len(str(tiles["S4"]["biome"])))//2)) + tiles["S4"]["biome"] + (" " * 10 if tiles["S4"]["biome"] != "desert" else " " * 9) + roads["MS"]['display'] + (" " * 14) + roads["NT"]['display'] +
+(" " * ((22 - len(str(tiles["S5"]["biome"])))//2)) + tiles["S5"]["biome"] + (" " * 9 if tiles["S5"]["biome"] != "desert" else " " * 8) + roads["OU"]['display'] + (" " * 13) + roads["PV"]['display'] +
+(" " * ((22 - len(str(tiles["S6"]["biome"])))//2)) + tiles["S6"]["biome"] + (" " * 9 if tiles["S6"]["biome"] != "desert" else " " * 8) + roads["QW"]['display'] + "\n" +
+#line 21 & 22
+(" " * 18) + roads["LR"]['display'] + (" " * 10) + "S4" + (" " * 10) + roads["MS"]['display'] + (" " * 16) + roads["NT"]['display'] + (" " * 9) + "S5" + (" " * 9) + roads["OU"]['display'] + (" " * 15) + roads["PV"]['display'] 
++ (" " * 9) + "S6" + (" " * 9) + roads["QW"]['display'] + "\n\n" +
+#line 23
+(" " * 20) + roads["LR"]['display'] + (" " * 18) + roads["MS"]['display'] + (" " * 7) + kaomojis[tiles["S7"]["biome"]] + (" " * 7) + roads["NT"]['display'] + (" " * 16) + roads["OU"]['display'] + (" " * 7) + kaomojis[tiles["S8"]["biome"]]  + (" " * 6) + roads["PV"]['display'] +
+(" " * 16) + roads["QW"]['display'] + "\n" +
+#line 24
+(" " * 3) + "2:1 wood port - " + settlement_locs["R"]["display"] + " " + roads["LR"]['display'] + "  " + (roads["RS"]['display'] + " ") * 4 + settlement_locs["S"]["display"] + " " + roads["MS"]['display'] + (" " * 10) + str(tiles["S7"]["number"]) + 
+(" " * 8 if len(str(tiles["S7"]["number"])) == 1 else " " * 7) + settlement_locs["T"]["display"] + "  " + roads["NT"]['display'] + "  " + (roads["TU"]['display'] + " ") * 4 + roads["OU"]['display'] + " " + settlement_locs["U"]["display"] +
+(" " * 8) + str(tiles["S8"]["number"]) + (" " * 8 if len(str(tiles["S8"]["number"])) == 1 else " " * 7) + settlement_locs["V"]["display"] + " " + roads["PV"]['display'] + " " + (roads["VW"]['display'] + " ") * 4 + " " + roads["QW"]['display'] + 
+settlement_locs["W"]["display"] +  " _ _ _  2:1 sheep port" + "\n" +
+#line 25
+(" " * 8) + "\\" + (" " * 12) + roads["RX"]['display'] + (" " * 16) + roads["SY"]['display'] + (" " * ((22 - len(str(tiles["S7"]["biome"])))//2)) + tiles["S7"]["biome"] + 
+(" " * (((22-len(str(tiles["S7"]["biome"])))//2) + (1 if len(str(tiles["S7"]["biome"]))%2 != 0 else 0))) + roads["TZ"]['display'] + (" " * 14) + roads["Ua"]['display'] +
+(" " * ((21 - len(str(tiles["S8"]["biome"])))//2)) + tiles["S8"]["biome"] + 
+(" " * (((21-len(str(tiles["S8"]["biome"])))//2) + (1 if len(str(tiles["S8"]["biome"]))%2 != 1 else 0))) + roads["Vb"]['display'] + (" " * 14) + roads["Wc"]['display'] + "         /\n" +
+#line 26
+(" " * 9) + "\\" + (" " * 10) + roads["RX"]['display'] + (" " * 18) + roads["SY"]['display'] + (" " * 9) + "S7" + (" " * 9) + roads["TZ"]['display'] + (" " * 16) + roads["Ua"]['display'] + (" " * 8) + "S8" + (" " * 9) + 
+roads["Vb"]['display'] + (" " * 16) + roads["Wc"]['display'] + "       /" + "\n" +
+#line 27
+(" " * 10) + "\\" + (" " * 110) + "/" + "\n" +
+#line 28
+(" " * 11) + "\\" + (" " * 6) + roads["RX"]['display'] + (" " * 8) + kaomojis[tiles["S9"]["biome"]] + (" " * 8) + roads["SY"]['display'] + (" " * 16) + 
+roads["TZ"]['display'] + (" " * 6) + kaomojis[tiles["S10"]["biome"]] + (" " * 8) + roads["Ua"]['display']
++ (" " * 15) + roads["Vb"]['display'] + (" " * 7) + kaomojis[tiles["S11"]["biome"]] + (" " * 7) + roads["Wc"]['display'] + "   /" + "\n" +
+#line 29
+(" " * 12) + "\\  " + settlement_locs["X"]["display"] + " " + roads["RX"]['display'] + (" " * 12) + str(tiles["S9"]["number"]) + 
+(" " * 9 if len(str(tiles["S9"]["number"])) == 1 else " " * 8) 
++ settlement_locs["Y"]["display"] + " " + roads["SY"]['display'] + " " + (roads["YZ"]['display'] + " ") * 4 + settlement_locs["Z"]["display"] + 
+roads["TZ"]['display'] + (" " * 10) + str(tiles["S10"]["number"]) + (" " * 9 if len(str(tiles["S10"]["number"])) == 1 else " " * 8) + 
+settlement_locs["a"]["display"] + " " + roads["Ua"]['display'] + (" " + roads["ab"]['display']) * 4 + settlement_locs["b"]["display"] + roads["Vb"]['display'] +
+(" " * 10) + str(tiles["S11"]["number"]) + (" " * 11 if len(str(tiles["S11"]["number"])) == 1 else " " * 10) + roads["Wc"]['display'] + " " + settlement_locs["c"]["display"] + "\n" +
+#line 30
+(" " * 17) + roads["Xd"]['display'] + (" " * ((24 - len(str(tiles["S9"]["biome"])))//2)) + tiles["S9"]["biome"] + (" " * (((24-len(str(tiles["S9"]["biome"])))//2) + (1 if len(str(tiles["S9"]["biome"]))%2 != 0 else 0))) 
++ roads["Ye"]['display'] + (" " * 14) + roads["Zf"]['display'] + (" " * ((22 - len(str(tiles["S10"]["biome"])))//2)) + tiles["S10"]["biome"] + 
+(" " * (((22-len(str(tiles["S10"]["biome"])))//2) + (1 if len(str(tiles["S10"]["biome"]))%2 != 0 else 0))) + roads["ag"]['display'] + (" " * 13) + roads["bh"]['display'] +
+(" " * ((22 - len(str(tiles["S11"]["biome"])))//2)) + tiles["S11"]["biome"] + 
+(" " * (((22-len(str(tiles["S11"]["biome"])))//2) + (1 if len(str(tiles["S11"]["biome"]))%2 != 0 else 0))) + roads["ci"]['display'] + "\n"
+        
+        )
+
+        grid_part_3 = (
+#line 31 & 32
+(" " * 18) + roads["Xd"]['display'] + (" " * 10) + "S9" + (" " * 10) + roads["Ye"]['display'] + (" " * 16) + roads["Zf"]['display'] + (" " * 8) + "S10" + (" " * 9) + roads["ag"]['display'] + (" " * 15) + roads["bh"]['display'] + (" " * 8) + "S11" + (" " * 9) + roads["ci"]['display'] + "\n\n" +
+#line 33
+(" " * 20) + roads["Xd"]['display'] + (" " * 18) + roads["Ye"]['display'] + (" " * 7) + kaomojis[tiles["S12"]["biome"]] + (" " * 7) + roads["Zf"]['display'] + (" " * 16) + roads["ag"]['display'] + (" " * 6) + kaomojis[tiles["S13"]["biome"]] + (" " * 7) + 
+roads["bh"]['display'] + (" " * 16) + roads["ci"]['display']
++ "\n" +
+#line 34
+(" " * 19) + settlement_locs["d"]["display"] + " " + roads["Xd"]['display'] + "  " + (roads["de"]['display'] + " ") * 4 + settlement_locs["e"]["display"] + " " + roads["Ye"]['display'] + (" " * 10) + 
+str(tiles["S12"]["number"]) + (" " * 9 if len(str(tiles["S12"]["number"])) == 1 else " " * 8) + settlement_locs["f"]["display"] + " " + roads["Zf"]['display'] + " " + (roads["fg"]['display'] + " ") * 4 + settlement_locs["g"]["display"] + roads["ag"]['display'] +
+(" " * 10) + str(tiles["S13"]["number"]) + (" " * 8 if len(str(tiles["S13"]["number"])) == 1 else " " * 7) + settlement_locs["h"]["display"] + " " + roads["bh"]['display'] + " " + (roads["hi"]['display'] + " ") * 4 + " " + roads["ci"]['display'] + " " 
++ settlement_locs["i"]["display"] + "\n" +
+#line 35
+(" " * 21) + roads["dj"]['display'] + (" " * 16) + roads["ek"]['display'] + (" " * ((23 - len(str(tiles["S12"]["biome"])))//2)) + tiles["S12"]["biome"] + 
+(" " * (((21-len(str(tiles["S12"]["biome"])))//2) + (1 if len(str(tiles["S12"]["biome"]))%2 != 1 else 0))) + roads["fl"]['display'] + (" " * 14) + roads["gm"]['display']
++ (" " * ((21 - len(str(tiles["S13"]["biome"])))//2)) + tiles["S13"]["biome"] + 
+(" " * (((21-len(str(tiles["S13"]["biome"])))//2) + (1 if len(str(tiles["S13"]["biome"]))%2 != 1 else 0))) + roads["hn"]['display'] + (" " * 14) + roads["io"]['display'] + "\n" +
+#line 36 & 37
+(" " * 20) + roads["dj"]['display'] + (" " * 18) + roads['ek']['display'] + (" " * 8) + "S12" + (" " * 9) + roads['fl']['display'] + (" " * 16) + roads['gm']['display'] + (" " * 8) + "S13" + (" " * 8) + roads['hn']['display'] + (" " * 16) + roads['io']['display'] + "\n\n" +
+#line 38 
+(" " * 18) + roads['dj']['display'] + (" " * 8) + kaomojis[tiles["S14"]["biome"]] + (" " * 8) + roads['ek']['display'] + (" " * 16) + roads['fl']['display'] + 
+(" " * 7) + kaomojis[tiles["S15"]["biome"]] + (" " * 7) + roads['gm']['display'] + (" " * 15) + roads['hn']['display'] + (" " * 7) + kaomojis[tiles["S16"]["biome"]] + (" " * 7)
++ roads['io']['display'] + "\n" +
+#line 39
+(" " * 15) + settlement_locs["j"]["display"] + " " + roads['dj']['display'] + (" " * 11) + str(tiles["S14"]["number"]) + (" " * 10 if len(str(tiles["S14"]["number"])) == 1 else " " * 9) + settlement_locs["k"]["display"]
++ " " + roads['ek']['display'] + " " + (roads["kl"]['display'] + " ") * 4 + settlement_locs["l"]["display"] + roads['fl']['display'] + (" " * 10) + str(tiles["S15"]["number"]) + (" " * 9 if len(str(tiles["S15"]["number"])) == 1 else " " * 8)
++ settlement_locs["m"]["display"] + " " + roads['gm']['display'] + " " + (roads["mn"]['display'] + " ") * 4 + roads['hn']['display'] + settlement_locs["n"]["display"] + (" " * 9) + str(tiles["S16"]["number"]) + 
+(" " * 11 if len(str(tiles["S16"]["number"])) == 1 else " " * 10) + roads['io']['display'] + " " + settlement_locs["o"]["display"] + "\n" +
+#line 40
+(" " * 17) + roads['jp']['display'] + (" " * ((24 - len(str(tiles["S14"]["biome"])))//2)) + tiles["S14"]["biome"] +
+(" " * (((24-len(str(tiles["S14"]["biome"])))//2) + (1 if len(str(tiles["S14"]["biome"]))%2 != 0 else 0))) + roads['kq']['display'] + (" " * 14) + roads['lr']['display'] +
+(" " * ((22 - len(str(tiles["S15"]["biome"])))//2)) + tiles["S15"]["biome"] + 
+(" " * (((22-len(str(tiles["S15"]["biome"])))//2) + (1 if len(str(tiles["S15"]["biome"]))%2 != 0 else 0))) + roads['ms']['display'] + (" " * 13) + roads['nt']['display'] +
+(" " * ((22 - len(str(tiles["S16"]["biome"])))//2)) + tiles["S16"]["biome"] + 
+(" " * (((22 - len(str(tiles["S16"]["biome"])))//2) + (1 if len(str(tiles["S16"]["biome"]))%2 != 0 else 0))) + roads['ou']['display'] + "\n" +
+#line 41 
+(" " * 14) + "/" + (" " * 3) + roads['jp']['display'] + (" " * 9) + "S14"  + (" " * 10) + roads['kq']['display'] + (" " * 16) + roads['lr']['display'] + (" " * 8) + "S15" + (" " * 9) + roads['ms']['display'] 
++ (" " * 15) + roads['nt']['display'] + (" " * 8) + "S16" + (" " * 9) + roads['ou']['display'] + 
+(" " * 3) + "\\" + "\n" +
+#line 42
+(" " * 13) + "/" + (" " * 107) + "\\" + "\n" 
+                )
+
+        grid_part_4 = (
+#line 43
+(" " * 12) + "/" + (" " * 7) + roads['jp']['display'] + (" " * 18) + roads['kq']['display'] + (" " * 7) + kaomojis[tiles["S17"]["biome"]] + 
+(" " * 7) + roads['lr']['display'] + (" " * 16) + roads['ms']['display'] + (" " * 6) + kaomojis[tiles["S18"]["biome"]] + (" " * 7)
++ roads['nt']['display'] + (" " * 16) + roads['ou']['display'] + (" " * 7) + "\\" + "\n" +
+#line 44
+" 2:1 brick port _  " + settlement_locs["p"]["display"] + " " + roads['jp']['display'] + " " + (roads["pq"]['display'] + " ") * 4 + " " 
++ settlement_locs["q"]["display"] + " " + roads['kq']['display'] + (" " * 11) + str(tiles["S17"]["number"]) +
+(" " * 8 if len(str(tiles["S17"]["number"])) == 1 else " " * 7) + settlement_locs["r"]["display"] + " " + roads['lr']['display'] + " " + 
+(roads["rs"]['display'] + " ") * 4 + settlement_locs["s"]["display"] + roads['ms']['display'] + (" " * 10) + 
+str(tiles["S18"]["number"]) + (" " * 8 if len(str(tiles["S18"]["number"])) == 1 else " " * 7) + settlement_locs["t"]["display"] + " " + roads['nt']['display'] + 
+" " + (roads["tu"]['display'] + " ") * 4 + " " + roads['ou']['display'] +
+settlement_locs["u"]["display"] + "  _ _ 3:1 port" + "\n" +
+#line 45
+(" " * 38) + roads['qv']['display'] + (" " * ((22 - len(str(tiles["S17"]["biome"])))//2)) + tiles["S17"]["biome"] + 
+(" " * (((22 - len(str(tiles["S17"]["biome"])))//2) + (1 if len(str(tiles["S17"]["biome"]))%2 != 0 else 0))) + roads['rw']['display'] + (" " * 14) + roads['sx']['display'] +
+(" " * ((21 - len(str(tiles["S18"]["biome"])))//2)) + tiles["S18"]["biome"] + (" " * (((21 - len(str(tiles["S18"]["biome"])))//2) 
++ (1 if len(str(tiles["S18"]["biome"]))%2 != 1 else 0))) + roads['ty']['display'] + "\n" +
+#line 46 & 47
+(" " * 39) + roads['qv']['display'] + (" " * 8)  + "S17" + (" " * 9) + roads['rw']['display'] + (" " * 16) + roads['sx']['display'] + 
+(" " * 8) + "S18" + (" " * 8) + roads['ty']['display'] + "\n\n" +
+#line 48
+(" " * 41) + roads['qv']['display'] + (" " * 16) + roads['rw']['display'] + (" " * 7) + kaomojis[tiles["S19"]["biome"]] + (" " * 7) + 
+roads['sx']['display'] + (" " * 15) + roads['ty']['display'] + "\n" +
+#line 49
+(" " * 42) + roads['qv']['display'] + settlement_locs["v"]["display"] + " " + (roads["vw"]['display'] + " ") * 4 + settlement_locs["w"]["display"] + 
+(" " * 10) + str(tiles["S19"]["number"]) + (" " * 9 if len(str(tiles["S19"]["number"])) == 1 else " " * 8) + settlement_locs["x"]["display"] + " " + 
+roads['sx']['display'] + " " + (roads["xy"]['display'] + " ") * 4 + roads['ty']['display'] + " " 
++ settlement_locs["y"]["display"] + "\n" +
+#line 50
+(" " * 58) + roads['wz']['display'] +(" " * ((21 - len(str(tiles["S19"]["biome"])))//2)) + tiles["S19"]["biome"] + 
+(" " * (((21 - len(str(tiles["S19"]["biome"])))//2) + (1 if len(str(tiles["S19"]["biome"]))%2 != 1 else 0))) + roads[quick_reorder("x+")]['display'] + "\n" +
+#line 51
+(" " * 44) + "\\" + (" " * 11) + "/  " + roads['wz']['display'] + (" " * 8) + "S19" + (" " * 8) + roads[quick_reorder("x+")]['display'] + "  \\          /" + "\n" +
+#line 52
+(" " * 45) + "\\         /" + (" " * 27) + "\\" + "        " + "/" + "\n" +
+#line 53
+(" " * 46) + "\\       /      " + roads['wz']['display'] + "               " + roads[quick_reorder("x+")]['display'] + "      " + "\\" + "      " + "/" + "\n" +
+#line 54
+(" " * 45) + "2:1 ore port     " + roads['wz']['display'] + settlement_locs["z"]["display"] + " " + (roads["+z"]['display'] + " ") * 4 + settlement_locs["+"]["display"] 
++ "      3:1 port"
+
+        )
+
+        quick_grid_access = [grid_part_1, grid_part_2, grid_part_3, grid_part_4]
+
+        for grid in quick_grid_access:
+                print(grid, end="")
+        print("\n")
+
+def buggy_check():
+        def check(text : str, CONSTS : dict, game : dict, mode : str):
+
+        valid = True 
+
+        if mode == 'settlement':
+                settlement = text
+                try:
+                        if game['settlement_locs'][settlement]['owner'] != 0:
+                                print("This settlement is already taken. Pro tip: if it has a colour, it's not up for grabs.")
+                                valid = False
+                                
+                        else:
+                                related_roads = []
+                                for road in game['roads']:
+                                        if settlement in road:
+                                                related_roads.append(road)
+                                
+                                related_settlements = []
+                                for road in related_roads:
+                                        for place in road:
+                                                if place != settlement:
+                                                        related_settlements.append(place)
+
+                                for place in related_settlements:
+                                        if game['settlement_locs'][place]['owner'] != 0:
+                                                print(f"It looks like you're trying to place a settlement adjacent to another settlement, 'location {place}'. You must place it at least two roads away.")
+                                                valid = False
+                                                break
+        
+                except KeyError:
+                        if settlement in game['settlement_locs']:
+                                valid = True
+                        else:
+                                print("That settlement doesn't exist.")
+                                valid = False
+
+                if game["mode"] != "initial":
+                        case = []
+                        for road in game['roads']:
+                                if settlement in road:
+                                        if game['roads'][road]['owner'] != 0:
+                                                owner = game['roads'][road]['owner']
+                                                if owner == game["player_turn"]:
+                                                        case.append(road)
+
+                        if len(case) != 0:
+                                print("Congratulations on obtaining a new settlement.")
+                        else:
+                                print("You can only build next to a road that you own. Sorry.")
+                                valid = False
+
+
+        elif mode == 'road':
+
+                try:
+                        text = quick_reorder(text)
+                except IndexError:
+                        pass
+
+                if text not in game['roads']:
+                        valid = False
+                        print("That road doesn't exist.")
+
+                else:      
+                        owner = game["roads"][text]['owner']
+                        if owner != game['player_turn'] and game["roads"][text]['owner'] != 0:
+                                print("That road already belongs to someone else.")
+                                valid = False         
+                        case = []
+                        for settlement in text:
+                                if game["settlement_locs"][settlement]['owner'] != 0:
+                                        owner = game['settlement_locs'][settlement]['owner']
+                                        if game['player_turn'] == owner:
+                                                case.append(settlement)
+
+                                for road in game['roads']:
+                                        if settlement in road:
+                                                owner = game['settlement_locs'][settlement]['owner']
+                                                if game['player_turn'] == owner:
+                                                        case.append(road)
+                                                        
+                                for road in game[game["player_turn"]]["roads"]:
+                                        for char in road:
+                                                if char in text:
+                                                        case.append(road)
+                        
+                        if valid != False and len(case) != 0:
+                                print("Congratulations on paving a new road.")
+                        else:
+                                print("You don't own any settlements/roads next to that road, so you can't build it. Sorry.")
+                                valid = False
+
+        return valid
+
+def main():
         associated_settlements = {
         "S1": ["A", "B", "E", "I", "H", "D"],
         "S2": ["C", "D", "H", "N", "M", "G"],
@@ -324,6 +693,14 @@ def main():
         "S18": ["m", "n", "t", "y", "x", "s"],
         "S19": ["r", "s", "x", "+", "z", "w"]
         }
+        kaomojis = {
+                        "ores": "‧₊˚🗻`",
+                        "brick": "↟↟↟↟↟↟",
+                        "grain": "˚ʚ🌱₊˚",
+                        "wood": " ݁˖𓂃.𖠰.",
+                        "sheep": ":3 ^^~", 
+                        "desert": " ⛰︎ ོ ༄-"
+}
         number_tokens = make_token_list()
         biomes = make_biomes() 
         
@@ -332,7 +709,12 @@ def main():
         clear_screen()
         quick_key, player_number, player_dicts = initialise_player_dicts()
         game_bank = make_bank()#get the cleverly named vriable? hahahahahahhaa WERE making bank tiday YES US
-        generate_grid(biomes, number_tokens, associated_settlements)
+        tiles, robber, settlement_locs, roads = generate_grid(biomes, number_tokens, associated_settlements)
+        print_board(game_bank, quick_key, player_dicts, robber, tiles, settlement_locs, roads, kaomojis)
+        
+        game = True
+        while game:
+                pass
 
 if __name__ == "__main__":
         main()
