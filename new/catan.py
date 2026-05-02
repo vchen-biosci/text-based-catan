@@ -8,11 +8,13 @@ class Grid:
                 self.roads = roads
                 self.kaomojis = kaomojis
 
+
 class PlayerInfo:
         def __init__(self, game_bank, quick_key, player_dicts):
                 self.game_bank = game_bank
                 self.quick_key = quick_key
                 self.player_dicts = player_dicts
+              
                         
 def quick_reorder(road : str):
 
@@ -21,8 +23,10 @@ def quick_reorder(road : str):
 
         return road
 
+
 def clear_screen():
         print("\033c", end="")
+
 
 def ansi_stitching(color : list, text : str) -> str:
         
@@ -40,6 +44,7 @@ def ansi_stitching(color : list, text : str) -> str:
 
         return colored_ver
 
+
 def get_player_number() -> int:
         player_number = 0
         while not player_number in [3, 4]:
@@ -52,12 +57,14 @@ def get_player_number() -> int:
                         
         return player_number
 
+
 def create_player_key(player_number : int) -> list:
         quick_key = []
         for player in range(player_number):
                 quick_key.append(player + 1)
                 
         return quick_key
+
 
 def get_player_name(player : int, player_names : list) -> str:
         valid_name = False
@@ -72,12 +79,14 @@ def get_player_name(player : int, player_names : list) -> str:
                         
         return player_name
 
+
 def create_player_dicts(quick_key : list) -> dict:
         player_dicts = {}
         for player in quick_key:
                 player_dicts[player] = {}
                 
         return player_dicts
+
 
 def get_player_password() -> str:
         valid_password = False
@@ -89,6 +98,7 @@ def get_player_password() -> str:
                         valid_password = True
         
         return password
+
 
 def setup_player_dicts(quick_key : list) -> dict:
         resources = ["ores", "grain", "wood", "brick", "sheep"]
@@ -114,6 +124,7 @@ def setup_player_dicts(quick_key : list) -> dict:
         print_names(player_names, quick_key)
         return player_dicts
 
+
 def print_names(player_names, quick_key):
         print("Okay; your names are: ")
         for player in quick_key:
@@ -123,6 +134,7 @@ def print_names(player_names, quick_key):
                         print(player_names[player - 1], end=", and ")
                 else:
                         print(player_names[player - 1], end=", ")
+
 
 def add_keys(player_dicts, quick_key) -> dict:
         for player in quick_key:
@@ -135,6 +147,7 @@ def add_keys(player_dicts, quick_key) -> dict:
                 player_dicts[player]['VPs'] = 0
         return player_dicts
                
+               
 def initialise_player_dicts() -> tuple[list, int, dict]:
         player_number = get_player_number()
         quick_key = create_player_key(player_number)
@@ -145,10 +158,12 @@ def initialise_player_dicts() -> tuple[list, int, dict]:
         
         return quick_key, player_number, player_dicts
 
+
 def print_rules():
         print("""This is the link to the official Catan Almanac:
 https://www.catan.com/sites/default/files/2024-01/Almanac%20CATAN-3D.pdf
 If the link doesn't work, please paste it into your browser.""")
+
 
 def choose_color() -> list:
         player_color = []
@@ -185,6 +200,7 @@ Please make sure all other players can see this color.\n""") + "> ").strip()
         clear_screen()
         return player_color
 
+
 def assign_player_colors(quick_key : list) -> list:
         preset_colors = [[1, 201, 184], [252, 210, 1], [252, 84, 1], [210, 1, 252]]
         player_colors = []
@@ -206,11 +222,13 @@ def assign_player_colors(quick_key : list) -> list:
         print_player_colors(quick_key, player_colors)
         
         return player_colors           
+
                                 
 def print_player_colors(quick_key, player_colors):
         for player in quick_key:
                 print(ansi_stitching(player_colors[player - 1], f"Player {player}, this is your color."))
                 time.sleep(0.3)
+
 
 def initialise_resource_cards() -> tuple[dict, dict]:
         
@@ -224,6 +242,7 @@ def initialise_resource_cards() -> tuple[dict, dict]:
                 dev_bank[dev_card] = value
         
         return resources, dev_bank
+
                 
 def make_bank() -> dict:
         game_bank = {}
@@ -233,6 +252,7 @@ def make_bank() -> dict:
         
         return game_bank
 
+
 def create_tiles() -> dict:
         print("Setting up your tiles...")
         tiles = {}
@@ -240,6 +260,7 @@ def create_tiles() -> dict:
                 tiles[("S"+str(i+1))] = {}
                 
         return tiles
+
 
 def place_desert(tiles : dict) -> tuple[dict, str]:
         print("Spawning your desert...")
@@ -249,6 +270,7 @@ def place_desert(tiles : dict) -> tuple[dict, str]:
         robber = "S"+str(desert_placement)
         
         return tiles, robber
+
         
 def generate_grid(biomes : list, number_tokens : list, associated_settlements : dict) -> tuple[dict, str, dict, dict]:
         settlement_locations = "abcdefghijklmnopqrstuvwxyz".upper()
@@ -262,6 +284,7 @@ def generate_grid(biomes : list, number_tokens : list, associated_settlements : 
         roads = create_roads()
         
         return tiles, robber, settlement_locs, roads
+
         
 def create_roads() -> dict:
         print("Paving your roads...")
@@ -283,6 +306,7 @@ def create_roads() -> dict:
                 counter = 0
                 
         return roads
+
         
 def assign_tile_variables(tiles : dict, biomes : list, number_tokens : list, associated_settlements):
          
@@ -301,6 +325,7 @@ def assign_tile_variables(tiles : dict, biomes : list, number_tokens : list, ass
                 tiles["S"+str(i+1)]["attached_settlements"] = associated_settlements["S"+str(i+1)]
         
         return tiles
+
 
 def assign_ports(settlement_locations : str) -> dict:
         
@@ -322,6 +347,7 @@ def assign_ports(settlement_locations : str) -> dict:
                         i += 1
         
         return settlement_locs
+
                         
 def make_biomes() -> list:
         biomes = []
@@ -336,6 +362,7 @@ def make_biomes() -> list:
         
         return biomes
 
+
 def make_token_list() -> list:
         number_tokens = []
         for i in range(10):
@@ -346,6 +373,7 @@ def make_token_list() -> list:
         number_tokens.append(12)
         
         return number_tokens
+
 
 def print_board(player_info : PlayerInfo, grid : Grid, game_bank : dict):
         print("________ WELCOME TO THE WORLD OF CATAN. WHERE WILL YOU SETTLE TODAY? ________\n")
@@ -361,6 +389,7 @@ def print_board(player_info : PlayerInfo, grid : Grid, game_bank : dict):
         print("\n")
         print_grid(grid.settlement_locs, grid.roads, grid.tiles, grid.kaomojis)
         print(f"The robber is currently pillaging the citizens of {grid.robber} and stealing all their {grid.tiles[grid.robber]['biome']}...")
+
         
 def initial_loop(player_info : PlayerInfo, grid : Grid, game_bank : dict) -> tuple[PlayerInfo, Grid, dict]:
         
@@ -395,6 +424,7 @@ def initial_loop(player_info : PlayerInfo, grid : Grid, game_bank : dict) -> tup
         player_turn = 1
                         
         return player_info, grid, game_bank
+
 
 def print_grid(settlement_locs : dict, roads : dict, tiles : dict, kaomojis : dict):
 
@@ -592,6 +622,7 @@ roads['sx']['display'] + " " + (roads["xy"]['display'] + " ") * 4 + roads['ty'][
                 print(grid, end="")
         print("\n")
 
+
 def check(text, settlement_locs : dict, roads, mode, player_turn, game_mode, player_dicts):
 
         valid = True 
@@ -686,6 +717,7 @@ def check(text, settlement_locs : dict, roads, mode, player_turn, game_mode, pla
 
         return valid
 
+
 def roll_die(quick_key : list, player_dicts : dict, tiles : dict): #"player_dicts, game_bank"
         
         dice_1 = random.randint(1, 6)
@@ -700,6 +732,7 @@ def roll_die(quick_key : list, player_dicts : dict, tiles : dict): #"player_dict
                                                 print(f"P{player} has obtained {tiles[tile]['biome']} from settlement {settlement}.")
         
         pass
+
 
 def main():    
                         
@@ -751,6 +784,7 @@ def main():
         """game = True
         while game:
                 pass"""
+
 
 if __name__ == "__main__":
         main()
