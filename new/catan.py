@@ -764,6 +764,7 @@ def main_game(player_info, grid, game_bank):
         while player_info.game_mode == "main":
 
                 for player in player_info.quick_key:
+                        
                         turn = True
                         roll_allowed = True
                         while turn:
@@ -781,7 +782,7 @@ def main_game(player_info, grid, game_bank):
                                         build()
                                 
                                 elif action == "trade":
-                                        trade()
+                                        call_trade(player_info, grid, game_bank)
                                         
                                 elif action == "roll":
                                         if roll_allowed:
@@ -795,8 +796,83 @@ def build():
         pass
 
 
-def trade():
-        pass
+def trade_port(player_info : PlayerInfo, grid : Grid, game_bank : dict):
+        player_ports = []
+        for settlement in player_info.player_dicts[player_info.player_turn]["settlements"]:
+                if grid.settlement_locs[settlement]["port"] != "":
+                        player_ports.append(grid.settlement_locs[settlement]["port"])
+                        
+        if player_ports == []:
+                print("It seems like you don't have any ports accessible for trade right now. Kindly build a settlement next to the sea.")
+                ports = False
+        else:
+                ports = True
+        
+        valid = False
+        while not valid and ports == True:
+                action = input("Which port would you like to select? (Hint: type 'check' to see what ports are available.)\n> ").strip().lower()
+                if action in player_ports:
+                        valid = True
+                elif action == 'check':
+                        print(f"Your port{'s are: ' if len(player_ports) != 1 else ' is: '}")
+                        for port in player_ports:
+                                print(port, end=", " if port != player_ports[-1] else "\n")
+        
+        if ports == True:
+                """bank_trade(game_bank)"""
+
+
+def trade_player(player_info):
+        
+        valid = False
+        while not valid:
+                action = input("Which player would you like to trade with? (Hint: 'x' or 'cancel' to end loop)\n> ").strip().lower()
+                if action in ["cancel", "x"]:
+                        wants_to_trade = False
+                        valid = True
+                try:
+                        action = int(action)
+                        if not action in player_info.quick_key:
+                                print("That's not an existing player. If you want to exit, please type 'x' or 'cancel'.")
+                        elif action == player_info.player_turn:
+                                print("You're trying to trade with... yourself?")
+                        else:
+                                wants_to_trade = True
+                                valid = True
+                except TypeError:
+                        print("Sorry, please put the player number in instead of the player name. It needs to be a single integer!")
+        
+        if wants_to_trade == "True":
+                """trade_with_player(player_info)"""
+                
+        return player_info
+          
+                
+def make_trade(trader : int, other_party : int):
+        for i in range(2):
+                private = False
+                while not private:
+                        pass
+
+
+def call_trade(player_info : PlayerInfo, grid : Grid, game_bank : dict):
+        
+        valid = False
+        while not valid:
+                choice = input("Would you like to trade at 1. a port, or 2. with a player?\n> ").strip().lower()
+                if choice in ["1", "port"]:
+                        trade_port(player_info, grid, game_bank)
+                        valid = True
+
+                elif choice in ["2", "player"]:
+                        player_info = trade_player(player_info)
+                        valid = True
+                        
+                elif choice in ["cancel", "x"]:
+                        valid = True
+                
+                else:
+                        print("Please type in a valid response! If you don't want to anymore, type 'X' or 'cancel'!")
 
 
 def main():    
@@ -854,7 +930,7 @@ def main():
 
 if __name__ == "__main__":
         action = input()
-        if input == "play":
+        if action == "play":
                 main()
-        elif input == "break":
+        elif action == "break":
                 pass
