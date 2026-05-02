@@ -2,17 +2,17 @@ import random, time, os
 
 class Grid:
         def __init__(self, robber, tiles, settlement_locs, roads, kaomojis):
-                self.robber = ""
-                self.tiles = {}
-                self.settlement_locs = {}
-                self.roads = {}
-                self.kaomojis = {}
+                self.robber = robber
+                self.tiles = tiles
+                self.settlement_locs = settlement_locs
+                self.roads = roads
+                self.kaomojis = kaomojis
 
 class PlayerInfo:
         def __init__(self, game_bank, quick_key, player_dicts):
-                self.game_bank = {}
-                self.quick_key = []
-                self.player_dicts = {}
+                self.game_bank = game_bank
+                self.quick_key = quick_key
+                self.player_dicts = player_dicts
                         
 def quick_reorder(road : str):
 
@@ -362,38 +362,39 @@ def print_board(player_info : PlayerInfo, grid : Grid, game_bank : dict):
         print_grid(grid.settlement_locs, grid.roads, grid.tiles, grid.kaomojis)
         print(f"The robber is currently pillaging the citizens of {grid.robber} and stealing all their {grid.tiles[grid.robber]['biome']}...")
         
-def initial_loop(player : PlayerInfo, grid : Grid, game_bank : dict) -> tuple[dict, dict, dict]:
+def initial_loop(player_info : PlayerInfo, grid : Grid, game_bank : dict) -> tuple[PlayerInfo, Grid, dict]:
+        
         game_mode = "initial"
         player_turn = 1 
 
-        print_board(game_bank, quick_key, player_dicts, robber, tiles, settlement_locs, roads, kaomojis)
-        print(f"We'll go from player 1 to player {len(quick_key)}; you can place two settlements and two roads for free. Please choose wisely.")
+        print_board(player_info, grid, game_bank)
+        print(f"We'll go from player 1 to player {len(player_info.quick_key)}; you can place two settlements and two roads for free. Please choose wisely.")
         for i in range(2):
-                for player in quick_key:
+                for player in player_info.quick_key:
                         player_turn = player
                         valid = False
                         while not valid:
-                                text = input(ansi_stitching(player_dicts[player]['color'], f"Player {player}, where would you like to place your settlement?") + "\n> ").strip()
-                                valid = check(text, settlement_locs, roads, 'settlement', player_turn, 'initial', player_dicts)
-                        player_dicts[player]['settlements'].append(text)
-                        print(settlement_locs[text]['display'])
-                        settlement_locs[text]['display'] = ansi_stitching(player_dicts[player]['color'], settlement_locs[text]['display'])
-                        settlement_locs[text]['owner'] = player
+                                text = input(ansi_stitching(player_info.player_dicts[player]['color'], f"Player {player}, where would you like to place your settlement?") + "\n> ").strip()
+                                valid = check(text, grid.settlement_locs, grid.roads, 'settlement', player_turn, 'initial', player_info.player_dicts)
+                        player_info.player_dicts[player]['settlements'].append(text)
+                        print(grid.settlement_locs[text]['display'])
+                        grid.settlement_locs[text]['display'] = ansi_stitching(player_info.player_dicts[player]['color'], grid.settlement_locs[text]['display'])
+                        grid.settlement_locs[text]['owner'] = player
                         clear_screen()
-                        print_board(game_bank, quick_key, player_dicts, robber, tiles, settlement_locs, roads, kaomojis)
+                        print_board(player_info, grid, game_bank)
 
                         valid = False
                         while not valid:
-                                text = input(ansi_stitching(player_dicts[player]['color'], f"Player {player}, where are you placing your road?") + "\n> ").strip()
-                                valid = check(text, settlement_locs, roads, 'road', player_turn, "initial", player_dicts)
-                        player_dicts[player]['roads'].append(text)
-                        roads[quick_reorder(text)]['display'] = ansi_stitching(player_dicts[player]['color'], roads[quick_reorder(text)]['display'])
+                                text = input(ansi_stitching(player_info.player_dicts[player]['color'], f"Player {player}, where are you placing your road?") + "\n> ").strip()
+                                valid = check(text, grid.settlement_locs, grid.roads, 'road', player_turn, "initial", player_info.player_dicts)
+                        player_info.player_dicts[player]['roads'].append(text)
+                        grid.roads[quick_reorder(text)]['display'] = ansi_stitching(player_info.player_dicts[player]['color'], grid.roads[quick_reorder(text)]['display'])
                         clear_screen()
-                        print_board(game_bank, quick_key, player_dicts, robber, tiles, settlement_locs, roads, kaomojis)
+                        print_board(player_info, grid, game_bank)
 
         player_turn = 1
                         
-        return player_dicts, roads, settlement_locs
+        return player_info, grid, game_bank
 
 def print_grid(settlement_locs : dict, roads : dict, tiles : dict, kaomojis : dict):
 
@@ -685,43 +686,6 @@ def check(text, settlement_locs : dict, roads, mode, player_turn, game_mode, pla
 
         return valid
 
-def weird_thing(quick_key):
-        for player in quick_key:
-                        roll_allowed = True
-                        while turn:
-
-                                game["mode"], game = evaluate_game_state(game, CONSTS)
-                                action = input(ansi_stitching(game[player]['color'], f"Player {player}, what's your move?") + "\n> ").strip().lower()
-
-                                if action == "end turn":
-                                        game['suspect'] = player
-                                        if password_confirm(game, CONSTS):
-                                                break
-
-                                elif action == "end turn":
-                                        turn = False
-
-                                elif action == "build":
-                                        build(game, CONSTS)
-                                
-                                elif action == "trade":
-                                        call_trade(game, CONSTS)
-                                        
-                                elif action == "roll":
-                                        if roll_allowed:
-                                                roll_die(quick_key, player_dicts, tiles)
-                                                roll_allowed = False
-                                        else:
-                                                print("You've already rolled this turn.")
-
-                                else:
-                                        try:
-                                                CONSTS["commands"][action](game, CONSTS)
-                                        except KeyError:
-                                                print("Oops, that command doesn't exist.")             
-
-        return game
-
 def roll_die(quick_key : list, player_dicts : dict, tiles : dict): #"player_dicts, game_bank"
         
         dice_1 = random.randint(1, 6)
@@ -782,11 +746,11 @@ def main():
         player_info = PlayerInfo(game_bank, quick_key, player_dicts)
         
         print_board(player_info, grid, game_bank)
-        player_info.player_dicts, grid.roads, grid.settlement_locs = initial_loop(player_info, grid, game_bank)
+        player_info, grid, game_bank = initial_loop(player_info, grid, game_bank)
         
-        game = True
+        """game = True
         while game:
-                pass
+                pass"""
 
 if __name__ == "__main__":
         main()
