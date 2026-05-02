@@ -121,7 +121,7 @@ def add_keys(player_dicts, quick_key) -> dict:
                 player_dicts[player]['VPs'] = 0
         return player_dicts
                
-def initialise_player_dicts():
+def initialise_player_dicts() -> tuple[list, int, dict]:
         player_number = get_player_number()
         quick_key = create_player_key(player_number)
         player_dicts = setup_player_dicts(quick_key)
@@ -336,8 +336,8 @@ def make_token_list() -> list:
 def print_board(game_bank : dict, quick_key : list, player_dicts : dict, robber : str, tiles : dict, settlement_locs : dict, roads : dict, kaomojis : dict):
         print("________ WELCOME TO THE WORLD OF CATAN. WHERE WILL YOU SETTLE TODAY? ________\n")
         print(f"GAME BANK:")
-        for resource in game_bank["resource_bank"]:
-                print(f'{resource} : {game_bank["resource_bank"][resource]}', end="  ||  ")
+        for resource in game_bank["resources"]:
+                print(f'{resource} : {game_bank["resources"][resource]}', end="  ||  ")
         print("\n")
         for dev_card in game_bank['dev_cards']:
                 print(f'{dev_card} : {game_bank["dev_cards"][dev_card]}', end="  ||  ")
@@ -348,7 +348,8 @@ def print_board(game_bank : dict, quick_key : list, player_dicts : dict, robber 
         print_grid(settlement_locs, roads, tiles, kaomojis)
         print(f"The robber is currently pillaging the citizens of {robber} and stealing all their {tiles[robber]['biome']}...")
         
-def old_thing(game_bank, quick_key, player_dicts, robber, tiles, settlement_locs, roads, kaomojis):
+def initial_loop(game_bank, quick_key, player_dicts, robber, tiles, settlement_locs, roads, kaomojis):
+        game_mode = "initial"
         player_turn = 1 
 
         print_board(game_bank, quick_key, player_dicts, robber, tiles, settlement_locs, roads, kaomojis)
@@ -359,26 +360,26 @@ def old_thing(game_bank, quick_key, player_dicts, robber, tiles, settlement_locs
                         valid = False
                         while not valid:
                                 text = input(ansi_stitching(player_dicts[player]['color'], f"Player {player}, where would you like to place your settlement?") + "\n> ").strip()
-                                valid = check(text, CONSTS, game, 'settlement')
-                        game[player]['settlements'].append(text)
-                        print(game['settlement_locs'][text]['display'])
-                        game['settlement_locs'][text]['display'] = ansi_stitching(game[player]['color'], game['settlement_locs'][text]['display'])
-                        game['settlement_locs'][text]['owner'] = player
+                                valid = check(text, settlement_locs, roads, 'settlement', player_turn, 'initial')
+                        player_dicts[player]['settlements'].append(text)
+                        print(settlement_locs[text]['display'])
+                        settlement_locs[text]['display'] = ansi_stitching(player_dicts[player]['color'], settlement_locs[text]['display'])
+                        settlement_locs[text]['owner'] = player
                         clear_screen()
-                        print_board(game, CONSTS)
+                        print_board(game_bank, quick_key, player_dicts, robber, tiles, settlement_locs, roads, kaomojis)
 
                         valid = False
                         while not valid:
-                                text = input(ansi_stitching(game[player]['color'], f"Player {player}, where are you placing your road?") + "\n> ").strip()
-                                valid = check(text, CONSTS, game, 'road')
-                        game[player]['roads'].append(text)
-                        game['roads'][quick_reorder(text)]['display'] = ansi_stitching(game[player]['color'], game['roads'][quick_reorder(text)]['display'])
+                                text = input(ansi_stitching(player_dicts[player]['color'], f"Player {player}, where are you placing your road?") + "\n> ").strip()
+                                valid = check(text, settlement_locs, roads, 'road', player_turn, "initial")
+                        player_dicts[player]['roads'].append(text)
+                        roads[quick_reorder(text)]['display'] = ansi_stitching(player_dicts[player]['color'], roads[quick_reorder(text)]['display'])
                         clear_screen()
-                        print_board(game, CONSTS)
+                        print_board(game_bank, quick_key, player_dicts, robber, tiles, settlement_locs, roads, kaomojis)
 
-        game['player_turn'] = 1
+        player_turn = 1
                         
-        return game
+        return player_dicts, roads, settlement_locs
 
 def print_grid(settlement_locs : dict, roads : dict, tiles : dict, kaomojis : dict):
 
@@ -576,21 +577,20 @@ roads['sx']['display'] + " " + (roads["xy"]['display'] + " ") * 4 + roads['ty'][
                 print(grid, end="")
         print("\n")
 
-def buggy_check():
-        def check(text : str, CONSTS : dict, game : dict, mode : str):
+def check(text, settlement_locs : dict, roads, mode, player_turn, game_mode):
 
         valid = True 
 
         if mode == 'settlement':
                 settlement = text
                 try:
-                        if game['settlement_locs'][settlement]['owner'] != 0:
+                        if settlement_locs[settlement]['owner'] != 0:
                                 print("This settlement is already taken. Pro tip: if it has a colour, it's not up for grabs.")
                                 valid = False
                                 
                         else:
                                 related_roads = []
-                                for road in game['roads']:
+                                for road in roads:
                                         if settlement in road:
                                                 related_roads.append(road)
                                 
@@ -601,25 +601,25 @@ def buggy_check():
                                                         related_settlements.append(place)
 
                                 for place in related_settlements:
-                                        if game['settlement_locs'][place]['owner'] != 0:
+                                        if settlement_locs[place]['owner'] != 0:
                                                 print(f"It looks like you're trying to place a settlement adjacent to another settlement, 'location {place}'. You must place it at least two roads away.")
                                                 valid = False
                                                 break
         
                 except KeyError:
-                        if settlement in game['settlement_locs']:
+                        if settlement in settlement_locs:
                                 valid = True
                         else:
                                 print("That settlement doesn't exist.")
                                 valid = False
 
-                if game["mode"] != "initial":
+                if game_mode != "initial":
                         case = []
-                        for road in game['roads']:
+                        for road in roads:
                                 if settlement in road:
-                                        if game['roads'][road]['owner'] != 0:
-                                                owner = game['roads'][road]['owner']
-                                                if owner == game["player_turn"]:
+                                        if roads[road]['owner'] != 0:
+                                                owner = roads[road]['owner']
+                                                if owner == player_turn:
                                                         case.append(road)
 
                         if len(case) != 0:
@@ -636,29 +636,29 @@ def buggy_check():
                 except IndexError:
                         pass
 
-                if text not in game['roads']:
+                if text not in roads:
                         valid = False
                         print("That road doesn't exist.")
 
                 else:      
-                        owner = game["roads"][text]['owner']
-                        if owner != game['player_turn'] and game["roads"][text]['owner'] != 0:
+                        owner = roads[text]['owner']
+                        if owner != player_turn and roads[text]['owner'] != 0:
                                 print("That road already belongs to someone else.")
                                 valid = False         
                         case = []
                         for settlement in text:
-                                if game["settlement_locs"][settlement]['owner'] != 0:
-                                        owner = game['settlement_locs'][settlement]['owner']
-                                        if game['player_turn'] == owner:
+                                if settlement_locs[settlement]['owner'] != 0:
+                                        owner = settlement_locs[settlement]['owner']
+                                        if player_turn == owner:
                                                 case.append(settlement)
 
-                                for road in game['roads']:
+                                for road in roads:
                                         if settlement in road:
-                                                owner = game['settlement_locs'][settlement]['owner']
-                                                if game['player_turn'] == owner:
+                                                owner = settlement_locs[settlement]['owner']
+                                                if player_turn == owner:
                                                         case.append(road)
                                                         
-                                for road in game[game["player_turn"]]["roads"]:
+                                for road in player_turn["roads"]:
                                         for char in road:
                                                 if char in text:
                                                         case.append(road)
@@ -711,6 +711,7 @@ def main():
         game_bank = make_bank()#get the cleverly named vriable? hahahahahahhaa WERE making bank tiday YES US
         tiles, robber, settlement_locs, roads = generate_grid(biomes, number_tokens, associated_settlements)
         print_board(game_bank, quick_key, player_dicts, robber, tiles, settlement_locs, roads, kaomojis)
+        initial_loop(game_bank, quick_key, player_dicts, robber, tiles, settlement_locs, roads, kaomojis)
         
         game = True
         while game:
