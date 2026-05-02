@@ -16,8 +16,8 @@ class PlayerInfo:
                 self.player_dicts = player_dicts
                 self.player_turn = 1
                 self.game_mode = "initial"
-              
-                        
+             
+                                    
 def quick_reorder(road : str):
 
         if road[0] > road[1]:
@@ -76,6 +76,8 @@ def get_player_name(player : int, player_names : list) -> str:
                         print("... That name's already owned. Choose something else.")
                 elif player_name.isdigit():
                         print("Sorry, you're not allowed a name consisting of only numbers, as this will cause problems later.")
+                elif len(player_name) > 8:
+                        print("Please set a shorter name. Sorry if your name is really that long, but it's hard to display.")
                 else:
                         valid_name = True
                         
@@ -735,6 +737,68 @@ def roll_die(quick_key : list, player_dicts : dict, tiles : dict): #"player_dict
         pass
 
 
+def check_password(player, player_info) -> bool:
+        print("Enter your password:")
+        valid = False
+        while not valid:
+                password = input("> ")
+                
+                if password == player_info.player_dicts[player]["password"]:
+                        print("Password is correct. You may allow everyone to see the screen now.")
+                        valid = True
+                        
+                elif password in ['X', 'x']:
+                        print("Password was not authenticated.")
+                        valid = False
+                        break
+                        
+                else:
+                        print("Please try again. You may type 'X' if you cannot remember.")
+        
+        return valid
+
+
+def main_game(player_info, grid, game_bank):
+        player_info.game_mode = "main"
+
+        while player_info.game_mode == "main":
+
+                for player in player_info.quick_key:
+                        turn = True
+                        roll_allowed = True
+                        while turn:
+                                action = input(ansi_stitching(player_info.player_dicts[player]['color'], f"Player {player}, what's your move?") + "\n> ").strip().lower()
+
+                                if action == "end turn":
+                                        if not roll_allowed:
+                                                        if check_password(player, player_info):
+                                                                print("Your turn has ended.")
+                                                                turn = False
+                                        else:
+                                                print("You must roll before you can end your turn.")
+
+                                elif action == "build":
+                                        build()
+                                
+                                elif action == "trade":
+                                        trade()
+                                        
+                                elif action == "roll":
+                                        if roll_allowed:
+                                                roll_die(player_info.quick_key, player_info.player_dicts, grid.tiles)
+                                                roll_allowed = False
+                                        else:
+                                                print("You've already rolled this turn. You can only roll once per turn.")     
+
+
+def build():
+        pass
+
+
+def trade():
+        pass
+
+
 def main():    
                         
         associated_settlements = {
@@ -781,6 +845,7 @@ def main():
         
         print_board(player_info, grid, game_bank)
         player_info, grid, game_bank = initial_loop(player_info, grid, game_bank)
+        main_game(player_info, grid, game_bank)
         
         """game = True
         while game:
@@ -788,4 +853,8 @@ def main():
 
 
 if __name__ == "__main__":
-        main()
+        action = input()
+        if input == "play":
+                main()
+        elif input == "break":
+                pass
