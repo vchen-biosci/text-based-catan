@@ -14,6 +14,8 @@ class PlayerInfo:
                 self.game_bank = game_bank
                 self.quick_key = quick_key
                 self.player_dicts = player_dicts
+                self.player_turn = 1
+                self.game_mode = "initial"
               
                         
 def quick_reorder(road : str):
@@ -394,17 +396,16 @@ def print_board(player_info : PlayerInfo, grid : Grid, game_bank : dict):
 def initial_loop(player_info : PlayerInfo, grid : Grid, game_bank : dict) -> tuple[PlayerInfo, Grid, dict]:
         
         game_mode = "initial"
-        player_turn = 1 
 
         print_board(player_info, grid, game_bank)
         print(f"We'll go from player 1 to player {len(player_info.quick_key)}; you can place two settlements and two roads for free. Please choose wisely.")
         for i in range(2):
                 for player in player_info.quick_key:
-                        player_turn = player
+                        player_info.player_turn = player
                         valid = False
                         while not valid:
                                 text = input(ansi_stitching(player_info.player_dicts[player]['color'], f"Player {player}, where would you like to place your settlement?") + "\n> ").strip()
-                                valid = check(text, grid.settlement_locs, grid.roads, 'settlement', player_turn, 'initial', player_info.player_dicts)
+                                valid = check(text, grid, player_info, "settlement")
                         player_info.player_dicts[player]['settlements'].append(text)
                         print(grid.settlement_locs[text]['display'])
                         grid.settlement_locs[text]['display'] = ansi_stitching(player_info.player_dicts[player]['color'], grid.settlement_locs[text]['display'])
@@ -415,13 +416,13 @@ def initial_loop(player_info : PlayerInfo, grid : Grid, game_bank : dict) -> tup
                         valid = False
                         while not valid:
                                 text = input(ansi_stitching(player_info.player_dicts[player]['color'], f"Player {player}, where are you placing your road?") + "\n> ").strip()
-                                valid = check(text, grid.settlement_locs, grid.roads, 'road', player_turn, "initial", player_info.player_dicts)
+                                valid = check(text, grid, player_info, "road")
                         player_info.player_dicts[player]['roads'].append(text)
                         grid.roads[quick_reorder(text)]['display'] = ansi_stitching(player_info.player_dicts[player]['color'], grid.roads[quick_reorder(text)]['display'])
                         clear_screen()
                         print_board(player_info, grid, game_bank)
 
-        player_turn = 1
+        player_info.player_turn = 1
                         
         return player_info, grid, game_bank
 
@@ -623,20 +624,20 @@ grid.roads['sx']['display'] + " " + (grid.roads["xy"]['display'] + " ") * 4 + gr
         print("\n")
 
 
-def check(text, settlement_locs : dict, roads, mode, player_turn, game_mode, player_dicts):
+def check(text : str, grid : Grid, player_info : PlayerInfo, mode : str) -> bool:
 
         valid = True 
 
         if mode == 'settlement':
                 settlement = text
                 try:
-                        if settlement_locs[settlement]['owner'] != 0:
+                        if grid.settlement_locs[settlement]['owner'] != 0:
                                 print("This settlement is already taken. Pro tip: if it has a colour, it's not up for grabs.")
                                 valid = False
                                 
                         else:
                                 related_roads = []
-                                for road in roads:
+                                for road in grid.roads:
                                         if settlement in road:
                                                 related_roads.append(road)
                                 
@@ -647,25 +648,25 @@ def check(text, settlement_locs : dict, roads, mode, player_turn, game_mode, pla
                                                         related_settlements.append(place)
 
                                 for place in related_settlements:
-                                        if settlement_locs[place]['owner'] != 0:
+                                        if grid.settlement_locs[place]['owner'] != 0:
                                                 print(f"It looks like you're trying to place a settlement adjacent to another settlement, 'location {place}'. You must place it at least two roads away.")
                                                 valid = False
                                                 break
         
                 except KeyError:
-                        if settlement in settlement_locs:
+                        if settlement in grid.settlement_locs:
                                 valid = True
                         else:
                                 print("That settlement doesn't exist.")
                                 valid = False
 
-                if game_mode != "initial":
+                if player_info.game_mode != "initial":
                         case = []
-                        for road in roads:
+                        for road in grid.roads:
                                 if settlement in road:
-                                        if roads[road]['owner'] != 0:
-                                                owner = roads[road]['owner']
-                                                if owner == player_turn:
+                                        if grid.roads[road]['owner'] != 0:
+                                                owner = grid.roads[road]['owner']
+                                                if owner == player_info.player_turn:
                                                         case.append(road)
 
                         if len(case) != 0:
@@ -682,29 +683,29 @@ def check(text, settlement_locs : dict, roads, mode, player_turn, game_mode, pla
                 except IndexError:
                         pass
 
-                if text not in roads:
+                if text not in grid.roads:
                         valid = False
                         print("That road doesn't exist.")
 
                 else:      
-                        owner = roads[text]['owner']
-                        if owner != player_turn and roads[text]['owner'] != 0:
+                        owner = grid.roads[text]['owner']
+                        if owner != player_info.player_turn and grid.roads[text]['owner'] != 0:
                                 print("That road already belongs to someone else.")
                                 valid = False         
                         case = []
                         for settlement in text:
-                                if settlement_locs[settlement]['owner'] != 0:
-                                        owner = settlement_locs[settlement]['owner']
-                                        if player_turn == owner:
+                                if grid.settlement_locs[settlement]['owner'] != 0:
+                                        owner = grid.settlement_locs[settlement]['owner']
+                                        if player_info.player_turn == owner:
                                                 case.append(settlement)
 
-                                for road in roads:
+                                for road in grid.roads:
                                         if settlement in road:
-                                                owner = settlement_locs[settlement]['owner']
-                                                if player_turn == owner:
+                                                owner = grid.settlement_locs[settlement]['owner']
+                                                if player_info.player_turn == owner:
                                                         case.append(road)
                                                         
-                                for road in player_dicts[player_turn]["roads"]:
+                                for road in player_info.player_dicts[player_info.player_turn]["roads"]:
                                         for char in road:
                                                 if char in text:
                                                         case.append(road)
