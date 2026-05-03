@@ -758,7 +758,7 @@ def give_resources(resource : str, game_bank : dict, player_dicts : dict, player
                 game_bank['resources'][resource] -= 1
                 player_dicts[player]['resources'][resource] += 1
         else:
-                print(f"The game bank is broke! P{player} is unable to obtain {resource} from their settlement {settlement}")
+                print(f"The bank has run out of {resource}! P{player} is unable to obtain {resource} from their settlement {settlement}")
 
         return game_bank, player_dicts
         
@@ -790,7 +790,7 @@ def main_game(player_info, grid, game_bank):
         while player_info.game_mode == "main":
 
                 for player in player_info.quick_key:
-                        
+                        player_info.player_turn = player
                         turn = True
                         roll_allowed = True
                         while turn:
@@ -821,7 +821,6 @@ def main_game(player_info, grid, game_bank):
                         
                         clear_screen()
                         print_board(player_info, grid, game_bank)  
-                        player_info.player_turn += 1 if player_info.player_turn != 4 else - 3
 
 
 def build():
@@ -919,11 +918,13 @@ def weird_thing(game_bank, player_info, grid : Grid):
                         except TypeError:
                                 print("Sorry, that's not valid. Type X to escape.")
 
+
 def bank_trade(game_bank : dict, player_info : PlayerInfo, grid : Grid):
         
         finished = False
         while not finished:
                 pass
+
                 
 def make_trade(trader : int, other_party : int):
         for i in range(2):
@@ -996,6 +997,7 @@ def main():
         grid = Grid(robber, tiles, settlement_locs, roads, kaomojis, biomes)
         player_info = PlayerInfo(game_bank, quick_key, player_dicts)
         
+        clear_screen()
         print_board(player_info, grid, game_bank)
         player_info, grid, game_bank = initial_loop(player_info, grid, game_bank)
         main_game(player_info, grid, game_bank)
