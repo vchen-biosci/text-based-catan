@@ -722,21 +722,44 @@ def check(text : str, grid : Grid, player_info : PlayerInfo, mode : str) -> bool
         return valid
 
 
-def roll_die(quick_key : list, player_dicts : dict, tiles : dict): #"player_dicts, game_bank"
+def rolled_a_seven():
+        pass
+
+def roll_die(player_info : PlayerInfo, grid : Grid, game_bank): #"player_dicts, game_bank"
+        
+        player_dicts = player_info.player_dicts
         
         dice_1 = random.randint(1, 6)
         dice_2 = random.randint(1, 6)
         roll = dice_1 + dice_2
         print(f"As everyone watches with bated breath, you roll the die. You pray for a good result. They land as follows: |{dice_1}| |{dice_2}| ... {dice_1} + {dice_2} = {roll}. You've rolled a {roll}.")
-        for player in quick_key:
+        
+        if roll == 7:
+                print(f"The robber has awakened and will now migrate to a square of {player_info.player_turn}'s choosing.")
+                rolled_a_seven()
+                
+        for player in player_info.quick_key:
                 for settlement in player_dicts[player]["settlements"]:
-                        for tile in tiles:
-                                if settlement in tiles[tile]["attached_settlements"]:
-                                        if roll == tiles[tile]["number"]:
-                                                print(f"P{player} has obtained {tiles[tile]['biome']} from settlement {settlement}.")
+                        for tile in grid.tiles:
+                                if settlement in grid.tiles[tile]["attached_settlements"]:
+                                        if roll == grid.tiles[tile]["number"]:
+                                                if grid.robber != tile:
+                                                        give_resources(grid.tiles[tile]['biome'], game_bank, player_dicts, player, settlement)
+                                                else:
+                                                        print(f"The robber has prevented anyone from obtaining resources on {tile}")
         
         pass
 
+def give_resources(resource : str, game_bank : dict, player_dicts : dict, player : int, settlement) -> tuple[dict, dict]:
+        if game_bank['resources'][resource] != 0:
+                print(f"P{player} has obtained {resource} from their settlement {settlement}.")
+                game_bank['resources'][resource] -= 1
+                player_dicts['resources'][resource] += 1
+        else:
+                print(f"The game bank is broke! P{player} is unable to obtain {resource} from their settlement {settlement}")
+                
+        return game_bank, player_dicts
+        
 
 def check_password(player, player_info) -> bool:
         print("Enter your password:")
@@ -787,10 +810,14 @@ def main_game(player_info, grid, game_bank):
                                         
                                 elif action == "roll":
                                         if roll_allowed:
-                                                roll_die(player_info.quick_key, player_info.player_dicts, grid.tiles)
+                                                roll_die(player_info.quick_key, player_info.player_dicts, grid.tiles, grid.robber)
                                                 roll_allowed = False
                                         else:
-                                                print("You've already rolled this turn. You can only roll once per turn.")     
+                                                print("You've already rolled this turn. You can only roll once per turn.") 
+                                                
+                        
+                        clear_screen()
+                        print_board(player_info, grid, game_bank)    
 
 
 def build():
@@ -840,7 +867,7 @@ def trade_player(player_info):
                         else:
                                 wants_to_trade = True
                                 valid = True
-                except TypeError:
+                except ValueError:
                         print("Sorry, please put the player number in instead of the player name. It needs to be a single integer!")
         
         if wants_to_trade == "True":
