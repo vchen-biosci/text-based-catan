@@ -1,12 +1,13 @@
 import random, time, os
 
 class Grid:
-        def __init__(self, robber, tiles, settlement_locs, roads, kaomojis):
+        def __init__(self, robber, tiles, settlement_locs, roads, kaomojis, biomes):
                 self.robber = robber
                 self.tiles = tiles
                 self.settlement_locs = settlement_locs
                 self.roads = roads
                 self.kaomojis = kaomojis
+                self.biomes = biomes
 
 
 class PlayerInfo:
@@ -847,6 +848,47 @@ def trade_player(player_info):
                 
         return player_info
           
+          
+def weird_thing(game_bank, player_info, grid : Grid):
+        resource_list = []
+        for biome in grid.biomes:
+                resource_list.append(biome)
+        resource_list.remove("desert")
+        
+        player_trade = {}
+        game_bank_trade = {}
+        loop = True
+        while loop:
+                action = input("Which resource would you like to trade? (Hint: type 'check' to see commands, or 'X' to cancel)").strip().lower()
+                
+                if action == "check":
+                        i = 1
+                        for resource in resource_list:
+                                print(str(i) + ". " + resource)
+                                i += 1
+                                
+                elif action in grid.biomes:
+                        resource = action
+                        loop = False
+                        valid = True
+                        
+                elif action == "x":
+                        loop = False
+                        valid = False
+                        
+                else:
+                        try:
+                                number = int(action)
+                                if number < len(resource_list):
+                                        print(f"You are trading {resource_list[number - 1]}")
+                        except TypeError:
+                                print("Sorry, that's not valid. Type X to escape.")
+
+def bank_trade(game_bank : dict, player_info : PlayerInfo, grid : Grid):
+        
+        finished = False
+        while not finished:
+                pass
                 
 def make_trade(trader : int, other_party : int):
         for i in range(2):
@@ -916,7 +958,7 @@ def main():
         game_bank = make_bank()
         tiles, robber, settlement_locs, roads = generate_grid(biomes, number_tokens, associated_settlements)
         
-        grid = Grid(robber, tiles, settlement_locs, roads, kaomojis)
+        grid = Grid(robber, tiles, settlement_locs, roads, kaomojis, biomes)
         player_info = PlayerInfo(game_bank, quick_key, player_dicts)
         
         print_board(player_info, grid, game_bank)
