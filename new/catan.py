@@ -213,7 +213,7 @@ def assign_player_colors(quick_key : list) -> list:
                 action = ""
                 while not action in ["y", "n"]:
                         action = input("Would you like to customise your own color? (If not, you'll get a premade one!)" + 
-                                       " Type 'Y' for yes and 'N' for no.").strip().lower()
+                                       " Type 'Y' for yes and 'N' for no.\n> ").strip().lower()
                         if action == "y":
                                 player_colors.append(choose_color())
                         elif action == "n":
@@ -725,6 +725,7 @@ def check(text : str, grid : Grid, player_info : PlayerInfo, mode : str) -> bool
 def rolled_a_seven():
         pass
 
+
 def roll_die(player_info : PlayerInfo, grid : Grid, game_bank): #"player_dicts, game_bank"
         
         player_dicts = player_info.player_dicts
@@ -735,7 +736,7 @@ def roll_die(player_info : PlayerInfo, grid : Grid, game_bank): #"player_dicts, 
         print(f"As everyone watches with bated breath, you roll the die. You pray for a good result. They land as follows: |{dice_1}| |{dice_2}| ... {dice_1} + {dice_2} = {roll}. You've rolled a {roll}.")
         
         if roll == 7:
-                print(f"The robber has awakened and will now migrate to a square of {player_info.player_turn}'s choosing.")
+                print(f"The robber has awakened and will now migrate to a hex of P{player_info.player_turn}'s choosing.")
                 rolled_a_seven()
                 
         for player in player_info.quick_key:
@@ -750,14 +751,15 @@ def roll_die(player_info : PlayerInfo, grid : Grid, game_bank): #"player_dicts, 
         
         pass
 
+
 def give_resources(resource : str, game_bank : dict, player_dicts : dict, player : int, settlement) -> tuple[dict, dict]:
         if game_bank['resources'][resource] != 0:
                 print(f"P{player} has obtained {resource} from their settlement {settlement}.")
                 game_bank['resources'][resource] -= 1
-                player_dicts['resources'][resource] += 1
+                player_dicts[player]['resources'][resource] += 1
         else:
                 print(f"The game bank is broke! P{player} is unable to obtain {resource} from their settlement {settlement}")
-                
+
         return game_bank, player_dicts
         
 
@@ -810,14 +812,16 @@ def main_game(player_info, grid, game_bank):
                                         
                                 elif action == "roll":
                                         if roll_allowed:
-                                                roll_die(player_info.quick_key, player_info.player_dicts, grid.tiles, grid.robber)
+                                                roll_die(player_info, grid, game_bank)
                                                 roll_allowed = False
+                        
                                         else:
                                                 print("You've already rolled this turn. You can only roll once per turn.") 
                                                 
                         
                         clear_screen()
-                        print_board(player_info, grid, game_bank)    
+                        print_board(player_info, grid, game_bank)  
+                        player_info.player_turn += 1 if player_info.player_turn != 4 else - 3
 
 
 def build():
@@ -868,10 +872,14 @@ def trade_player(player_info):
                                 wants_to_trade = True
                                 valid = True
                 except ValueError:
-                        print("Sorry, please put the player number in instead of the player name. It needs to be a single integer!")
+                        for i in range(player_info.quick_key):
+                                if action == player_info.player_dicts[i + 1]["name"]:
+                                        if action != player_info.player_turn:
+                                                wants_to_trade = True
+                                                valid = True
         
         if wants_to_trade == "True":
-                """trade_with_player(player_info)"""
+                """trade_with_player(player_info, action)"""
                 
         return player_info
           
