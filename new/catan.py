@@ -745,22 +745,23 @@ def roll_die(player_info : PlayerInfo, grid : Grid, game_bank): #"player_dicts, 
                                 if settlement in grid.tiles[tile]["attached_settlements"]:
                                         if roll == grid.tiles[tile]["number"]:
                                                 if grid.robber != tile:
-                                                        give_resources(grid.tiles[tile]['biome'], game_bank, player_dicts, player, settlement)
+                                                        give_resources(grid.tiles[tile]['biome'], game_bank, player_info, settlement)
                                                 else:
                                                         print(f"The robber has prevented anyone from obtaining resources on {tile}")
         
         pass
 
 
-def give_resources(resource : str, game_bank : dict, player_dicts : dict, player : int, settlement) -> tuple[dict, dict]:
+def give_resources(resource : str, game_bank : dict, player_info : PlayerInfo, settlement) -> tuple[dict, PlayerInfo]:
         if game_bank['resources'][resource] != 0:
-                print(f"P{player} has obtained {resource} from their settlement {settlement}.")
+                if settlement != "":
+                        print(f"P{player_info.player_turn} has obtained {resource} from their settlement {settlement}.")
                 game_bank['resources'][resource] -= 1
-                player_dicts[player]['resources'][resource] += 1
+                player_info.player_dicts[player_info.player_turn]['resources'][resource] += 1
         else:
-                print(f"The bank has run out of {resource}! P{player} is unable to obtain {resource} from their settlement {settlement}")
+                print(f"The bank has run out of {resource}! P{player_info.player_turn} is unable to obtain {resource} from their settlement {settlement}")
 
-        return game_bank, player_dicts
+        return game_bank, player_info
         
 
 def check_password(player, player_info) -> bool:
@@ -844,16 +845,26 @@ def trade_port(player_info : PlayerInfo, grid : Grid, game_bank : dict):
                 action = input("Which port would you like to select? (Hint: type 'check' to see what ports are available.)\n> ").strip().lower()
                 if action in player_ports:
                         valid = True
+                        port_trade = action
                 elif action == 'check':
+                        i = 1
                         print(f"Your port{'s are: ' if len(player_ports) != 1 else ' is: '}")
                         for port in player_ports:
-                                print(port, end=", " if port != player_ports[-1] else "\n")
+                                print(str(i) + ". " + port, end=", " if port != player_ports[-1] else "\n")
+                else:
+                        try:
+                                if int(action) <= len(player_ports):
+                                        port = player_ports[int(action) - 1]
+                                        ports = True
+                                        valid = True
+                        except ValueError:
+                                print("That's not an option. Sorry.")
         
         if ports == True:
-                """bank_trade(game_bank)"""
+                port_exchange(game_bank, player_info, port)
 
 
-def trade_player(player_info):
+def trade_player(player_info : PlayerInfo):
         
         valid = False
         while not valid:
@@ -871,7 +882,7 @@ def trade_player(player_info):
                                 wants_to_trade = True
                                 valid = True
                 except ValueError:
-                        for i in range(player_info.quick_key):
+                        for i in range(len(player_info.quick_key)):
                                 if action == player_info.player_dicts[i + 1]["name"]:
                                         if action != player_info.player_turn:
                                                 wants_to_trade = True
@@ -881,8 +892,56 @@ def trade_player(player_info):
                 """trade_with_player(player_info, action)"""
                 
         return player_info
+
+
+def port_exchange(game_bank, player_info, port):
+        ports = ["wood", "grain", "sheep", "ore", "brick"]
+        if port[0] == "3":
+                resource = "anything"
+        else:
+                
+                for attribute in ports:
+                        for character in attribute:
+                                if character.isalpha():
+                                        first_letter = character
+                                        break
+                        if first_letter == port[0]:
+                                resource = attribute
+        
+        print(f"You can trade {'3 of' if resource == 'anything' else '2'} {resource} for a resource of your choosing. Which would you like to pick?")
+        compensation = pick_resource(ports, "receive")
           
+def player_trade(player_info : PlayerInfo):
+        pass
           
+def pick_resource(resources : list, mode : str) -> str:
+        
+        resources_with_numbers = {}
+        i = 1
+        for resource in resources:
+                resources_with_numbers[str(i)] = resource
+                i += 1
+        while True:
+                action = input("Which resource would you like to select? (Hint: type 'check' to view the available resources)\n> ")
+                if action in resources:
+                        resource = action
+                        break
+                elif action in resources_with_numbers:
+                        resource = resources_with_numbers[action]
+                        break
+                elif action == "check":
+                        print("The possible resources available to you are:")
+                        for i in resources_with_numbers:
+                                print(f"{i}. {resources_with_numbers[i - 1]}")
+                else:
+                        print("Invalid.")
+        
+        return resource
+        
+
+def get_numbers(player_info):
+        pass
+
 def weird_thing(game_bank, player_info, grid : Grid):
         resource_list = []
         for biome in grid.biomes:
