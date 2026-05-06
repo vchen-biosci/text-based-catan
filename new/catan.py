@@ -722,8 +722,51 @@ def check(text : str, grid : Grid, player_info : PlayerInfo, mode : str) -> bool
         return valid
 
 
-def rolled_a_seven():
-        pass
+def rolled_a_seven(grid : Grid, player_info : PlayerInfo, game_bank : dict):
+        grid.robber = place_robber(grid)
+        halve_decks(player_info, game_bank)
+        
+        
+def halve_decks(player_info : PlayerInfo, game_bank : dict):
+        for player in player_info.player_dicts:
+                if len(player_info.player_dicts[player]['resources']) > 8:
+                        print(f"Player {player} has too many cards. You must discard half your deck.")
+                        
+        return player_info, game_bank
+
+
+def place_robber(grid : Grid):
+        error_message = "That tile doesn't exist. Please input as either the arabic numerals following the S or with the S."
+        valid = False
+        while not valid:
+                placement = input("Where would you like to place the robber?").title().lower()
+                
+                if placement in grid.tiles:
+                        tile = placement
+                        proceed = True
+                        if placement.isdigit():
+                                if int(placement) <= 19:
+                                        tile = "S" + str(int)
+                                        proceed = True
+                                else:
+                                        print(error_message)
+                                        proceed = False
+                        else:
+                               print(error_message)
+                               proceed = False
+                else:
+                        print(error_message)
+                        proceed = False
+                               
+                if proceed:
+                        if grid.robber == tile:
+                                print("You can't choose not to move it!")
+                                
+                        else:
+                                grid.robber = tile
+                                valid = True
+                                
+        return grid.robber
 
 
 def roll_die(player_info : PlayerInfo, grid : Grid, game_bank): #"player_dicts, game_bank"
@@ -737,7 +780,7 @@ def roll_die(player_info : PlayerInfo, grid : Grid, game_bank): #"player_dicts, 
         
         if roll == 7:
                 print(f"The robber has awakened and will now migrate to a hex of P{player_info.player_turn}'s choosing.")
-                rolled_a_seven()
+                rolled_a_seven(grid, player_info, game_bank)
                 
         for player in player_info.quick_key:
                 for settlement in player_dicts[player]["settlements"]:
@@ -911,8 +954,10 @@ def port_exchange(game_bank, player_info, port):
         print(f"You can trade {'3 of' if resource == 'anything' else '2'} {resource} for a resource of your choosing. Which would you like to pick?")
         compensation = pick_resource(ports, "receive")
           
+          
 def player_trade(player_info : PlayerInfo):
         pass
+        
           
 def pick_resource(resources : list, mode : str) -> str:
         
@@ -941,6 +986,7 @@ def pick_resource(resources : list, mode : str) -> str:
 
 def get_numbers(player_info):
         pass
+
 
 def weird_thing(game_bank, player_info, grid : Grid):
         resource_list = []
@@ -1057,7 +1103,6 @@ def main():
         player_info = PlayerInfo(game_bank, quick_key, player_dicts)
         
         clear_screen()
-        print_board(player_info, grid, game_bank)
         player_info, grid, game_bank = initial_loop(player_info, grid, game_bank)
         main_game(player_info, grid, game_bank)
         
@@ -1067,8 +1112,6 @@ def main():
 
 
 if __name__ == "__main__":
-        action = input()
-        if action == "play":
+        meow = "n"
+        if meow == "f":
                 main()
-        elif action == "break":
-                pass
