@@ -1,6 +1,8 @@
 import random, time, os
 
 class Grid:
+        """A class to contain information that needs to be accessed when either printing or referring to the grid."""
+        
         def __init__(self, robber, tiles, settlement_locs, roads, kaomojis, biomes):
                 self.robber = robber
                 self.tiles = tiles
@@ -11,6 +13,8 @@ class Grid:
 
 
 class PlayerInfo:
+        """A class to easily pass in all variables about player information"""
+        
         def __init__(self, game_bank, quick_key, player_dicts):
                 self.game_bank = game_bank
                 self.quick_key = quick_key
@@ -20,6 +24,7 @@ class PlayerInfo:
              
                                     
 def quick_reorder(road : str):
+        """Reorders a 2-letter string based on ascii values (alphabetical order I suppose). This allows me to standardise the way in which roads are called from the dictionary."""
 
         if road[0] > road[1]:
                 road = road[1] + road[0]
@@ -28,10 +33,12 @@ def quick_reorder(road : str):
 
 
 def clear_screen():
+        """Clears the screen :D"""
         print("\033c", end="")
 
 
 def ansi_stitching(color : list, text : str) -> str:
+        """Edits the string's value with an ANSI code that imbues it with pretty colours :3"""
         
         colored_ver = "\x1b[38;2;"
 
@@ -49,6 +56,8 @@ def ansi_stitching(color : list, text : str) -> str:
 
 
 def get_player_number() -> int:
+        """Gets the number of players, doesn't quit until it's correct"""
+        
         player_number = 0
         while not player_number in [3, 4]:
                 try:
@@ -62,6 +71,8 @@ def get_player_number() -> int:
 
 
 def create_player_key(player_number : int) -> list:
+        """Simply creates a key which can be used to iterate through players!"""
+        
         quick_key = []
         for player in range(player_number):
                 quick_key.append(player + 1)
@@ -70,6 +81,8 @@ def create_player_key(player_number : int) -> list:
 
 
 def get_player_name(player : int, player_names : list) -> str:
+        """Gets the name of the current player and checks the length and if it is composed of numbers."""
+        
         valid_name = False
         while not valid_name:
                 player_name = input(f"Player {player}, enter the name you'd like to be known by.\n> ").strip()
@@ -86,6 +99,8 @@ def get_player_name(player : int, player_names : list) -> str:
 
 
 def create_player_dicts(quick_key : list) -> dict:
+        """Creates a dictionary for each player"""
+        
         player_dicts = {}
         for player in quick_key:
                 player_dicts[player] = {}
@@ -94,6 +109,8 @@ def create_player_dicts(quick_key : list) -> dict:
 
 
 def get_player_password() -> str:
+        """Gets a password and checks if it's valid."""
+        
         valid_password = False
         while not valid_password:
                 password = input("Please enter a password; it'll be used to check for your consent later. Keep it short but memorable, and make sure it's not a password you use for important sites.\n> ")
@@ -106,6 +123,8 @@ def get_player_password() -> str:
 
 
 def setup_player_dicts(quick_key : list) -> dict:
+        """Adds a bountiful multitude of keys to each player's dictionary"""
+        
         resources = ["ores", "grain", "wood", "brick", "sheep"]
         player_names = []
         player_dicts = create_player_dicts(quick_key)
@@ -131,6 +150,8 @@ def setup_player_dicts(quick_key : list) -> dict:
 
 
 def print_names(player_names, quick_key):
+        """Iterates through each player, printing their names"""
+        
         print("Okay; your names are: ")
         for player in quick_key:
                 if player == quick_key[-1]:
@@ -142,6 +163,8 @@ def print_names(player_names, quick_key):
 
 
 def add_keys(player_dicts, quick_key) -> dict:
+        """Adds keys to each existing player dictionary"""
+        
         for player in quick_key:
                 player_dicts[player]['roads'] = []
                 player_dicts[player]['settlements'] = []
@@ -154,6 +177,8 @@ def add_keys(player_dicts, quick_key) -> dict:
                
                
 def initialise_player_dicts() -> tuple[list, int, dict]:
+        """Calls all the functions initially neded for the initialising of player dictionaries"""
+        
         player_number = get_player_number()
         quick_key = create_player_key(player_number)
         player_dicts = setup_player_dicts(quick_key)
@@ -165,12 +190,16 @@ def initialise_player_dicts() -> tuple[list, int, dict]:
 
 
 def print_rules():
+        """Prints the rules"""
+        
         print("""This is the link to the official Catan Almanac:
 https://www.catan.com/sites/default/files/2024-01/Almanac%20CATAN-3D.pdf
 If the link doesn't work, please paste it into your browser.""")
 
 
 def choose_color() -> list:
+        """Get a player's colors by iterating through red, blue, and green."""
+        
         player_color = []
         satisfied = False
         while not satisfied:
@@ -207,6 +236,8 @@ Please make sure all other players can see this color.\n""") + "> ").strip()
 
 
 def assign_player_colors(quick_key : list) -> list:
+        """Iterates through each player and makes sure they have a colour assigned"""
+        
         preset_colors = [[1, 201, 184], [252, 210, 1], [252, 84, 1], [210, 1, 252]]
         player_colors = []
         for player in quick_key:
@@ -230,12 +261,15 @@ def assign_player_colors(quick_key : list) -> list:
 
                                 
 def print_player_colors(quick_key, player_colors):
+        """Prints the colour for each player"""
+        
         for player in quick_key:
                 print(ansi_stitching(player_colors[player - 1], f"Player {player}, this is your color."))
                 time.sleep(0.3)
 
 
 def initialise_resource_cards() -> tuple[dict, dict]:
+        """Initialises the dictionary for each resource to be passed into the game bank"""
         
         resources = {}
         for resource in ["ores", "grain", "wood", "brick", "sheep"]:
@@ -250,6 +284,8 @@ def initialise_resource_cards() -> tuple[dict, dict]:
 
                 
 def make_bank() -> dict:
+        """Calls the functions needed to set up the game bank"""
+        
         game_bank = {}
         resources, dev_bank = initialise_resource_cards()
         game_bank['resources'] = resources
@@ -259,6 +295,8 @@ def make_bank() -> dict:
 
 
 def create_tiles() -> dict:
+        """Sets up tiles"""
+        
         print("Setting up your tiles...")
         tiles = {}
         for i in range(19):
@@ -268,6 +306,8 @@ def create_tiles() -> dict:
 
 
 def place_desert(tiles : dict) -> tuple[dict, str]:
+        """Places the exception desert"""
+        
         print("Spawning your desert...")
         desert_placement = random.randint(1, 19)
         tiles[("S"+str(desert_placement))]["biome"] = "desert"
@@ -278,6 +318,8 @@ def place_desert(tiles : dict) -> tuple[dict, str]:
 
         
 def generate_grid(biomes : list, number_tokens : list, associated_settlements : dict) -> tuple[dict, str, dict, dict]:
+        """Generates the grid"""
+        
         settlement_locations = "abcdefghijklmnopqrstuvwxyz".upper()
         settlement_locations += settlement_locations.lower() + "+" + "$"
         
@@ -292,6 +334,8 @@ def generate_grid(biomes : list, number_tokens : list, associated_settlements : 
 
         
 def create_roads() -> dict:
+        """Creates a dictionary for roads and adds roads into it"""
+        
         print("Paving your roads...")
         counter = 0
         quick_dict = dict(zip(["__", "/", "\\"], ["ABCDEF$GHIJKMNOPRSTUVWYZabdefghiklmnpqrstuvwxyz+", 
@@ -314,6 +358,7 @@ def create_roads() -> dict:
 
         
 def assign_tile_variables(tiles : dict, biomes : list, number_tokens : list, associated_settlements):
+        """Assigns variables to each tile"""
          
         for i in range(19):
                 try:
@@ -333,6 +378,7 @@ def assign_tile_variables(tiles : dict, biomes : list, number_tokens : list, ass
 
 
 def assign_ports(settlement_locations : str) -> dict:
+        """Assigns ports to relevant tiles"""
         
         ports = ["wood", "grain", "sheep", "ore", "brick"]
         settlement_locs = {}
@@ -355,6 +401,8 @@ def assign_ports(settlement_locations : str) -> dict:
 
                         
 def make_biomes() -> list:
+        """Creates a list of biomes"""
+        
         biomes = []
         for i in range(3):
                 biomes.append("ores")
@@ -369,6 +417,8 @@ def make_biomes() -> list:
 
 
 def make_token_list() -> list:
+        """Creates a list of the number tokens that will be assigned onto each hex of the grid."""
+        
         number_tokens = []
         for i in range(10):
                 if (i + 2) != 7:
@@ -381,6 +431,7 @@ def make_token_list() -> list:
 
 
 def print_board(player_info : PlayerInfo, grid : Grid, game_bank : dict):
+        print(grid.tiles.keys())
         print("________ WELCOME TO THE WORLD OF CATAN. WHERE WILL YOU SETTLE TODAY? ________\n")
         print(f"GAME BANK:")
         for resource in game_bank["resources"]:
@@ -726,11 +777,40 @@ def rolled_a_seven(grid : Grid, player_info : PlayerInfo, game_bank : dict):
         grid.robber = place_robber(grid)
         halve_decks(player_info, game_bank)
         
+        return grid.robber
+        
         
 def halve_decks(player_info : PlayerInfo, game_bank : dict):
-        for player in player_info.player_dicts:
-                if len(player_info.player_dicts[player]['resources']) > 8:
+        for player in player_info.quick_key:
+                hand_size = len(player_info.player_dicts[player]['resources'].keys())
+                if hand_size >= 8:
                         print(f"Player {player} has too many cards. You must discard half your deck.")
+                        valid = False
+                        while not valid:
+                                print(f"Please turn your screen away. Player {player}, it is mandatory that you complete this stage.\nDo not attempt to skip the entering of your password.")
+                                valid = check_password(player, player_info)
+                        needed_size = hand_size // 2
+                        while hand_size > needed_size:
+                                valid = False
+                                while not valid:
+                                        resource = input("Which resource would you like to discard?").strip().lower()
+                                        if resource in player_info.player_dicts[player]['resources']:
+                                                if player_info.player_dicts[player]['resources'][resource] == 0:
+                                                        print("You have 0 of that card. Get good.")
+                                                else:
+                                                        proceed = False
+                                                        while not proceed:
+                                                                number = input(f"How many of your {resource} would you like to discard?").strip().lower()
+                                                                if number.isdigit():
+                                                                        number = int(number)
+                                                                        if player_info.player_dicts[player]['resources'] < number:
+                                                                                print(f"You only have {player_info.player_dicts[player]['resources'][resource]} {resource}.\nWould you like to type 'check' to view your hand?")
+                                                                else:
+                                                                        print("Oops, enter arabic numerals please.")
+                                        
+                                
+                        
+                        
                         
         return player_info, game_bank
 
@@ -739,21 +819,18 @@ def place_robber(grid : Grid):
         error_message = "That tile doesn't exist. Please input as either the arabic numerals following the S or with the S."
         valid = False
         while not valid:
-                placement = input("Where would you like to place the robber?").title().lower()
+                placement = input("Where would you like to place the robber?\n> ")
                 
-                if placement in grid.tiles:
+                if placement in grid.tiles.keys():
                         tile = placement
                         proceed = True
-                        if placement.isdigit():
-                                if int(placement) <= 19:
-                                        tile = "S" + str(int)
-                                        proceed = True
-                                else:
-                                        print(error_message)
-                                        proceed = False
+                elif placement.isdigit():
+                        if int(placement) <= 19:
+                                tile = "S" + str(placement)
+                                proceed = True
                         else:
-                               print(error_message)
-                               proceed = False
+                                print(error_message)
+                                proceed = False
                 else:
                         print(error_message)
                         proceed = False
@@ -780,7 +857,9 @@ def roll_die(player_info : PlayerInfo, grid : Grid, game_bank): #"player_dicts, 
         
         if roll == 7:
                 print(f"The robber has awakened and will now migrate to a hex of P{player_info.player_turn}'s choosing.")
-                rolled_a_seven(grid, player_info, game_bank)
+                grid.robber = rolled_a_seven(grid, player_info, game_bank)
+                clear_screen()
+                print_board(player_info, grid, game_bank)
                 
         for player in player_info.quick_key:
                 for settlement in player_dicts[player]["settlements"]:
@@ -1112,6 +1191,6 @@ def main():
 
 
 if __name__ == "__main__":
-        meow = "n"
-        if meow == "f":
+        action = input("Press enter").strip().lower()
+        if action == "":
                 main()
