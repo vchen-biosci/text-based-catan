@@ -431,6 +431,7 @@ def make_token_list() -> list:
 
 
 def print_board(player_info : PlayerInfo, grid : Grid, game_bank : dict):
+        """Prints out basic information (visual display for what players need to see during their turns)"""
         print(grid.tiles.keys())
         print("________ WELCOME TO THE WORLD OF CATAN. WHERE WILL YOU SETTLE TODAY? ________\n")
         print(f"GAME BANK:")
@@ -448,6 +449,7 @@ def print_board(player_info : PlayerInfo, grid : Grid, game_bank : dict):
 
         
 def initial_loop(player_info : PlayerInfo, grid : Grid, game_bank : dict) -> tuple[PlayerInfo, Grid, dict]:
+        """Carries out the initial loop for the players to place down their settlements and roads FOR FREE."""
         
         game_mode = "initial"
 
@@ -482,6 +484,7 @@ def initial_loop(player_info : PlayerInfo, grid : Grid, game_bank : dict) -> tup
 
 
 def print_grid(grid : Grid):
+        """Prints out the grid."""
 
         grid_part_1 = (
 #line 1
@@ -679,6 +682,7 @@ grid.roads['sx']['display'] + " " + (grid.roads["xy"]['display'] + " ") * 4 + gr
 
 
 def check(text : str, grid : Grid, player_info : PlayerInfo, mode : str) -> bool:
+        """Checks if the settlement/road is eligible to be claimed"""
 
         valid = True 
 
@@ -774,6 +778,8 @@ def check(text : str, grid : Grid, player_info : PlayerInfo, mode : str) -> bool
 
 
 def rolled_a_seven(grid : Grid, player_info : PlayerInfo, game_bank : dict):
+        """Makes the player place the robber somewhere else and players over 7 cards to discard half their hand size."""
+        
         grid.robber = place_robber(grid)
         halve_decks(player_info, game_bank)
         
@@ -791,28 +797,49 @@ def halve_decks(player_info : PlayerInfo, game_bank : dict):
                                 valid = check_password(player, player_info)
                         needed_size = hand_size // 2
                         while hand_size > needed_size:
-                                valid = False
-                                while not valid:
-                                        resource = input("Which resource would you like to discard?").strip().lower()
-                                        if resource in player_info.player_dicts[player]['resources']:
-                                                if player_info.player_dicts[player]['resources'][resource] == 0:
-                                                        print("You have 0 of that card. Get good.")
-                                                else:
-                                                        proceed = False
-                                                        while not proceed:
-                                                                number = input(f"How many of your {resource} would you like to discard?").strip().lower()
-                                                                if number.isdigit():
-                                                                        number = int(number)
-                                                                        if player_info.player_dicts[player]['resources'] < number:
-                                                                                print(f"You only have {player_info.player_dicts[player]['resources'][resource]} {resource}.\nWould you like to type 'check' to view your hand?")
-                                                                else:
-                                                                        print("Oops, enter arabic numerals please.")
-                                        
-                                
-                        
-                        
+                                player_info, game_bank = discard_resource(player_info, game_bank, player)
+                                hand_size = len(player_info.player_dicts[player]['resources'].keys())
+                                if hand_size > needed_size:
+                                        print(f"You are still {hand_size - needed_size} cards above the number you are allowed.")                
                         
         return player_info, game_bank
+
+
+def discard_resource(player_info : PlayerInfo, game_bank : dict, player : int):
+        
+        resource = input("Which resource would you like to discard?").strip().lower()
+        if resource in player_info.player_dicts[player]['resources']:
+                if player_info.player_dicts[player]['resources'][resource] == 0:
+                        print("You have 0 of that card.")
+                else:
+                        number = get_discard_number(player_info, resource, player)
+                        if number == 'cancel':
+                                pass
+                        else:
+                                player_info.player_dicts[player]['resources'][resource] -= number
+                                game_bank['resources'][resource] += number
+                                
+        return player_info, game_bank
+                                        
+                                                
+def get_discard_number(player_info, resource, player):
+        valid = False
+        while not valid:
+                number = input(f"How many of your {resource} would you like to discard? Hint: type 'cancel' to cancel.").strip().lower()
+                if number.isdigit():
+                        number = int(number)
+                        if player_info.player_dicts[player]['resources'] < number:
+                                print(f"You only have {player_info.player_dicts[player]['resources'][resource]} {resource}.\nWould you like to type 'check' to view your hand?")
+                        else:
+                                valid = True
+                elif number == 'cancel':
+                        valid = True
+                else:
+                        print("Oops, enter arabic numerals please.")
+                        
+        
+        return number
+        
 
 
 def place_robber(grid : Grid):
@@ -1032,6 +1059,10 @@ def port_exchange(game_bank, player_info, port):
         
         print(f"You can trade {'3 of' if resource == 'anything' else '2'} {resource} for a resource of your choosing. Which would you like to pick?")
         compensation = pick_resource(ports, "receive")
+        if compensation != "none":
+                print("Trade canceled")
+        else:
+                offer = pick_resource(ports, "offer")
           
           
 def player_trade(player_info : PlayerInfo):
@@ -1049,14 +1080,16 @@ def pick_resource(resources : list, mode : str) -> str:
                 action = input("Which resource would you like to select? (Hint: type 'check' to view the available resources)\n> ")
                 if action in resources:
                         resource = action
-                        break
                 elif action in resources_with_numbers:
                         resource = resources_with_numbers[action]
                         break
                 elif action == "check":
                         print("The possible resources available to you are:")
-                        for i in resources_with_numbers:
-                                print(f"{i}. {resources_with_numbers[i - 1]}")
+                        for key in resources_with_numbers:
+                                print(f"{key}. {resources_with_numbers[int(i) - 1]}")
+                elif action == 'cancel':
+                        resource = "none"
+                        break
                 else:
                         print("Invalid.")
         
@@ -1191,6 +1224,6 @@ def main():
 
 
 if __name__ == "__main__":
-        action = input("Press enter").strip().lower()
+        action = input("Press enter (Ik this is a weird input loop but i need an easy way to start and break the program)\n>").strip().lower()
         if action == "":
                 main()
