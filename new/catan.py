@@ -1057,39 +1057,62 @@ def port_exchange(game_bank, player_info, port):
                         if first_letter == port[0]:
                                 resource = attribute
         
-        print(f"You can trade {'3 of' if resource == 'anything' else '2'} {resource} for a resource of your choosing. Which would you like to pick?")
-        compensation = pick_resource(ports, "receive")
-        if compensation != "none":
-                print("Trade canceled")
+        print(f"You can trade {'3 of' if resource == 'anything' else '2'} {resource} for a resource of your choosing.?")
+        
+        if resource == 'anything':
+                print("Choose which resource you'd like to give/put down to carry out the trade.")
+                offer = pick_resource(player_info, ports, 'offer')
+                if offer == 'none':
+                        print('Trade canceled')
+                        continue_trade = False
+                else:
+                        continue_trade = True
         else:
-                offer = pick_resource(ports, "offer")
+                offer = resource
+                continue_trade = True
+        
+        if continue_trade:
+                print("Now pick which resource you'd like to obtain from the trade.")
+                compensation = pick_resource(player_info, ports, 'recieve')
+                if compensation == 'none':
+                        print("Trade canceled")
+                        continue_trade = False
+        
+        if continue_trade:
+                trade(player_info, game_bank, offer, compensation)
+                        
           
           
 def player_trade(player_info : PlayerInfo):
         pass
         
+def trade(player_info : PlayerInfo, game_bank : dict, offer : str, compensation : str):
+        
+        reciever = player_info.player_turn
+        #player_info.player_dicts[reciever]['resources'][offer] -= 
           
-def pick_resource(resources : list, mode : str) -> str:
+def pick_resource(player_info, resources : list, mode : str) -> str:
         
         resources_with_numbers = {}
         i = 1
         for resource in resources:
                 resources_with_numbers[str(i)] = resource
                 i += 1
-        while True:
-                action = input("Which resource would you like to select? (Hint: type 'check' to view the available resources)\n> ")
+        loop = True
+        while loop:
+                action = input("Which resource would you like to select? (Hint: type 'check' to view the available resources)\n> ").strip().lower()
                 if action in resources:
                         resource = action
                 elif action in resources_with_numbers:
                         resource = resources_with_numbers[action]
-                        break
+                        loop = False
                 elif action == "check":
                         print("The possible resources available to you are:")
                         for key in resources_with_numbers:
-                                print(f"{key}. {resources_with_numbers[int(i) - 1]}")
+                                print(f"{key}. {resources_with_numbers[str(resources.index(key) - 1)]}")
                 elif action == 'cancel':
                         resource = "none"
-                        break
+                        loop = False
                 else:
                         print("Invalid.")
         
@@ -1100,7 +1123,7 @@ def get_numbers(player_info):
         pass
 
 
-def weird_thing(game_bank, player_info, grid : Grid):
+def choose_resource(game_bank, player_info, grid : Grid):
         resource_list = []
         for biome in grid.biomes:
                 resource_list.append(biome)
@@ -1224,6 +1247,6 @@ def main():
 
 
 if __name__ == "__main__":
-        action = input("Press enter (Ik this is a weird input loop but i need an easy way to start and break the program)\n>").strip().lower()
+        action = input("Press enter (Ik this is a weird input loop but i need an easy way to start and break the program)\n> ").strip().lower()
         if action == "":
                 main()
