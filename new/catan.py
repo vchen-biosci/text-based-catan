@@ -62,7 +62,7 @@ def get_player_number() -> int:
         player_number = 0
         while not player_number in [3, 4]:
                 try:
-                        player_number = int(input("How many people are playing?\n> ").strip()) 
+                        player_number = int(input("How many people are playing? ⋆˚✿🍒𐙚⋆˚\n˚₊ · »-♡→ ").strip()) 
                         if not player_number in [3, 4]:
                                 print("You can only play with 3 or 4 people.")
                                 
@@ -88,7 +88,7 @@ def get_player_name(player : int, player_names : list) -> str:
         valid_name = False
         while not valid_name:
                 
-                player_name = input(f"Player {player}, enter the name you'd like to be known by.\n> ").strip()
+                player_name = input(f"Player {player}, enter your name!\n˚₊ · »-♡→ ").strip()
                 if player_name in player_names:
                         print("... That name's already owned. Choose something else.")
                         
@@ -120,7 +120,7 @@ def get_player_password() -> str:
         valid_password = False
         while not valid_password:
                 password = input("Please enter a password; it'll be used to check for your consent later. Keep it short but memorable," + 
-                                 "and make sure it's not a password you use for important sites.\n> ")
+                                 "and make sure it's not a password you use for important sites.\n˚₊ · »-♡→ ")
                 
                 if len(password) > 7:
                         print("That password is way too long. Keep it to 7 or below characters.")
@@ -232,7 +232,7 @@ def get_color(player_color : list) -> list:
         for color in color_codes:               
                         valid_input = False
                         while not valid_input:
-                                action = input(ansi_stitching(color_codes[color], f"‧₊˚♪ 𝄞₊˚⊹ What value would you like to use for {color}? ‧₊˚♪ 𝄞₊˚⊹\n> ")).strip().lower()
+                                action = input(ansi_stitching(color_codes[color], f"‧₊˚♪ 𝄞₊˚⊹ What value would you like to use for {color}? ‧₊˚♪ 𝄞₊˚⊹\n˚₊ · »-♡→ ")).strip().lower()
                                 try:
                                         if int(action) <= 255:
                                                 player_color.append(int(action))
@@ -271,7 +271,7 @@ def assign_player_colors(quick_key : list) -> list:
                 action = ""
                 while not action in ["y", "n"]:
                         action = input("Would you like to customise your own color? (If not, you'll get a premade one!)" + 
-                                       " Type 'Y' for yes and 'N' for no.\n> ").strip().lower()
+                                       " Type 'Y' for yes and 'N' for no.\n˚₊ · »-♡→ ").strip().lower()
                         if action == "y":
                                 player_colors.append(choose_color())
                         elif action == "n":
@@ -461,7 +461,7 @@ def print_board(player_info : PlayerInfo, grid : Grid, game_bank : dict):
         """Prints out basic information (visual display for what players need to see during their turns)"""
         
         print("________ WELCOME TO THE WORLD OF CATAN. WHERE WILL YOU SETTLE TODAY? ________\n")
-        print(f"GAME BANK:")
+        print(f"˗ˋˏ$ˎˊ˗ GAME BANK ˗ˋˏ$ˎˊ˗")
         for resource in game_bank["resources"]:
                 print(f'{resource} : {game_bank["resources"][resource]}', end="  ||  ")
         print("\n")
@@ -491,7 +491,7 @@ def initial_loop(player_info : PlayerInfo, grid : Grid, game_bank : dict) -> tup
                         player_info.player_turn = player
                         valid = False
                         while not valid:
-                                text = input(ansi_stitching(player_info.player_dicts[player]['color'], f"Player {player}, where would you like to place your settlement?") + "\n> ").strip()
+                                text = input(ansi_stitching(player_info.player_dicts[player]['color'], f"Player {player}, where would you like to place your settlement?") + "\n˚₊ · »-♡→ ").strip()
                                 valid = check(text, grid, player_info, "settlement")
                         player_info.player_dicts[player]['settlements'].append(text)
                         print(grid.settlement_locs[text]['display'])
@@ -502,7 +502,7 @@ def initial_loop(player_info : PlayerInfo, grid : Grid, game_bank : dict) -> tup
 
                         valid = False
                         while not valid:
-                                text = input(ansi_stitching(player_info.player_dicts[player]['color'], f"Player {player}, where are you placing your road?") + "\n> ").strip()
+                                text = input(ansi_stitching(player_info.player_dicts[player]['color'], f"Player {player}, where are you placing your road?") + "\n˚₊ · »-♡→ ").strip()
                                 valid = check(text, grid, player_info, "road")
                         player_info.player_dicts[player]['roads'].append(text)
                         
@@ -890,7 +890,7 @@ def place_robber(grid : Grid):
         error_message = "That tile doesn't exist. Please input as either the arabic numerals following the S or with the S."
         valid = False
         while not valid:
-                placement = input("Where would you like to place the robber?\n> ")
+                placement = input("Where would you like to place the robber?\n˚₊ · »-♡→ ")
                 
                 if placement in grid.tiles.keys():
                         tile = placement
@@ -988,7 +988,7 @@ def main_game(player_info, grid, game_bank):
                         turn = True
                         roll_allowed = True
                         while turn:
-                                action = input(ansi_stitching(player_info.player_dicts[player]['color'], f"Player {player}, what's your move?") + "\n> ").strip().lower()
+                                action = input(ansi_stitching(player_info.player_dicts[player]['color'], f"Player {player}, what's your move?") + "\n˚₊ · »-♡→ ").strip().lower()
 
                                 if action == "end turn":
                                         if not roll_allowed:
@@ -1035,7 +1035,7 @@ def trade_port(player_info : PlayerInfo, grid : Grid, game_bank : dict):
         
         valid = False
         while not valid and ports == True:
-                action = input("Which port would you like to select? (Hint: type 'check' to see what ports are available.)\n> ").strip().lower()
+                action = input("Which port would you like to select? (Hint: type 'check' to see what ports are available.)\n˚₊ · »-♡→ ").strip().lower()
                 if action in player_ports:
                         valid = True
                         port_trade = action
@@ -1061,7 +1061,7 @@ def trade_player(player_info : PlayerInfo):
         
         valid = False
         while not valid:
-                action = input("Which player would you like to trade with? (Hint: 'x' or 'cancel' to end loop)\n> ").strip().lower()
+                action = input("Which player would you like to trade with? (Hint: 'x' or 'cancel' to end loop)\n˚₊ · »-♡→ ").strip().lower()
                 if action in ["cancel", "x"]:
                         wants_to_trade = False
                         valid = True
@@ -1145,7 +1145,7 @@ def pick_resource(player_info, resources : list, mode : str) -> str:
                 i += 1
         loop = True
         while loop:
-                action = input("Which resource would you like to select? (Hint: type 'check' to view the available resources)\n> ").strip().lower()
+                action = input("Which resource would you like to select? (Hint: type 'check' to view the available resources)\n˚₊ · »-♡→ ").strip().lower()
                 if action in resources:
                         resource = action
                 elif action in resources_with_numbers:
@@ -1222,7 +1222,7 @@ def call_trade(player_info : PlayerInfo, grid : Grid, game_bank : dict):
         
         valid = False
         while not valid:
-                choice = input("Would you like to trade at 1. a port, or 2. with a player?\n> ").strip().lower()
+                choice = input("Would you like to trade at 1. a port, or 2. with a player?\n˚₊ · »-♡→ ").strip().lower()
                 if choice in ["1", "port"]:
                         trade_port(player_info, grid, game_bank)
                         valid = True
@@ -1292,6 +1292,6 @@ def main():
 
 
 if __name__ == "__main__":
-        action = input("Press enter (Ik this is a weird input loop but i need an easy way to start and break the program)\n> ").strip().lower()
+        action = input("Press enter (Ik this is a weird input loop but i need an easy way to start and break the program)\n˚₊ · »-♡→ ").strip().lower()
         if action == "":
                 main()
