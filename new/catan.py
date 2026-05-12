@@ -24,7 +24,8 @@ class PlayerInfo:
              
                                     
 def quick_reorder(road : str):
-        """Reorders a 2-letter string based on ascii values (alphabetical order I suppose). This allows me to standardise the way in which roads are called from the dictionary."""
+        """Reorders a 2-letter string based on ascii values (alphabetical order I suppose). 
+        This allows me to standardise the way in which roads are called from the dictionary."""
 
         if road[0] > road[1]:
                 road = road[1] + road[0]
@@ -64,6 +65,7 @@ def get_player_number() -> int:
                         player_number = int(input("How many people are playing?\n> ").strip()) 
                         if not player_number in [3, 4]:
                                 print("You can only play with 3 or 4 people.")
+                                
                 except ValueError:
                         print("Enter an integer (3 or 4) please.")
                         
@@ -85,13 +87,17 @@ def get_player_name(player : int, player_names : list) -> str:
         
         valid_name = False
         while not valid_name:
+                
                 player_name = input(f"Player {player}, enter the name you'd like to be known by.\n> ").strip()
                 if player_name in player_names:
                         print("... That name's already owned. Choose something else.")
+                        
                 elif player_name.isdigit():
                         print("Sorry, you're not allowed a name consisting of only numbers, as this will cause problems later.")
+                        
                 elif len(player_name) > 8:
                         print("Please set a shorter name. Sorry if your name is really that long, but it's hard to display.")
+                        
                 else:
                         valid_name = True
                         
@@ -113,7 +119,9 @@ def get_player_password() -> str:
         
         valid_password = False
         while not valid_password:
-                password = input("Please enter a password; it'll be used to check for your consent later. Keep it short but memorable, and make sure it's not a password you use for important sites.\n> ")
+                password = input("Please enter a password; it'll be used to check for your consent later. Keep it short but memorable," + 
+                                 "and make sure it's not a password you use for important sites.\n> ")
+                
                 if len(password) > 7:
                         print("That password is way too long. Keep it to 7 or below characters.")
                 else:
@@ -129,6 +137,7 @@ def setup_player_dicts(quick_key : list) -> dict:
         player_names = []
         player_dicts = create_player_dicts(quick_key)
         for player in quick_key:
+                
                 name = get_player_name(player, player_names)
                 player_names.append(name)
                 player_dicts[player]['name'] = name
@@ -138,6 +147,7 @@ def setup_player_dicts(quick_key : list) -> dict:
                 for resource in resources:
                         player_dicts[player]["resources"][resource] = 0
                 player_dicts[player]["dev_cards"] = {}
+                
                 quick_dict = dict(zip(["knight", "year of plenty", "road building", "monopoly", "VPs"], [14, 2, 2, 2, 5]))
                 for dev_card in quick_dict:
                         player_dicts[player]["dev_cards"][dev_card] = quick_dict[dev_card]
@@ -166,13 +176,16 @@ def add_keys(player_dicts, quick_key) -> dict:
         """Adds keys to each existing player dictionary"""
         
         for player in quick_key:
+                
                 player_dicts[player]['roads'] = []
                 player_dicts[player]['settlements'] = []
                 player_dicts[player]['cities'] = []
                 player_dicts[player]['construct_bank'] = {"settlements": 5, "cities": 4, "roads": 15}
+                
                 player_dicts[player]['achievements'] = {"longest road" : 0, "largest army" : 0}
                 player_dicts[player]['knights_recruited'] = 0
                 player_dicts[player]['VPs'] = 0
+                
         return player_dicts
                
                
@@ -203,10 +216,23 @@ def choose_color() -> list:
         player_color = []
         satisfied = False
         while not satisfied:
-                for color in ["red", "blue", "green"]:                  
+                get_color(player_color)   
+                                        
+                confirmed = False
+                while not confirmed:
+                        confirmed, satisfied = confirm_color(player_color, satisfied, confirmed)
+                        
+
+        clear_screen()
+        return player_color
+
+
+def get_color(player_color : list) -> list:
+        color_codes = {"red" : [255, 0, 0], "green" : [0, 255, 0], "blue" : [0, 0, 255]}
+        for color in color_codes:               
                         valid_input = False
                         while not valid_input:
-                                action = input(f"What value would you like to use for {color}?\n> ").strip().lower()
+                                action = input(ansi_stitching(color_codes[color], f"‧₊˚♪ 𝄞₊˚⊹ What value would you like to use for {color}? ‧₊˚♪ 𝄞₊˚⊹\n> ")).strip().lower()
                                 try:
                                         if int(action) <= 255:
                                                 player_color.append(int(action))
@@ -215,26 +241,27 @@ def choose_color() -> list:
                                                 print("Sorry; RGB values only go up to 255.")
                                         
                                 except ValueError:
-                                        print("Please input a valid integer, in arabic numerals, within the range of 0 to 255.")     
+                                        print("Please input a valid integer, in arabic numerals, within the range of 0 to 255.")
                                         
-                confirmed = False
-                while not confirmed:
-                        confirm = input(ansi_stitching(player_color, """This is what your color looks like - are you sure you want it? 
+        return player_color
+            
+            
+def confirm_color(player_color, satisfied, confirmed) -> tuple[bool, bool]:
+        confirm = input(ansi_stitching(player_color, """This is what your color looks like - are you sure you want it? 
 Type 'Y' for yes and 'N' for no. 
 Please make sure all other players can see this color.\n""") + "> ").strip()
-                        if confirm == "N":
-                                player_color = []
-                                confirmed = True
-                        elif confirm == "Y":
-                                satisfied = True
-                                confirmed = True
-                        else:
-                                print("Please type either 'Y' or 'N'. This is case sensitive.")
-
-        clear_screen()
-        return player_color
-
-
+        if confirm == "N":
+                player_color = []
+                confirmed = True
+        elif confirm == "Y":
+                satisfied = True
+                confirmed = True
+        else:
+                print("Please type either 'Y' or 'N'. This is case sensitive.")
+                
+        return confirmed, satisfied
+                               
+                                                            
 def assign_player_colors(quick_key : list) -> list:
         """Iterates through each player and makes sure they have a colour assigned"""
         
@@ -432,7 +459,7 @@ def make_token_list() -> list:
 
 def print_board(player_info : PlayerInfo, grid : Grid, game_bank : dict):
         """Prints out basic information (visual display for what players need to see during their turns)"""
-        print(grid.tiles.keys())
+        
         print("________ WELCOME TO THE WORLD OF CATAN. WHERE WILL YOU SETTLE TODAY? ________\n")
         print(f"GAME BANK:")
         for resource in game_bank["resources"]:
@@ -444,7 +471,9 @@ def print_board(player_info : PlayerInfo, grid : Grid, game_bank : dict):
         for player in player_info.quick_key:
                 print(ansi_stitching(player_info.player_dicts[player]['color'], f"Player {player} ({player_info.player_dicts[player]['name']})"), end="  ||  ")
         print("\n")
+        
         print_grid(grid)
+        
         print(f"The robber is currently pillaging the citizens of {grid.robber} and stealing all their {grid.tiles[grid.robber]['biome']}...")
 
         
@@ -455,8 +484,10 @@ def initial_loop(player_info : PlayerInfo, grid : Grid, game_bank : dict) -> tup
 
         print_board(player_info, grid, game_bank)
         print(f"We'll go from player 1 to player {len(player_info.quick_key)}; you can place two settlements and two roads for free. Please choose wisely.")
+        
         for i in range(2):
                 for player in player_info.quick_key:
+                        
                         player_info.player_turn = player
                         valid = False
                         while not valid:
@@ -474,6 +505,7 @@ def initial_loop(player_info : PlayerInfo, grid : Grid, game_bank : dict) -> tup
                                 text = input(ansi_stitching(player_info.player_dicts[player]['color'], f"Player {player}, where are you placing your road?") + "\n> ").strip()
                                 valid = check(text, grid, player_info, "road")
                         player_info.player_dicts[player]['roads'].append(text)
+                        
                         grid.roads[quick_reorder(text)]['display'] = ansi_stitching(player_info.player_dicts[player]['color'], grid.roads[quick_reorder(text)]['display'])
                         clear_screen()
                         print_board(player_info, grid, game_bank)
@@ -787,23 +819,36 @@ def rolled_a_seven(grid : Grid, player_info : PlayerInfo, game_bank : dict):
         
         
 def halve_decks(player_info : PlayerInfo, game_bank : dict):
+        """Makes greedy players discard half their hand"""
+        
         for player in player_info.quick_key:
-                hand_size = len(player_info.player_dicts[player]['resources'].keys())
+                hand_size = calculate_hand_size(player_info.player_dicts, player)
                 if hand_size >= 8:
                         print(f"Player {player} has too many cards. You must discard half your deck.")
+                        
                         valid = False
                         while not valid:
                                 print(f"Please turn your screen away. Player {player}, it is mandatory that you complete this stage.\nDo not attempt to skip the entering of your password.")
                                 valid = check_password(player, player_info)
+                                
                         needed_size = hand_size // 2
                         while hand_size > needed_size:
                                 player_info, game_bank = discard_resource(player_info, game_bank, player)
-                                hand_size = len(player_info.player_dicts[player]['resources'].keys())
+                                
+                                hand_size = calculate_hand_size(player_info.player_dicts, player)
                                 if hand_size > needed_size:
                                         print(f"You are still {hand_size - needed_size} cards above the number you are allowed.")                
                         
         return player_info, game_bank
 
+def calculate_hand_size(player_dicts : dict, player : int) -> int:
+        
+        hand_size = 0
+        for resource in player_dicts[player]['resources']:
+                hand_size += player_dicts[player]['resources'][resource]
+                
+        return hand_size
+                
 
 def discard_resource(player_info : PlayerInfo, game_bank : dict, player : int):
         
@@ -838,8 +883,7 @@ def get_discard_number(player_info, resource, player):
                         print("Oops, enter arabic numerals please.")
                         
         
-        return number
-        
+        return number       
 
 
 def place_robber(grid : Grid):
@@ -1080,16 +1124,17 @@ def port_exchange(game_bank, player_info, port):
         
         if continue_trade:
                 trade(player_info, game_bank, offer, compensation)
-                        
-          
+                                  
           
 def player_trade(player_info : PlayerInfo):
         pass
+ 
         
 def trade(player_info : PlayerInfo, game_bank : dict, offer : str, compensation : str):
         
         reciever = player_info.player_turn
         #player_info.player_dicts[reciever]['resources'][offer] -= 
+ 
           
 def pick_resource(player_info, resources : list, mode : str) -> str:
         
