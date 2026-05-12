@@ -57,7 +57,7 @@ def ansi_stitching(color : list, text : str) -> str:
 
 
 def get_player_number() -> int:
-        """Gets the number of players, doesn't quit until it's correct"""
+        """Gets the number of players, doesn't quit until it's valid"""
         
         player_number = 0
         while not player_number in [3, 4]:
@@ -841,6 +841,7 @@ def halve_decks(player_info : PlayerInfo, game_bank : dict):
                         
         return player_info, game_bank
 
+
 def calculate_hand_size(player_dicts : dict, player : int) -> int:
         
         hand_size = 0
@@ -1054,7 +1055,7 @@ def trade_port(player_info : PlayerInfo, grid : Grid, game_bank : dict):
                                 print("That's not an option. Sorry.")
         
         if ports == True:
-                port_exchange(game_bank, player_info, port)
+                game_bank, player_info = port_exchange(game_bank, player_info, port)
 
 
 def trade_player(player_info : PlayerInfo):
@@ -1089,6 +1090,78 @@ def trade_player(player_info : PlayerInfo):
 
 def port_exchange(game_bank, player_info, port):
         ports = ["wood", "grain", "sheep", "ore", "brick"]
+        resource = find_starting_resource(ports, port)
+        
+        if resource != 'anything':
+                if not player_info.player_dicts[player_info.player_turn]['resources'][resource] >= 2:
+                        print("You actually don't have enough to trade that resource. You need at least 2.")
+                        return game_bank, player_info
+                
+        print(f"You can trade {'3 of' if resource == 'anything' else '2'} {resource} for a resource of your choosing.?")
+        
+        offer = {}
+        if resource == 'anything':
+                print("Choose which resource you'd like to give/put down 3 of to carry out the trade.")
+                offer['resource'] = pick_resource(player_info, ports, 'offer')
+                if offer['resource'] == 'none':
+                        print('Trade canceled')
+                        return game_bank, player_info
+                else:
+                        continue_trade = True
+                        offer['number'] = 3
+        else:
+                offer['resource'] = resource
+                
+                offer['number'] = 2
+                
+        compensation = {}
+        
+        print("Please pick which resource you'd like to obtain from the trade.")
+        compensation['resource'] = pick_resource(player_info, ports, 'recieve')
+        if compensation['resource'] == 'none':
+                print("Trade canceled")
+                return game_bank, player_info
+        else:
+                compensation['number'] = pick_number(compensation['resource'])
+                if compensation['number'] == 0:
+                        return game_bank, player_info
+                if game_bank['resources'][compensation['resource']] < compensation['number']:
+                        print("The game bank can't afford it. Come back again next time.")
+                        return game_bank, player_info
+        
+        player_info, game_bank = trade(player_info, game_bank, offer, compensation)
+        print("Trade successful!")
+                
+        return game_bank, player_info
+            
+def pick_number(resource):
+        """Forces player to pick a number"""
+        
+        valid = False
+        while not valid:
+                number = input(f"How many {resource} would you like to recieve?\n˚₊ · »-♡→ ")
+                
+                if number.isdigit():
+                        number = int(number)
+                        if number > 0:
+                                print(f"Okay, you're trading for {number} {resource}.")
+                        if number == 0:
+                                print("Looks like you're canceling the trade.")      
+                        
+                        valid = True
+                                
+                elif input == 'cancel':
+                        print("To cancel, just type in 0.")
+                        
+                else:
+                        print("Please enter arabic numerals. If you want to cancel the trade, just input a 0." + 
+                              "Negative numbers are not allowed, by the way.")
+        
+        return number
+            
+def find_starting_resource(ports, port):
+        """Based on the port the player has selected, finds the relevant resource that is being traded"""
+        
         if port[0] == "3":
                 resource = "anything"
         else:
@@ -1099,41 +1172,25 @@ def port_exchange(game_bank, player_info, port):
                                         first_letter = character
                                         break
                         if first_letter == port[0]:
-                                resource = attribute
-        
-        print(f"You can trade {'3 of' if resource == 'anything' else '2'} {resource} for a resource of your choosing.?")
-        
-        if resource == 'anything':
-                print("Choose which resource you'd like to give/put down to carry out the trade.")
-                offer = pick_resource(player_info, ports, 'offer')
-                if offer == 'none':
-                        print('Trade canceled')
-                        continue_trade = False
-                else:
-                        continue_trade = True
-        else:
-                offer = resource
-                continue_trade = True
-        
-        if continue_trade:
-                print("Now pick which resource you'd like to obtain from the trade.")
-                compensation = pick_resource(player_info, ports, 'recieve')
-                if compensation == 'none':
-                        print("Trade canceled")
-                        continue_trade = False
-        
-        if continue_trade:
-                trade(player_info, game_bank, offer, compensation)
-                                  
+                                resource = attribute   
+                                
+        return resource                   
+          
           
 def player_trade(player_info : PlayerInfo):
         pass
  
         
-def trade(player_info : PlayerInfo, game_bank : dict, offer : str, compensation : str):
+def trade(player_info : PlayerInfo, game_bank : dict, offer : dict, compensation : dict) -> tuple[PlayerInfo, dict]:
         
-        reciever = player_info.player_turn
-        #player_info.player_dicts[reciever]['resources'][offer] -= 
+        player = player_info.player_turn
+        player_info.player_dicts[player]['resources'][offer['resource']] -= offer['number']
+        game_bank['resources'][offer['resource']] += offer ['number']
+        
+        player_info.player_dicts[player]['resources'][compensation['resource']] += compensation['number']
+        game_bank['resources'][compensation['number']] -= compensation['number']
+        
+        return player_info, game_bank
  
           
 def pick_resource(player_info, resources : list, mode : str) -> str:
@@ -1146,20 +1203,22 @@ def pick_resource(player_info, resources : list, mode : str) -> str:
         loop = True
         while loop:
                 action = input("Which resource would you like to select? (Hint: type 'check' to view the available resources)\n˚₊ · »-♡→ ").strip().lower()
+                
                 if action in resources:
                         resource = action
+                        loop = False
                 elif action in resources_with_numbers:
                         resource = resources_with_numbers[action]
                         loop = False
                 elif action == "check":
                         print("The possible resources available to you are:")
                         for key in resources_with_numbers:
-                                print(f"{key}. {resources_with_numbers[str(resources.index(key) - 1)]}")
+                                print(key, f". {resources_with_numbers[key]}")
                 elif action == 'cancel':
                         resource = "none"
                         loop = False
                 else:
-                        print("Invalid.")
+                        print("Invalid. (Hint: type 'cancel' to cancel!)")
         
         return resource
         
@@ -1167,41 +1226,6 @@ def pick_resource(player_info, resources : list, mode : str) -> str:
 def get_numbers(player_info):
         pass
 
-
-def choose_resource(game_bank, player_info, grid : Grid):
-        resource_list = []
-        for biome in grid.biomes:
-                resource_list.append(biome)
-        resource_list.remove("desert")
-        
-        player_trade = {}
-        game_bank_trade = {}
-        loop = True
-        while loop:
-                action = input("Which resource would you like to trade? (Hint: type 'check' to see commands, or 'X' to cancel)").strip().lower()
-                
-                if action == "check":
-                        i = 1
-                        for resource in resource_list:
-                                print(str(i) + ". " + resource)
-                                i += 1
-                                
-                elif action in grid.biomes:
-                        resource = action
-                        loop = False
-                        valid = True
-                        
-                elif action == "x":
-                        loop = False
-                        valid = False
-                        
-                else:
-                        try:
-                                number = int(action)
-                                if number < len(resource_list):
-                                        print(f"You are trading {resource_list[number - 1]}")
-                        except TypeError:
-                                print("Sorry, that's not valid. Type X to escape.")
 
 
 def bank_trade(game_bank : dict, player_info : PlayerInfo, grid : Grid):
