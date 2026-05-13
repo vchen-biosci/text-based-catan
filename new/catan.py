@@ -148,7 +148,7 @@ def setup_player_dicts(quick_key : list) -> dict:
                         player_dicts[player]["resources"][resource] = 0
                 player_dicts[player]["dev_cards"] = {}
                 
-                quick_dict = dict(zip(["knight", "year of plenty", "road building", "monopoly", "VPs"], [14, 2, 2, 2, 5]))
+                quick_dict = dict(zip(["knight", "year of plenty", "road building", "monopoly", "VP cards"], [14, 2, 2, 2, 5]))
                 for dev_card in quick_dict:
                         player_dicts[player]["dev_cards"][dev_card] = quick_dict[dev_card]
                         
@@ -172,6 +172,31 @@ def print_names(player_names, quick_key):
                         print(player_names[player - 1], end=", ")
 
 
+def calculate_VP(player_info : PlayerInfo) -> dict:
+        
+        victory_points = {}
+        for player in player_info.quick_key:
+                victory_points[player] = 0
+                victory_points[player] += player_info.player_dicts[player]['VP cards']
+                for key in player_info.player_dicts[player]['achievements']:
+                        victory_points[player] += player_info.player_dicts[player]['achievements'][key]
+                victory_points[player] += len(player_info.player_dicts[player]['settlements'])
+                victory_points[player] += len(player_info.player_dicts[player]['cities']) * 2
+                
+        return victory_points
+        
+        
+def check_if_game(victory_points : dict, player_info : PlayerInfo) -> bool:
+        """Checks if game should continue or not"""
+        
+        for player in player_info.quick_key:
+                if victory_points[player] >= 10:
+                        game = False
+                else:
+                        game = True
+                        
+        return game
+        
 def add_keys(player_dicts, quick_key) -> dict:
         """Adds keys to each existing player dictionary"""
         
@@ -184,7 +209,7 @@ def add_keys(player_dicts, quick_key) -> dict:
                 
                 player_dicts[player]['achievements'] = {"longest road" : 0, "largest army" : 0}
                 player_dicts[player]['knights_recruited'] = 0
-                player_dicts[player]['VPs'] = 0
+                player_dicts[player]['VP cards'] = 0
                 
         return player_dicts
                
@@ -302,7 +327,7 @@ def initialise_resource_cards() -> tuple[dict, dict]:
         for resource in ["ores", "grain", "wood", "brick", "sheep"]:
                 resources[resource] = 19
         dev_bank = {}
-        dev_cards = ["knight", "year of plenty", "road building", "monopoly", "VPs"]
+        dev_cards = ["knight", "year of plenty", "road building", "monopoly", "VP cards"]
         dev_values = [14, 2, 2, 2, 5]
         for dev_card, value in zip(dev_cards, dev_values):
                 dev_bank[dev_card] = value
@@ -942,7 +967,6 @@ def roll_die(player_info : PlayerInfo, grid : Grid, game_bank):
         return game_bank, player_info
 
 
-
 def check_robber(roll : int, grid : Grid, tile : str, game_bank : dict, player_info : PlayerInfo, settlement : str):
         """Checks if robber is occupying the relevant tile; if not, hands out resources."""
         
@@ -992,9 +1016,12 @@ def check_password(player, player_info) -> bool:
 
 
 def main_game(player_info, grid, game_bank):
+        
+        game = True
         player_info.game_mode = "main"
 
-        while player_info.game_mode == "main":
+        while player_info.game_mode == "main" and game:
+                
 
                 for player in player_info.quick_key:
                         player_info.player_turn = player
@@ -1025,7 +1052,7 @@ def main_game(player_info, grid, game_bank):
                                         else:
                                                 print("You've already rolled this turn. You can only roll once per turn.") 
                                                 
-                        
+                        game = check_if_game(calculate_VP(player_info), player_info)
                         clear_screen()
                         print_board(player_info, grid, game_bank)  
 
@@ -1120,7 +1147,6 @@ def port_exchange(game_bank, player_info, port):
                         print('Trade canceled')
                         return game_bank, player_info
                 else:
-                        continue_trade = True
                         offer['number'] = 3
         else:
                 offer['resource'] = resource
@@ -1208,7 +1234,7 @@ def trade(player_info : PlayerInfo, game_bank : dict, offer : dict, compensation
         game_bank['resources'][offer['resource']] += offer ['number']
         
         player_info.player_dicts[player]['resources'][compensation['resource']] += compensation['number']
-        game_bank['resources'][compensation['number']] -= compensation['number']
+        game_bank['resources'][compensation['resource']] -= compensation['number']
         
         return player_info, game_bank
  
