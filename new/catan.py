@@ -874,7 +874,7 @@ def get_discard_number(player_info, resource, player):
                 number = input(f"How many of your {resource} would you like to discard? Hint: type 'cancel' to cancel.").strip().lower()
                 if number.isdigit():
                         number = int(number)
-                        if player_info.player_dicts[player]['resources'] < number:
+                        if player_info.player_dicts[player]['resources'][resource] < number:
                                 print(f"You only have {player_info.player_dicts[player]['resources'][resource]} {resource}.\nWould you like to type 'check' to view your hand?")
                         else:
                                 valid = True
@@ -1111,8 +1111,13 @@ def port_exchange(game_bank, player_info, port):
                         offer['number'] = 3
         else:
                 offer['resource'] = resource
-                
                 offer['number'] = 2
+                
+        
+        if player_info.player_dicts[player_info.player_turn]['resources'][offer['resource']] < offer['number']:
+                print(f"Looks like you don't have enough {offer['resource']} to make the trade.")
+                return game_bank, player_info
+        
                 
         compensation = {}
         
