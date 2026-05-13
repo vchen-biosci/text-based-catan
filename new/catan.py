@@ -853,7 +853,7 @@ def calculate_hand_size(player_dicts : dict, player : int) -> int:
 
 def discard_resource(player_info : PlayerInfo, game_bank : dict, player : int):
         
-        resource = input("Which resource would you like to discard?").strip().lower()
+        resource = input("Which resource would you like to discard?\n˚₊ · »-♡→ ").strip().lower()
         if resource in player_info.player_dicts[player]['resources']:
                 if player_info.player_dicts[player]['resources'][resource] == 0:
                         print("You have 0 of that card.")
@@ -918,7 +918,7 @@ def place_robber(grid : Grid):
         return grid.robber
 
 
-def roll_die(player_info : PlayerInfo, grid : Grid, game_bank): #"player_dicts, game_bank"
+def roll_die(player_info : PlayerInfo, grid : Grid, game_bank):
         
         player_dicts = player_info.player_dicts
         
@@ -934,22 +934,34 @@ def roll_die(player_info : PlayerInfo, grid : Grid, game_bank): #"player_dicts, 
                 print_board(player_info, grid, game_bank)
                 
         for player in player_info.quick_key:
-                for settlement in player_dicts[player]["settlements"]:
-                        for tile in grid.tiles:
-                                if settlement in grid.tiles[tile]["attached_settlements"]:
-                                        if roll == grid.tiles[tile]["number"]:
-                                                if grid.robber != tile:
-                                                        give_resources(grid.tiles[tile]['biome'], game_bank, player_info, settlement)
-                                                else:
-                                                        print(f"The robber has prevented anyone from obtaining resources on {tile}")
+                for settlement, tile in zip(player_dicts[player]["settlements"], grid.tiles):
+                        if settlement in grid.tiles[tile]["attached_settlements"]:
+                                game_bank, player_info = check_robber(roll, grid, tile, game_bank, player_info, settlement)
+                                
         
-        pass
+        return game_bank, player_info
 
 
+
+def check_robber(roll : int, grid : Grid, tile : str, game_bank : dict, player_info : PlayerInfo, settlement : str):
+        """Checks if robber is occupying the relevant tile; if not, hands out resources."""
+        
+        if roll == grid.tiles[tile]["number"]:
+                if grid.robber != tile:
+                        game_bank, player_info = give_resources(grid.tiles[tile]['biome'], game_bank, player_info, settlement)
+                else:
+                        print(f"The robber has prevented anyone from obtaining resources on {tile}")
+                        
+        return game_bank, player_info
+                        
+                                                
 def give_resources(resource : str, game_bank : dict, player_info : PlayerInfo, settlement) -> tuple[dict, PlayerInfo]:
+        """Assigns relevant resources to relevant players based on their rolls"""
+        
         if game_bank['resources'][resource] != 0:
                 if settlement != "":
                         print(f"P{player_info.player_turn} has obtained {resource} from their settlement {settlement}.")
+                        
                 game_bank['resources'][resource] -= 1
                 player_info.player_dicts[player_info.player_turn]['resources'][resource] += 1
         else:
@@ -1045,6 +1057,7 @@ def trade_port(player_info : PlayerInfo, grid : Grid, game_bank : dict):
                         print(f"Your port{'s are: ' if len(player_ports) != 1 else ' is: '}")
                         for port in player_ports:
                                 print(str(i) + ". " + port, end=", " if port != player_ports[-1] else "\n")
+                                i += 1
                 else:
                         try:
                                 if int(action) <= len(player_ports):
@@ -1138,6 +1151,7 @@ def port_exchange(game_bank, player_info, port):
         print("Trade successful!")
                 
         return game_bank, player_info
+   
             
 def pick_number(resource):
         """Forces player to pick a number"""
@@ -1163,21 +1177,22 @@ def pick_number(resource):
                               "Negative numbers are not allowed, by the way.")
         
         return number
+       
             
 def find_starting_resource(ports, port):
         """Based on the port the player has selected, finds the relevant resource that is being traded"""
         
         if port[0] == "3":
                 resource = "anything"
-        else:
                 
+        else:
                 for attribute in ports:
                         for character in attribute:
                                 if character.isalpha():
                                         first_letter = character
                                         break
                         if first_letter == port[0]:
-                                resource = attribute   
+                                resource = attribute 
                                 
         return resource                   
           
@@ -1230,7 +1245,6 @@ def pick_resource(player_info, resources : list, mode : str) -> str:
 
 def get_numbers(player_info):
         pass
-
 
 
 def bank_trade(game_bank : dict, player_info : PlayerInfo, grid : Grid):
