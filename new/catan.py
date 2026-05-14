@@ -196,6 +196,7 @@ def check_if_game(victory_points : dict, player_info : PlayerInfo) -> bool:
                         game = True
                         
         return game
+  
         
 def add_keys(player_dicts, quick_key) -> dict:
         """Adds keys to each existing player dictionary"""
@@ -1021,9 +1022,11 @@ def main_game(player_info, grid, game_bank):
         player_info.game_mode = "main"
 
         while player_info.game_mode == "main" and game:
-                
 
                 for player in player_info.quick_key:
+                        if not game:
+                                print("Game has ended!")
+                                break
                         player_info.player_turn = player
                         turn = True
                         roll_allowed = True
@@ -1031,12 +1034,7 @@ def main_game(player_info, grid, game_bank):
                                 action = input(ansi_stitching(player_info.player_dicts[player]['color'], f"Player {player}, what's your move?") + "\n˚₊ · »-♡→ ").strip().lower()
 
                                 if action == "end turn":
-                                        if not roll_allowed:
-                                                        if check_password(player, player_info):
-                                                                print("Your turn has ended.")
-                                                                turn = False
-                                        else:
-                                                print("You must roll before you can end your turn.")
+                                        turn = allow_turn_end(roll_allowed, player_info)
 
                                 elif action == "build":
                                         build()
@@ -1045,21 +1043,41 @@ def main_game(player_info, grid, game_bank):
                                         call_trade(player_info, grid, game_bank)
                                         
                                 elif action == "roll":
-                                        if roll_allowed:
-                                                roll_die(player_info, grid, game_bank)
-                                                roll_allowed = False
-                        
-                                        else:
-                                                print("You've already rolled this turn. You can only roll once per turn.") 
+                                        game_bank, player_info = allow_roll(roll_allowed, player_info, grid, game_bank)
+                                        
                                                 
                         game = check_if_game(calculate_VP(player_info), player_info)
                         clear_screen()
                         print_board(player_info, grid, game_bank)  
+                        
+        print("Game has ended :)")
 
 
+def allow_turn_end(roll_allowed : bool, player_info : PlayerInfo) -> bool:
+        if not roll_allowed:
+                if check_password(player_info.player_turn, player_info):
+                        print("Your turn has ended.")
+                        turn = False
+        else:
+                print("You must roll before you can end your turn."
+                      )
+                
+        return turn
+        
 def build():
         pass
 
+def allow_roll(roll_allowed, player_info, grid, game_bank):
+        """Roll die if roll is allowed"""
+        
+        if roll_allowed:
+                game_bank, player_info = roll_die(player_info, grid, game_bank)
+                roll_allowed = False
+        else:
+                print("You've already rolled this turn. You can only roll once per turn.") 
+                
+        return game_bank, player_info
+        
 
 def trade_port(player_info : PlayerInfo, grid : Grid, game_bank : dict):
         player_ports = []
