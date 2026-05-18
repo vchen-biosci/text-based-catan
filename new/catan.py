@@ -1040,7 +1040,8 @@ def main_game(player_info, grid, game_bank):
                                         build()
                                 
                                 elif action == "trade":
-                                        call_trade(player_info, grid, game_bank)
+                                        choice = call_trade(player_info, grid, game_bank)
+                                        
                                         
                                 elif action == "roll":
                                         game_bank, player_info = allow_roll(roll_allowed, player_info, grid, game_bank)
@@ -1064,8 +1065,24 @@ def allow_turn_end(roll_allowed : bool, player_info : PlayerInfo) -> bool:
                 
         return turn
         
-def build():
-        pass
+        
+def build(player_info : PlayerInfo, game_bank : dict):
+        
+        loop = True
+        
+        while True:
+                action = input("What would you like to build?").strip().lower()
+                if action in game_bank['constructs'].keys():
+                        """check if player has enough of the required materials and prompt if not"""
+                elif action == 'check':
+                        """print constructs THEY can build. with a numbered list hopefully"""
+                elif action == 'mats':
+                        """print full building costs list"""
+                elif action in ['X', 'cancel']:
+                        print("Leaving the construction site...")
+                        loop = False
+                        
+        return player_info, game_bank
 
 def allow_roll(roll_allowed, player_info, grid, game_bank):
         """Roll die if roll is allowed"""
@@ -1080,6 +1097,8 @@ def allow_roll(roll_allowed, player_info, grid, game_bank):
         
 
 def trade_port(player_info : PlayerInfo, grid : Grid, game_bank : dict):
+        """Collects the data needed for port trades and calls the port trade subroutine"""
+        
         player_ports = []
         for settlement in player_info.player_dicts[player_info.player_turn]["settlements"]:
                 if grid.settlement_locs[settlement]["port"] != "":
@@ -1092,28 +1111,13 @@ def trade_port(player_info : PlayerInfo, grid : Grid, game_bank : dict):
                 ports = True
         
         valid = False
-        while not valid and ports == True:
-                action = input("Which port would you like to select? (Hint: type 'check' to see what ports are available.)\n˚₊ · »-♡→ ").strip().lower()
-                if action in player_ports:
-                        valid = True
-                        port_trade = action
-                elif action == 'check':
-                        i = 1
-                        print(f"Your port{'s are: ' if len(player_ports) != 1 else ' is: '}")
-                        for port in player_ports:
-                                print(str(i) + ". " + port, end=", " if port != player_ports[-1] else "\n")
-                                i += 1
-                else:
-                        try:
-                                if int(action) <= len(player_ports):
-                                        port = player_ports[int(action) - 1]
-                                        ports = True
-                                        valid = True
-                        except ValueError:
-                                print("That's not an option. Sorry.")
+        while not valid and ports:
+                valid, ports, port = other_thing(player_ports)      
         
-        if ports == True:
+        if ports:
                 game_bank, player_info = port_exchange(game_bank, player_info, port)
+                
+        return game_bank, player_info
 
 
 def trade_player(player_info : PlayerInfo):
@@ -1146,6 +1150,31 @@ def trade_player(player_info : PlayerInfo):
         return player_info
 
 
+def other_thing(player_ports : list):
+        
+        action = input("Which port would you like to select? (Hint: type 'check' to see what ports are available.)\n˚₊ · »-♡→ ").strip().lower()
+        if action in player_ports:
+                valid = True
+                port = action
+        elif action == 'check':
+                i = 1
+                print(f"Your port{'s are: ' if len(player_ports) != 1 else ' is: '}")
+                for port in player_ports:
+                        print(str(i) + ". " + port, end=", " if port != player_ports[-1] else "\n")
+                        i += 1
+        else:
+                try:
+                        if int(action) <= len(player_ports):
+                                port = player_ports[int(action) - 1]
+                                ports = True
+                                valid = True
+                        else:
+                                print("You don't even have that many ports in the first place!")
+                except ValueError:
+                        print("That's not an option. Sorry.")
+                        
+        return valid, ports, port
+                                
 def port_exchange(game_bank, player_info, port):
         ports = ["wood", "grain", "sheep", "ore", "brick"]
         resource = find_starting_resource(ports, port)
@@ -1311,7 +1340,7 @@ def call_trade(player_info : PlayerInfo, grid : Grid, game_bank : dict):
         while not valid:
                 choice = input("Would you like to trade at 1. a port, or 2. with a player?\n˚₊ · »-♡→ ").strip().lower()
                 if choice in ["1", "port"]:
-                        trade_port(player_info, grid, game_bank)
+                        player_info, game_bank = trade_port(player_info, grid, game_bank)
                         valid = True
 
                 elif choice in ["2", "player"]:
@@ -1323,6 +1352,8 @@ def call_trade(player_info : PlayerInfo, grid : Grid, game_bank : dict):
                 
                 else:
                         print("Please type in a valid response! If you don't want to anymore, type 'X' or 'cancel'!")
+                        
+        return player_info, game_bank
 
 
 def main():    
