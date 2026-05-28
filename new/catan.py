@@ -337,6 +337,7 @@ def initialise_resource_cards() -> tuple[dict, dict]:
         
         return resources, dev_bank
 
+
 def draw_dev_card(card_list : list, game_bank) -> tuple[str, dict]:
         """Draws a card and makes it so that the game bank loses the relevant card."""
         
@@ -533,8 +534,6 @@ def print_board(player_info : PlayerInfo, grid : Grid, game_bank : dict):
         
 def initial_loop(player_info : PlayerInfo, grid : Grid, game_bank : dict) -> tuple[PlayerInfo, Grid, dict]:
         """Carries out the initial loop for the players to place down their settlements and roads FOR FREE."""
-        
-        game_mode = "initial"
 
         print_board(player_info, grid, game_bank)
         print(f"We'll go from player 1 to player {len(player_info.quick_key)}; you can place two settlements and two roads for free. Please choose wisely.")
@@ -550,6 +549,7 @@ def initial_loop(player_info : PlayerInfo, grid : Grid, game_bank : dict) -> tup
         player_info.player_turn = 1
                         
         return player_info, grid, game_bank
+
 
 def place_settlement(player_info : PlayerInfo, grid, game_bank):
         """Places down a settlement. Does not deduct any resources from the player, do this separately"""
@@ -567,6 +567,7 @@ def place_settlement(player_info : PlayerInfo, grid, game_bank):
         print_board(player_info, grid, game_bank)
         
         return player_info, grid
+
 
 def place_road(player_info : PlayerInfo, grid : Grid, game_bank : dict) -> tuple[PlayerInfo, Grid]:
         """Places down a road and changes player information accordingly, as well as the grid. Does not take resources from the player in the process."""
@@ -1062,7 +1063,16 @@ def check_password(player, player_info) -> bool:
         return valid
 
 
+def force_password(player_info):
+        """Absolutely insists upon receiving the correct password"""
+        player = player_info.player_turn
+        
+        valid = False
+        while not valid:
+                valid = check_password(player, player_info)
+                
 def main_game(player_info, grid, game_bank):
+        """The main input loop after initial resource setup"""
         
         game = True
         player_info.game_mode = "main"
@@ -1094,7 +1104,7 @@ def main_game(player_info, grid, game_bank):
                                         
                                         
                                 else:
-                                        print("That action doesn't exist hahahahahahahahahhahahhahaah")
+                                        print("That action doesn't exist.")
                                         
                                                 
                         game = check_if_game(calculate_VP(player_info), player_info)
@@ -1140,7 +1150,19 @@ def execute_dev_card(dev_card, grid : Grid, player_info : PlayerInfo, game_bank 
         if dev_card == 'knight':
                 grid.robber = place_robber(grid)
         elif dev_card == 'build road':
-                pass
+                for i in range(2):
+                        print(f"Placing road no.{i + 1} out of your 2 free roads...")
+                        player_info, grid = place_road(player_info, grid, game_bank)
+        elif dev_card == "year of plenty":
+                year_of_plenty()
+        elif dev_card == "monopoly":
+                monopoly(player_info)
+                
+def monopoly(player_info):
+        pass
+                
+def year_of_plenty():
+        print("You have drawn the year of plenty card and may now choose to take a card from the game bank.")
 
 def something(materials):
         pass
