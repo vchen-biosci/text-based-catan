@@ -148,7 +148,7 @@ def setup_player_dicts(quick_key : list) -> dict:
                         player_dicts[player]["resources"][resource] = 0
                 player_dicts[player]["dev_cards"] = {}
                 
-                quick_dict = dict(zip(["knight", "year of plenty", "road building", "monopoly", "VP cards"], [14, 2, 2, 2, 5]))
+                quick_dict = dict(zip(["knight", "year of plenty", "build road", "monopoly", "VP cards"], [14, 2, 2, 2, 5]))
                 for dev_card in quick_dict:
                         player_dicts[player]["dev_cards"][dev_card] = quick_dict[dev_card]
                         
@@ -328,13 +328,37 @@ def initialise_resource_cards() -> tuple[dict, dict]:
         for resource in ["ores", "grain", "wood", "brick", "sheep"]:
                 resources[resource] = 19
         dev_bank = {}
-        dev_cards = ["knight", "year of plenty", "road building", "monopoly", "VP cards"]
+        dev_cards = ["knight", "year of plenty", "build road", "monopoly", "VP cards"]
         dev_values = [14, 2, 2, 2, 5]
         for dev_card, value in zip(dev_cards, dev_values):
                 dev_bank[dev_card] = value
+                
+        print(dev_bank)
         
         return resources, dev_bank
 
+def draw_dev_card(card_list : list, game_bank) -> tuple[str, dict]:
+        """Draws a card and makes it so that the game bank loses the relevant card."""
+        
+        drawn_card = card_list.pop(0)
+        game_bank['dev_cards'][drawn_card] -= 1
+        
+        return drawn_card, game_bank
+                
+                
+def list_dev_cards(game_bank : dict) -> list:
+        """Compiles a list of all the development cards available to draw"""
+        
+        card_list = []
+        for card in game_bank['dev_cards']:
+                if game_bank['dev_cards'][card] > 0:
+                        card_list.append(card)
+        
+        if card_list == []:
+                print("Looks like the game bank is out of dev cards. Sorry!")
+        
+        return card_list
+        
                 
 def make_bank() -> dict:
         """Calls the functions needed to set up the game bank"""
@@ -343,7 +367,10 @@ def make_bank() -> dict:
         resources, dev_bank = initialise_resource_cards()
         game_bank['resources'] = resources
         game_bank['dev_cards'] = dev_bank
-        game_bank['building_costs'] = {'road' : }
+        game_bank['building_costs'] = {'roads' : {'brick' : 1, 'wood' : 1},
+                                       'settlements' : {'brick' : 1, 'wood' : 1, 'grain' : 1, 'sheep' : 1},
+                                       'cities' : {'grain' : 2, 'ores' : 3},
+                                       'dev card': {'sheep' : 1, 'grain' : 1, 'ores' : 1}}
         
         return game_bank
 
@@ -514,34 +541,50 @@ def initial_loop(player_info : PlayerInfo, grid : Grid, game_bank : dict) -> tup
         
         for i in range(2):
                 for player in player_info.quick_key:
-                        
                         player_info.player_turn = player
-                        valid = False
-                        while not valid:
-                                text = input(ansi_stitching(player_info.player_dicts[player]['color'], f"Player {player}, where would you like to place your settlement?") + "\n˚₊ · »-♡→ ").strip()
-                                valid = check(text, grid, player_info, "settlement")
-                        player_info.player_dicts[player]['settlements'].append(text)
-                        print(grid.settlement_locs[text]['display'])
-                        grid.settlement_locs[text]['display'] = ansi_stitching(player_info.player_dicts[player]['color'], grid.settlement_locs[text]['display'])
-                        grid.settlement_locs[text]['owner'] = player
-                        clear_screen()
-                        print_board(player_info, grid, game_bank)
-
-                        valid = False
-                        while not valid:
-                                text = input(ansi_stitching(player_info.player_dicts[player]['color'], f"Player {player}, where are you placing your road?") + "\n˚₊ · »-♡→ ").strip()
-                                valid = check(text, grid, player_info, "road")
-                        player_info.player_dicts[player]['roads'].append(text)
                         
-                        grid.roads[quick_reorder(text)]['display'] = ansi_stitching(player_info.player_dicts[player]['color'], grid.roads[quick_reorder(text)]['display'])
-                        clear_screen()
-                        print_board(player_info, grid, game_bank)
+                        player_info, grid = place_settlement(player_info, grid, game_bank)
+                        player_info, grid = place_road(player_info, grid, game_bank)
+                        
 
         player_info.player_turn = 1
                         
         return player_info, grid, game_bank
 
+def place_settlement(player_info : PlayerInfo, grid, game_bank):
+        """Places down a settlement. Does not deduct any resources from the player, do this separately"""
+        
+        player = player_info.player_turn
+        valid = False
+        while not valid:
+                text = input(ansi_stitching(player_info.player_dicts[player]['color'], f"Player {player}, where would you like to place your settlement?") + "\n˚₊ · »-♡→ ").strip()
+                valid = check(text, grid, player_info, "settlement")
+        player_info.player_dicts[player]['settlements'].append(text)
+        print(grid.settlement_locs[text]['display'])
+        grid.settlement_locs[text]['display'] = ansi_stitching(player_info.player_dicts[player]['color'], grid.settlement_locs[text]['display'])
+        grid.settlement_locs[text]['owner'] = player
+        clear_screen()
+        print_board(player_info, grid, game_bank)
+        
+        return player_info, grid
 
+def place_road(player_info : PlayerInfo, grid : Grid, game_bank : dict) -> tuple[PlayerInfo, Grid]:
+        """Places down a road and changes player information accordingly, as well as the grid. Does not take resources from the player in the process."""
+        
+        player = player_info.player_turn
+        
+        valid = False
+        while not valid:
+                text = input(ansi_stitching(player_info.player_dicts[player]['color'], f"Player {player}, where are you placing your road?") + "\n˚₊ · »-♡→ ").strip()
+                valid = check(text, grid, player_info, "road")
+        player_info.player_dicts[player]['roads'].append(text)
+        grid.roads[quick_reorder(text)]['display'] = ansi_stitching(player_info.player_dicts[player]['color'], grid.roads[quick_reorder(text)]['display'])
+        clear_screen()
+        print_board(player_info, grid, game_bank)
+        
+        return player_info, grid
+        
+        
 def print_grid(grid : Grid):
         """Prints out the grid."""
 
@@ -1049,6 +1092,7 @@ def main_game(player_info, grid, game_bank):
                                 elif action == "roll":
                                         game_bank, player_info = allow_roll(roll_allowed, player_info, grid, game_bank)
                                         
+                                        
                                 else:
                                         print("That action doesn't exist hahahahahahahahahhahahhahaah")
                                         
@@ -1078,6 +1122,9 @@ def build(player_info : PlayerInfo, game_bank : dict):
         while True:
                 action = input("What would you like to build?").strip().lower()
                 if action in game_bank['constructs'].keys():
+                        if action == 'draw':
+                                dev_card_list = list_dev_cards(game_bank)
+                                drawn_card, game_bank = draw_dev_card(dev_card_list, game_bank)
                         """check if player has enough of the required materials and prompt if not"""
                 elif action == 'check':
                         """print constructs THEY can build. with a numbered list hopefully"""
@@ -1089,6 +1136,11 @@ def build(player_info : PlayerInfo, game_bank : dict):
                         
         return player_info, game_bank
 
+def execute_dev_card(dev_card, grid : Grid, player_info : PlayerInfo, game_bank : dict):
+        if dev_card == 'knight':
+                grid.robber = place_robber(grid)
+        elif dev_card == 'build road':
+                pass
 
 def something(materials):
         pass
@@ -1105,7 +1157,7 @@ def allow_roll(roll_allowed, player_info, grid, game_bank):
         return game_bank, player_info
         
 
-def trade_port(player_info : PlayerInfo, grid : Grid, game_bank : dict):
+def trade_port(player_info : PlayerInfo, grid : Grid, game_bank : dict) -> tuple[dict, PlayerInfo]:
         """Collects the data needed for port trades and calls the port trade subroutine"""
         
         player_ports = []
@@ -1330,33 +1382,13 @@ def pick_resource(player_info, resources : list, mode : str) -> str:
         return resource
         
 
-def get_numbers(player_info):
-        pass
-
-
-def bank_trade(game_bank : dict, player_info : PlayerInfo, grid : Grid):
-        
-        finished = False
-        while not finished:
-                pass
-
-                
-def make_trade(trader : int, other_party : int):
-        for i in range(2):
-                private = False
-                while not private:
-                        pass
-
-
-                
-
 def call_trade(player_info : PlayerInfo, grid : Grid, game_bank : dict):
         
         valid = False
         while not valid:
                 choice = input("Would you like to trade at 1. a port, or 2. with a player?\n˚₊ · »-♡→ ").strip().lower()
                 if choice in ["1", "port"]:
-                        player_info, game_bank = trade_port(player_info, grid, game_bank)
+                        game_bank, player_info = trade_port(player_info, grid, game_bank)
                         valid = True
 
                 elif choice in ["2", "player"]:
@@ -1432,3 +1464,5 @@ if __name__ == "__main__":
                 if action == "":
                         print("Welcome to Catan!")
                         main()
+                elif action == 'break':
+                        break
