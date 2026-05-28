@@ -10,6 +10,7 @@ class Grid:
                 self.roads = roads
                 self.kaomojis = kaomojis
                 self.biomes = biomes
+                self.resources = ["wood", "grain", "sheep", "ore", "brick"]
 
 
 class PlayerInfo:
@@ -1154,15 +1155,42 @@ def execute_dev_card(dev_card, grid : Grid, player_info : PlayerInfo, game_bank 
                         print(f"Placing road no.{i + 1} out of your 2 free roads...")
                         player_info, grid = place_road(player_info, grid, game_bank)
         elif dev_card == "year of plenty":
-                year_of_plenty()
+                year_of_plenty(game_bank, player_info)
         elif dev_card == "monopoly":
-                monopoly(player_info)
+                monopoly(player_info, grid)
                 
-def monopoly(player_info):
-        pass
+def monopoly(player_info, grid : Grid):
+        print("You may choose a resource that every player must hand over to you.")
+        card_to_steal = pick_resource(player_info, grid.resources, "")
                 
-def year_of_plenty():
+def year_of_plenty(game_bank, player_info) -> tuple[PlayerInfo, dict]:
         print("You have drawn the year of plenty card and may now choose to take a card from the game bank.")
+        
+        available_resources = []
+        for resource in game_bank['resources']:
+                if game_bank['resources'][resource] >= 1:
+                        available_resources.append(resource)
+        
+        if len(available_resources) == 0:
+                print("It looks like the game bank is empty... sorry, your card can't do anything this time around.")
+                number = 0
+        elif len(available_resources) == 1:
+                print("Oof, it seems that you can literally only obtain one card - we'll just automate that for you rq...")
+                number = 1
+        else:
+                number = 2
+                
+        for i in range(number):
+                if number == 2:
+                        resource = pick_resource(player_info, available_resources, "")
+                        
+                else:
+                        resource = available_resources[0]
+                
+                player_info.player_dicts[player_info.player_turn][resource] += 1
+                game_bank['resources'][resource] -= 1
+                
+        return player_info, game_bank
 
 def something(materials):
         pass
@@ -1198,7 +1226,7 @@ def trade_port(player_info : PlayerInfo, grid : Grid, game_bank : dict) -> tuple
                 ports, port = other_thing(player_ports)      
         
         if ports:
-                game_bank, player_info = port_exchange(game_bank, player_info, port)
+                game_bank, player_info = port_exchange(game_bank, player_info, port, grid)
                 
         return game_bank, player_info
 
@@ -1263,8 +1291,9 @@ def other_thing(player_ports : list):
                                 
         return ports, port
                                 
-def port_exchange(game_bank, player_info, port):
-        ports = ["wood", "grain", "sheep", "ore", "brick"]
+def port_exchange(game_bank, player_info, port, grid : Grid):
+        ports = grid.resources
+        
         resource = find_starting_resource(ports, port)
         
         if resource != 'anything':
@@ -1461,6 +1490,7 @@ def main():
         
         number_tokens = make_token_list()
         biomes = make_biomes() 
+        
 
         
         print("Starting your game...")
