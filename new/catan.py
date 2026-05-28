@@ -1148,6 +1148,8 @@ def build(player_info : PlayerInfo, game_bank : dict):
         return player_info, game_bank
 
 def execute_dev_card(dev_card, grid : Grid, player_info : PlayerInfo, game_bank : dict):
+        """Executes the card that the player wants"""
+        
         if dev_card == 'knight':
                 grid.robber = place_robber(grid)
         elif dev_card == 'build road':
@@ -1156,12 +1158,30 @@ def execute_dev_card(dev_card, grid : Grid, player_info : PlayerInfo, game_bank 
                         player_info, grid = place_road(player_info, grid, game_bank)
         elif dev_card == "year of plenty":
                 year_of_plenty(game_bank, player_info)
+                clear_screen()
+                print_board(player_info, grid, game_bank)
         elif dev_card == "monopoly":
-                monopoly(player_info, grid)
+                player_info.player_dicts = monopoly(player_info, grid)
+        elif dev_card == "VP":
+                print("You can't actual *play* your VPs, they just statically increase your victory points." +
+                      "Right now, you currently own", player_info.player_dicts[player_info.player_turn]['dev_cards']['VPs'], 
+                      "of these cards.")
                 
 def monopoly(player_info, grid : Grid):
-        print("You may choose a resource that every player must hand over to you.")
+        print("Pick a resource to have a monopoly on (take all copies of it from all players)")
+        
+        total_gain = 0
         card_to_steal = pick_resource(player_info, grid.resources, "")
+        for player in player_info.player_dicts:
+                if player != player_info.player_turn:
+                        player_info.player_dicts[player_info.player_turn][card_to_steal] += player_info.player_dicts[player][card_to_steal]
+                        total_gain += player_info.player_dicts[player][card_to_steal]
+                        print(f"Player {player} has conceded {player_info.player_dicts[player][card_to_steal]} {card_to_steal} to {player_info.player_turn}")
+                        player_info.player_dicts[player][card_to_steal] = 0
+        print(f"The total number of {card_to_steal} that player {player_info.player_turn} has gained is {total_gain}!")
+                        
+        return player_info.player_dicts
+        
                 
 def year_of_plenty(game_bank, player_info) -> tuple[PlayerInfo, dict]:
         print("You have drawn the year of plenty card and may now choose to take a card from the game bank.")
@@ -1183,7 +1203,6 @@ def year_of_plenty(game_bank, player_info) -> tuple[PlayerInfo, dict]:
         for i in range(number):
                 if number == 2:
                         resource = pick_resource(player_info, available_resources, "")
-                        
                 else:
                         resource = available_resources[0]
                 
