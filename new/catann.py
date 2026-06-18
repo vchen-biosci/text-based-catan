@@ -1,8 +1,9 @@
 import random, time
 
 class GameInfo:
+    """An object containing future variables that the program may reference"""
     def __init__(self):
-        self.resources = ["ores", "grain", "wood", "brick", "sheep"]
+        self.resources = ["ores", "grain", "wood", "brick", "sheep"]#this is a constant but it's ugly so I don't want to write it as full caps
    
     
 class GameResources:
@@ -88,6 +89,40 @@ def place_desert(tiles : dict) -> tuple[dict, str]:
     return tiles, robber
 
 
+def quick_reorder(road : str):
+        """Reorders a 2-letter string based on ascii values (alphabetical order I suppose). 
+        This allows me to standardise the way in which roads are called from the dictionary."""
+
+        if road[0] > road[1]:
+                road = road[1] + road[0]
+
+        return road
+
+
+def create_roads() -> dict:
+        """Creates a dictionary for roads and adds roads into it"""
+        
+        print("Paving your roads...")
+        counter = 0
+        quick_dict = dict(zip(["__", "/", "\\"], ["ABCDEF$GHIJKMNOPRSTUVWYZabdefghiklmnpqrstuvwxyz+", 
+                        "ADCG$LRXMSHNEIJPQWVbcihnoutyx+rwmsflagOUTZYedjkq",
+                        "BEFJDHIOGMLRSYNTXdekjpqvwzsxntiobhWcKQPVUaZfgmlr"]))
+        roads = {}
+        for road_type in ["__", "/", "\\"]:
+                for i in range(len(quick_dict[road_type])//2):
+                        
+                        road = quick_dict[road_type][counter]
+                        counter += 1
+                        road += quick_dict[road_type][counter]
+                        counter += 1
+
+                        road = quick_reorder(road)
+                        roads[road] = {'display' : road_type, 'owner' : 0}
+                counter = 0
+                
+        return roads
+
+
 def generate_grid(biomes : list, number_tokens : list, associated_settlements : dict) -> tuple[dict, str, dict, dict]:
         """Generates the grid"""
         
@@ -105,18 +140,20 @@ def generate_grid(biomes : list, number_tokens : list, associated_settlements : 
         
         return tiles, robber, settlement_locs, roads
 
+
 def assign_ports(settlement_locations : str) -> dict:
     """Assigns ports to relevant tiles"""
         
     ports = ["wood", "grain", "sheep", "ore", "brick"]
     settlement_locs = {}
     for loc in settlement_locations:
-        settlement_locs[loc] = {"display": loc}
+        settlement_locs[loc] = {"display": loc}#the display is the string that will be directly accessed for colouring later
         settlement_locs[loc]["port"] = ""
         settlement_locs[loc]["owner"] = 0
         
-    for loc in "ABFJouxy":#these settlements can access ports
+    for loc in "ABFJouxy":#these settlements can access the ports
         settlement_locs[loc]["port"] = "3:1 port"
+        
     i = 0
     reps = 0
     for loc in "RQCGWcvwjp":
@@ -124,7 +161,7 @@ def assign_ports(settlement_locations : str) -> dict:
         port_to_place = f"2:1 {ports[i]} port"
         settlement_locs[loc]["port"] = port_to_place
         if reps % 2 == 0:
-            i += 1
+            i += 1#it just makes sure that we iterate through the possible ports every 2 repetitions
 
     return settlement_locs
 
@@ -245,7 +282,7 @@ def get_initial_inputs():
     print("""WELCOME TO MY TEXT-BASED CATAN.
 Before we start, make sure \x1b[38;2;142;194;21mthis text\x1b[0m is green!
 CREDITS: Vivienne, CATAN game studio. To start the game, type 'start', or type 'rng' to gamble!
-ENTER YOUR COMMAND TO BEGIN""")
+ENTER YOUR COMMAND TO BEGIN""")#the welcome message
     
     while True:
         action = input("What would you like to do? :)\n˚₊ · »-♡→ ")     
@@ -256,7 +293,7 @@ ENTER YOUR COMMAND TO BEGIN""")
             clear_screen()
             break
         elif action == 'rng':
-            print("Sorry, that's been removed from the program now.")
+            print("Sorry, that's been removed from the program now.")#currently under work. i might add it back but there were some fishy calculations
         elif action == 'cls':
             clear_screen()
         else:
@@ -264,9 +301,10 @@ ENTER YOUR COMMAND TO BEGIN""")
       
       
 def create_classes():
+    #sets up the classes with their variables
     quick_key, player_dicts = create_player_info()
     game_bank = create_game_bank()
-    
+    generate_grid()
     
 def main():
     """the main code for the game"""
