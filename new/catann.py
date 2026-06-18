@@ -39,6 +39,7 @@ class PlayerInfo:
         self.quick_key = quick_key
         self.player_dicts = player_dicts
         self.player_turn = 1
+        self.game_stage = 1
 
 
 class Grid:
@@ -62,6 +63,22 @@ class Grid:
 def clear_screen():
     """Clears the screen with ansi code"""
     print("\033c", end="")
+    
+
+def ansi_stitching(color : list, text : str) -> str:
+	"""Edits the string's value with an ANSI code that imbues it with pretty colours :3"""
+	
+	colored_ver = "\x1b[38;2;"
+	reps = 0
+	for value in color:
+		colored_ver += str(value)
+		reps += 1
+		if reps < 3:
+			colored_ver += ";"
+	
+	colored_ver += "m" + text + "\x1b[0m"
+
+	return colored_ver
     
     
 def create_player_info() -> tuple[list, dict]:
@@ -545,6 +562,120 @@ grid.roads['sx']['display'] + " " + (grid.roads["xy"]['display'] + " ") * 4 + gr
                 print(grid, end="")
         print("\n")
         
+    
+def check(text : str, grid : Grid, player_info : PlayerInfo, mode : str) -> bool:
+	"""Checks if the settlement/road is eligible to be claimed"""
+
+	valid = True 
+
+	if mode == 'settlement':
+		settlement = text
+		try:
+			if grid.settlement_locs[settlement]['owner'] != 0:
+				print("This settlement is already taken. Pro tip: if it has a colour, it's not up for grabs.")
+				valid = False
+					
+			else:
+				related_roads = []
+				for road in grid.roads:
+					if settlement in road:
+						related_roads.append(road)
+				
+				related_settlements = []
+				for road in related_roads:
+					for place in road:
+						if place != settlement:
+							related_settlements.append(place)
+
+				for place in related_settlements:
+					if grid.settlement_locs[place]['owner'] != 0:
+						print(f"It looks like you're trying to place a settlement adjacent to another settlement, 'location {place}'. You must place it at least two roads away.")
+						valid = False
+						break
+	
+		except KeyError:
+			if settlement in grid.settlement_locs:
+				valid = True
+			else:
+				print("That settlement doesn't exist.")
+				valid = False
+
+		if player_info.game_stage != 1:
+				case = []
+				for road in grid.roads:
+						if settlement in road:
+								if grid.roads[road]['owner'] != 0:
+										owner = grid.roads[road]['owner']
+										if owner == player_info.player_turn:
+												case.append(road)
+
+				if len(case) != 0:
+						print("Congratulations on obtaining a new settlement.")
+				else:
+						print("You can only build next to a road that you own. Sorry.")
+						valid = False
+
+
+	elif mode == 'road':
+
+			try:
+					text = quick_reorder(text)
+			except IndexError:
+					pass
+
+			if text not in grid.roads:
+					valid = False
+					print("That road doesn't exist.")
+
+			else:      
+					owner = grid.roads[text]['owner']
+					if owner != player_info.player_turn and grid.roads[text]['owner'] != 0:
+							print("That road already belongs to someone else.")
+							valid = False         
+					case = []
+					for settlement in text:
+							if grid.settlement_locs[settlement]['owner'] != 0:
+									owner = grid.settlement_locs[settlement]['owner']
+									if player_info.player_turn == owner:
+											case.append(settlement)
+
+							for road in grid.roads:
+									if settlement in road:
+											owner = grid.settlement_locs[settlement]['owner']
+											if player_info.player_turn == owner:
+													case.append(road)
+													
+							for road in player_info.player_dicts[player_info.player_turn]["roads"]:
+									for char in road:
+											if char in text:
+													case.append(road)
+					
+					if valid != False and len(case) != 0:
+							print("Congratulations on paving a new road.")
+					else:
+							print("You don't own any settlements/roads next to that road, so you can't build it. Sorry.")
+							valid = False
+
+	return valid
+    
+    
+def place_settlement(player_info : PlayerInfo, grid, game_bank):
+	"""Places down a settlement. Does not deduct any resources from the player, do this separately"""
+	
+	player = player_info.player_turn
+	valid = False
+	while not valid:
+		text = input(ansi_stitching(player_info.player_dicts[player]['color'], f"Player {player}, where would you like to place your settlement?") + "\n˚₊ · »-♡→ ").strip()
+		valid = check(text, grid, player_info, "settlement")
+	player_info.player_dicts[player]['settlements'].append(text)
+	print(grid.settlement_locs[text]['display'])
+	grid.settlement_locs[text]['display'] = ansi_stitching(player_info.player_dicts[player]['color'], grid.settlement_locs[text]['display'])
+	grid.settlement_locs[text]['owner'] = player
+	clear_screen()
+	print_board(player_info, grid, game_bank)
+	
+	return player_info, grid
+    
     
 def print_board(player_info : PlayerInfo, grid : Grid, game_bank : dict):
 	"""Prints out basic information (visual display for what players need to see during their turns)"""
