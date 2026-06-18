@@ -255,13 +255,13 @@ def get_player_number() -> int:
     """Gets the number of players, repeats until valid"""
     
     player_number = 0
-    while not player_number in [3, 4]:
+    while not player_number in [3, 4]:#only 3 and 4 players are accepted so I simply created a list to make the conditional shorter.
         try:
             player_number = int(input("How many people are playing? ⋆˚✿🍒𐙚⋆˚\n˚₊ · »-♡→ ").strip()) 
             if not player_number in [3, 4]:
                 print("You can only play with 3 or 4 people.")
                 
-        except ValueError:
+        except ValueError:#as not entering an integer would lead the 'int' to return a value error (the types do not align)
             print("Enter an integer (3 or 4) please.")
             
     return player_number
@@ -562,6 +562,23 @@ grid.roads['sx']['display'] + " " + (grid.roads["xy"]['display'] + " ") * 4 + gr
                 print(grid, end="")
         print("\n")
         
+    
+def place_road(player_info : PlayerInfo, grid : Grid, game_bank : dict) -> tuple[PlayerInfo, Grid]:
+        """Places down a road and changes player information accordingly, as well as the grid. Does not take resources from the player in the process."""
+        
+        player = player_info.player_turn
+        
+        valid = False
+        while not valid:
+                text = input(ansi_stitching(player_info.player_dicts[player]['color'], f"Player {player}, where are you placing your road?") + "\n˚₊ · »-♡→ ").strip()
+                valid = check(text, grid, player_info, "road")
+        player_info.player_dicts[player]['roads'].append(text)
+        grid.roads[quick_reorder(text)]['display'] = ansi_stitching(player_info.player_dicts[player]['color'], grid.roads[quick_reorder(text)]['display'])
+        clear_screen()
+        print_board(player_info, grid, game_bank)
+        
+        return player_info, grid
+    
     
 def check(text : str, grid : Grid, player_info : PlayerInfo, mode : str) -> bool:
 	"""Checks if the settlement/road is eligible to be claimed"""
