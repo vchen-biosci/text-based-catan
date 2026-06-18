@@ -369,9 +369,13 @@ def make_bank() -> dict:
         resources, dev_bank = initialise_resource_cards()
         game_bank['resources'] = resources
         game_bank['dev_cards'] = dev_bank
-        game_bank['building_costs'] = {'roads' : {'brick' : 1, 'wood' : 1},
-                                       'settlements' : {'brick' : 1, 'wood' : 1, 'grain' : 1, 'sheep' : 1},
-                                       'cities' : {'grain' : 2, 'ores' : 3},
+        game_bank['constructs'] = {'road' : 60,
+                                   'settlement' : 20,
+                                   'city' : 16
+        }
+        game_bank['building_costs'] = {'road' : {'brick' : 1, 'wood' : 1},
+                                       'settlement' : {'brick' : 1, 'wood' : 1, 'grain' : 1, 'sheep' : 1},
+                                       'city' : {'grain' : 2, 'ores' : 3},
                                        'dev card': {'sheep' : 1, 'grain' : 1, 'ores' : 1}}
         
         return game_bank
@@ -1071,6 +1075,7 @@ def force_password(player_info):
         valid = False
         while not valid:
                 valid = check_password(player, player_info)
+             
                 
 def main_game(player_info, grid, game_bank):
         """The main input loop after initial resource setup"""
@@ -1103,6 +1108,10 @@ def main_game(player_info, grid, game_bank):
                                 elif action == "roll":
                                         game_bank, player_info = allow_roll(roll_allowed, player_info, grid, game_bank)
                                         
+                                elif action == "cls":
+                                        clear_screen()
+                                        print_board(player_info, grid, game_bank)
+                                        
                                         
                                 else:
                                         print("That action doesn't exist.")
@@ -1116,6 +1125,8 @@ def main_game(player_info, grid, game_bank):
 
 
 def allow_turn_end(roll_allowed : bool, player_info : PlayerInfo) -> bool:
+        """Checks if the turn can end and returns the turn"""
+        
         if not roll_allowed:
                 if check_password(player_info.player_turn, player_info):
                         print("Your turn has ended.")
@@ -1123,29 +1134,36 @@ def allow_turn_end(roll_allowed : bool, player_info : PlayerInfo) -> bool:
         else:
                 print("You must roll before you can end your turn."
                       )
+                turn = True
                 
         return turn
         
         
 def build(player_info : PlayerInfo, game_bank : dict):
+        """Asks the player what they would like to build, then builds it"""
 
         
         while True:
-                action = input("What would you like to build?").strip().lower()
-                if action in game_bank['constructs'].keys():
-                        if action == 'draw':
-                                dev_card_list = list_dev_cards(game_bank)
-                                drawn_card, game_bank = draw_dev_card(dev_card_list, game_bank)
-                        """check if player has enough of the required materials and prompt if not"""
+                action = input("What would you like to build?\n˚₊ · »-♡→ ").strip().lower()
+                
+                if action == 'draw':
+                        dev_card_list = list_dev_cards(game_bank)
+                        drawn_card, game_bank = draw_dev_card(dev_card_list, game_bank)
                 elif action == 'check':
                         """print constructs THEY can build. with a numbered list hopefully"""
                 elif action == 'mats':
                         """print full building costs list"""
+                elif action in game_bank['constructs']:
+                        if game_bank['constructs'][action] == 0:
+                                print(f"The game bank has run out of {action}. Sorry!")
+                        else:
+                                player_info.player_dicts[player_info.player_turn][]
                 elif action in ['X', 'cancel']:
                         print("Leaving the construction site...")
                         break
                         
         return player_info, game_bank
+
 
 def execute_dev_card(dev_card, grid : Grid, player_info : PlayerInfo, game_bank : dict):
         """Executes the card that the player wants"""
@@ -1166,6 +1184,7 @@ def execute_dev_card(dev_card, grid : Grid, player_info : PlayerInfo, game_bank 
                 print("You can't actual *play* your VPs, they just statically increase your victory points." +
                       "Right now, you currently own", player_info.player_dicts[player_info.player_turn]['dev_cards']['VPs'], 
                       "of these cards.")
+                
                 
 def monopoly(player_info, grid : Grid):
         print("Pick a resource to have a monopoly on (take all copies of it from all players)")
@@ -1211,8 +1230,10 @@ def year_of_plenty(game_bank, player_info) -> tuple[PlayerInfo, dict]:
                 
         return player_info, game_bank
 
+
 def something(materials):
         pass
+
 
 def allow_roll(roll_allowed, player_info, grid, game_bank):
         """Roll die if roll is allowed"""
@@ -1309,6 +1330,7 @@ def other_thing(player_ports : list):
                                 print("That's not an option. Sorry.")
                                 
         return ports, port
+          
                                 
 def port_exchange(game_bank, player_info, port, grid : Grid):
         ports = grid.resources
@@ -1526,7 +1548,6 @@ def main():
         player_info, grid, game_bank = initial_loop(player_info, grid, game_bank)
         main_game(player_info, grid, game_bank)
         
-
 
 if __name__ == "__main__":
         loop = True
