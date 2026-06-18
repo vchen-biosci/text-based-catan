@@ -1,7 +1,9 @@
 Notice -- 
-To find the most recent version of the game, please navigate to the 'master' branch and enter the 'main' file to find 'catan.py'! Thanks :) The rest of my edit history is randomly dispersed around this git page.
+To find the most recent version of the game, please navigate to the 'master' branch and enter the 'main' file to find 'catann.py'. <with the double n.
+(The 'catann.py' is better code but the 'catan.py' is more complete as it's not currently being worked on.)
+The rest of my edit history is everywhere else.
 
-I can't wait to check out how other people approached coding the game after submitting this project. I'm sure their projects will be absolutely amazing, and I wonder how they address certain aspects of the game!
+I can't wait to check out how other people approached coding the game after submitting this project. Especially to see how they would approach the ascii art, as it was a challenge for me.
 
 -- Gameplay --
 To play Catan, you should look at the 'rules' to check how it's generally played . 
