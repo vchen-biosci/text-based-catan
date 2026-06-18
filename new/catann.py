@@ -4,6 +4,27 @@ class GameInfo:
     """An object containing future variables that the program may reference"""
     def __init__(self):
         self.resources = ["ores", "grain", "wood", "brick", "sheep"]#this is a constant but it's ugly so I don't want to write it as full caps
+        self.associated_settlements = {
+    "S1": ["A", "B", "E", "I", "H", "D"],
+    "S2": ["C", "D", "H", "N", "M", "G"],
+    "S3": ["E", "F", "J", "P", "O", "I"],
+    "S4": ["$", "G", "M", "S", "R", "L"],
+    "S5": ["H", "I", "O", "U", "T", "N"],
+    "S6": ["J", "K", "Q", "W", "V", "P"],
+    "S7": ["M", "N", "T", "Z", "Y", "S"],
+    "S8": ["O", "P", "V", "b", "a", "U"],
+    "S9": ["R", "S", "Y", "e", "d", "X"],
+    "S10": ["T", "U", "a", "g", "f", "Z"],
+    "S11": ["V", "W", "c", "i", "h", "b"],
+    "S12": ["Y", "Z", "f", "l", "k", "e"],
+    "S13": ["a", "b", "h", "n", "m", "g"],
+    "S14": ["d", "e", "k", "q", "p", "j"],
+    "S15": ["f", "g", "m", "s", "r", "l"],
+    "S16": ["h", "i", "o", "u", "t", "n"],
+    "S17": ["k", "l", "r", "w", "v", "q"],
+    "S18": ["m", "n", "t", "y", "x", "s"],
+    "S19": ["r", "s", "x", "+", "z", "w"]
+    }
    
     
 class GameResources:
@@ -90,41 +111,40 @@ def place_desert(tiles : dict) -> tuple[dict, str]:
 
 
 def quick_reorder(road : str):
-        """Reorders a 2-letter string based on ascii values (alphabetical order I suppose). 
+    """Reorders a 2-letter string based on ascii values (alphabetical order I suppose). 
         This allows me to standardise the way in which roads are called from the dictionary."""
 
-        if road[0] > road[1]:
-                road = road[1] + road[0]
+    if road[0] > road[1]:
+        road = road[1] + road[0]
 
-        return road
+    return road
 
 
 def create_roads() -> dict:
-        """Creates a dictionary for roads and adds roads into it"""
-        
-        print("Paving your roads...")
-        counter = 0
-        quick_dict = dict(zip(["__", "/", "\\"], ["ABCDEF$GHIJKMNOPRSTUVWYZabdefghiklmnpqrstuvwxyz+", 
-                        "ADCG$LRXMSHNEIJPQWVbcihnoutyx+rwmsflagOUTZYedjkq",
-                        "BEFJDHIOGMLRSYNTXdekjpqvwzsxntiobhWcKQPVUaZfgmlr"]))
-        roads = {}
-        for road_type in ["__", "/", "\\"]:
-                for i in range(len(quick_dict[road_type])//2):
-                        
-                        road = quick_dict[road_type][counter]
-                        counter += 1
-                        road += quick_dict[road_type][counter]
-                        counter += 1
+	"""Creates a dictionary for roads and adds roads into it"""
+	
+	print("Paving your roads...")
+	counter = 0
+	quick_dict = dict(zip(["__", "/", "\\"], ["ABCDEF$GHIJKMNOPRSTUVWYZabdefghiklmnpqrstuvwxyz+", 
+					"ADCG$LRXMSHNEIJPQWVbcihnoutyx+rwmsflagOUTZYedjkq",
+					"BEFJDHIOGMLRSYNTXdekjpqvwzsxntiobhWcKQPVUaZfgmlr"]))
+	roads = {}
+	for road_type in ["__", "/", "\\"]:
+		for i in range(len(quick_dict[road_type])//2):
+			
+			for x in range(2):     
+				road = quick_dict[road_type][counter]
+				counter += 1
 
-                        road = quick_reorder(road)
-                        roads[road] = {'display' : road_type, 'owner' : 0}
-                counter = 0
-                
-        return roads
+			road = quick_reorder(road)
+			roads[road] = {'display' : road_type, 'owner' : 0}
+			counter = 0
+			
+	return roads
 
 
-def generate_grid(biomes : list, number_tokens : list, associated_settlements : dict) -> tuple[dict, str, dict, dict]:
-        """Generates the grid"""
+def make_grid(biomes : list, number_tokens : list, associated_settlements : dict) -> tuple[dict, str, dict, dict]:
+        """Creates variables used in the grid"""
         
         settlement_locations = "abcdefghijklmnopqrstuvwxyz".upper()
         settlement_locations += settlement_locations.lower() + "+" + "$"
@@ -133,8 +153,8 @@ def generate_grid(biomes : list, number_tokens : list, associated_settlements : 
         tiles = create_tiles()
         tiles, robber = place_desert(tiles)
         number_tokens = make_token_list()
-        tiles = assign_tile_variables(tiles, biomes, number_tokens, associated_settlements)
         
+        tiles = assign_tile_variables(tiles, biomes, number_tokens, associated_settlements)
         settlement_locs = assign_ports(settlement_locations)
         roads = create_roads()
         
@@ -300,41 +320,43 @@ ENTER YOUR COMMAND TO BEGIN""")#the welcome message
             print("That's not currently a valid command.")
       
       
-def create_classes():
-    #sets up the classes with their variables
+def make_biomes() -> list:
+        """Creates a list of biomes"""
+        
+        biomes = []
+        for i in range(3):
+                biomes.append("ores")
+                biomes.append("brick")
+
+        for i in range(4):
+                biomes.append("grain")
+                biomes.append("wood")
+                biomes.append("sheep")
+        
+        return biomes
+
+
+def create_classes() -> tuple[Grid, PlayerInfo, GameInfo]:
+    """Sets up class variables for later use"""
+    game_info = GameInfo()
+    number_tokens = make_token_list()
+    biomes = make_biomes()
     quick_key, player_dicts = create_player_info()
     game_bank = create_game_bank()
-    generate_grid()
+    tiles, robber, settlement_locs, roads = make_grid(biomes, number_tokens, game_info.associated_settlements)
+    
+    
+    grid = Grid(robber, tiles, settlement_locs, roads, biomes)
+    player_info = PlayerInfo(game_bank, quick_key, player_dicts)
+    
+    return grid, player_info, game_info
+    
     
 def main():
-    """the main code for the game"""
-    
-    associated_settlements = {
-    "S1": ["A", "B", "E", "I", "H", "D"],
-    "S2": ["C", "D", "H", "N", "M", "G"],
-    "S3": ["E", "F", "J", "P", "O", "I"],
-    "S4": ["$", "G", "M", "S", "R", "L"],
-    "S5": ["H", "I", "O", "U", "T", "N"],
-    "S6": ["J", "K", "Q", "W", "V", "P"],
-    "S7": ["M", "N", "T", "Z", "Y", "S"],
-    "S8": ["O", "P", "V", "b", "a", "U"],
-    "S9": ["R", "S", "Y", "e", "d", "X"],
-    "S10": ["T", "U", "a", "g", "f", "Z"],
-    "S11": ["V", "W", "c", "i", "h", "b"],
-    "S12": ["Y", "Z", "f", "l", "k", "e"],
-    "S13": ["a", "b", "h", "n", "m", "g"],
-    "S14": ["d", "e", "k", "q", "p", "j"],
-    "S15": ["f", "g", "m", "s", "r", "l"],
-    "S16": ["h", "i", "o", "u", "t", "n"],
-    "S17": ["k", "l", "r", "w", "v", "q"],
-    "S18": ["m", "n", "t", "y", "x", "s"],
-    "S19": ["r", "s", "x", "+", "z", "w"]
-    }
-    make_token_list()
-    
-    
-    
+    """Main code for the game, initially called"""
     get_initial_inputs()
+    #the initial input loop ends as soon as the game starts, so the game is directly programmed into main.
+    grid, player_info, game_info = create_classes()
     
     
 
