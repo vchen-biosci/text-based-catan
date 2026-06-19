@@ -1,4 +1,4 @@
-import random, time
+import random, time, sys
 
 class GameInfo:
     """An object containing future variables that the program may reference"""
@@ -42,6 +42,8 @@ class PlayerInfo:
         self.game_stage = 1
 
 
+
+
 class Grid:
     """An object to contain all the important information needed to render the grid or access its variables"""
     def __init__(self, robber, tiles, settlement_locs, roads, biomes):
@@ -58,8 +60,8 @@ class Grid:
         "desert": " ⛰︎ ོ ༄-"
 }
         self.biomes = biomes
-
-
+    
+    
 def clear_screen():
     """Clears the screen with ansi code"""
     print("\033c", end="")
@@ -81,11 +83,108 @@ def ansi_stitching(color : list, text : str) -> str:
 	return colored_ver
     
     
+def add_colours(player_info) -> tuple[list, dict]:
+        """Calls all the functions initially needed for the initialising of player dictionaries"""
+        quick_key, player_dicts = player_info.quick_key, player_info.player_dicts
+        
+        player_colors = assign_player_colors(quick_key)
+        for player, color in zip(player_dicts, player_colors):
+                player_dicts[player]["color"] = color
+        
+        return player_dicts
+    
+    
+def assign_player_colors(quick_key : list) -> list:
+    """Iterates through each player and makes sure they have a colour assigned"""
+    
+    preset_colors = [[1, 201, 184], [252, 210, 1], [252, 84, 1], [210, 1, 252]]#this variable only needs to be temporary
+    player_colors = []
+    new_color = False
+    for player in quick_key:#iterates through players
+        action = ""
+        while not action in ["y", "n"]:#indefinite iteration
+            print(' We strongly recommend making your own, since the default may be similar to the color someone else has chosen.' if new_color else '')
+            action = input("Would you like to customise your own color? (If not, you'll get a premade one!)" + 
+" Type 'Y' for yes and 'N' for no.\n˚₊ · »-♡→ ").strip().lower()#a prompt, as the default may be too similar and undifferentiable from a pre-chosen colour
+            if action == "y":
+                player_colors.append(choose_color())
+                new_color = True
+            elif action == "n":
+                print(ansi_stitching(preset_colors[player - 1], "This is your assigned color!"))
+                player_colors.append(preset_colors[player - 1])
+                time.sleep(0.3)
+            else:
+                print("Sorry, please either type 'y' or 'n'.")
+        clear_screen()
+                            
+    print_player_colors(quick_key, player_colors)
+    return player_colors   
+    
+    
+def choose_color() -> list:
+    """Get a player's colors by iterating through red, blue, and green."""
+    
+    player_color = []
+    satisfied = False
+    while not satisfied:
+        get_color(player_color)   
+                                
+        confirmed = False
+        while not confirmed:
+            confirmed, satisfied = confirm_color(player_color, satisfied, confirmed)
+
+    clear_screen()
+    return player_color
+    
+    
+def confirm_color(player_color, satisfied, confirmed) -> tuple[bool, bool]:
+        confirm = input(ansi_stitching(player_color, """This is what your color looks like - are you sure you want it? 
+Type 'Y' for yes and 'N' for no. 
+Please make sure all other players can see this color.\n""") + "> ").strip()
+        if confirm == "N":
+                player_color = []
+                confirmed = True
+        elif confirm == "Y":
+                satisfied = True
+                confirmed = True
+        else:
+                print("Please type either 'Y' or 'N'. This is case sensitive.")
+                
+        return confirmed, satisfied
+    
+    
+def print_player_colors(quick_key, player_colors):
+        """Prints the colour for each player"""
+        
+        for player in quick_key:
+                print(ansi_stitching(player_colors[player - 1], f"Player {player}, this is your color."))
+                time.sleep(0.3)
+                
+                
+def get_color(player_color : list) -> list:
+    color_codes = {"red" : [255, 0, 0], "green" : [0, 255, 0], "blue" : [0, 0, 255]}
+    for color in color_codes:#iterate through colours               
+        valid_input = False
+        while not valid_input:#makes sure that it doesn't end without getting the right colour
+            action = input(ansi_stitching(color_codes[color], f"‧₊˚♪ 𝄞₊˚⊹ What value would you like to use for {color}? ‧₊˚♪ 𝄞₊˚⊹\n˚₊ · »-♡→ ")).strip().lower()
+            try:
+                if int(action) <= 255:
+                    player_color.append(int(action))
+                    valid_input = True
+                else:
+                    print("Sorry; RGB values only go up to 255.")
+                    
+            except ValueError:
+                print("Please input a valid integer, in arabic numerals, within the range of 0 to 255.")
+                                    
+    return player_color
+    
+    
 def create_player_info() -> tuple[list, dict]:
     """Obtains player information needed to initialise variables"""
     
     quick_key = create_player_key(get_player_number())
-    player_dicts = {}
+    player_dicts = {}#the player dictionaries are also stored in dictionaries
     player_names = []
     for player in quick_key:
         player_dicts[player] = {}
@@ -347,23 +446,27 @@ ENTER YOUR COMMAND TO BEGIN""")#the welcome message
             print("That's not currently a valid command.")
       
 
-def initial_loop(player_info : PlayerInfo, grid : Grid, game_bank : dict) -> tuple[PlayerInfo, Grid, dict]:
-	"""Carries out the initial loop for the players to place down their settlements and roads FOR FREE."""
+def initial_loop(player_info : PlayerInfo, grid : Grid) -> tuple[PlayerInfo, Grid]:
+    """Carries out the initial loop for the players to place down their settlements and roads FOR FREE."""
+    
+    game_bank = player_info.game_bank
 
-	print_board(player_info, grid, game_bank)
-	print(f"We'll go from player 1 to player {len(player_info.quick_key)}; you can place two settlements and two roads for free. Please choose wisely.")
-	
-	for i in range(2):
-		for player in player_info.quick_key:
-			player_info.player_turn = player
-			
-			player_info, grid = place_settlement(player_info, grid, game_bank)
-			player_info, grid = place_road(player_info, grid, game_bank)
-					
+    print_board(player_info, grid)
+    print(f"We'll go from player 1 to player {len(player_info.quick_key)}; you can place two settlements and two roads for free. Please choose wisely.")
 
-	player_info.player_turn = 1
-					
-	return player_info, grid, game_bank
+    for i in range(2):
+        for player in player_info.quick_key:
+            player_info.player_turn = player
+            
+            player_info, grid = place_settlement(player_info, grid, game_bank)
+            player_info, grid = place_road(player_info, grid, game_bank)
+                    
+
+    player_info.player_turn = 1
+    player_info.game_bank = game_bank
+                    
+    return player_info, grid
+    
     
 def print_grid(grid : Grid):
         """Prints out the grid. KEEP THIS SUBROUTINE FOLDED OR IT WILL BE A GIANT BLOCK OF TEXT"""
@@ -564,52 +667,50 @@ grid.roads['sx']['display'] + " " + (grid.roads["xy"]['display'] + " ") * 4 + gr
         
     
 def place_road(player_info : PlayerInfo, grid : Grid, game_bank : dict) -> tuple[PlayerInfo, Grid]:
-        """Places down a road and changes player information accordingly, as well as the grid. Does not take resources from the player in the process."""
-        
-        player = player_info.player_turn
-        
-        valid = False
-        while not valid:
-                text = input(ansi_stitching(player_info.player_dicts[player]['color'], f"Player {player}, where are you placing your road?") + "\n˚₊ · »-♡→ ").strip()
-                valid = check(text, grid, player_info, "road")
-        player_info.player_dicts[player]['roads'].append(text)
-        grid.roads[quick_reorder(text)]['display'] = ansi_stitching(player_info.player_dicts[player]['color'], grid.roads[quick_reorder(text)]['display'])
-        clear_screen()
-        print_board(player_info, grid, game_bank)
-        
-        return player_info, grid
+    """Places down a road and changes player information accordingly, as well as the grid. Does not take resources from the player in the process."""
+    
+    player = player_info.player_turn
+    
+    valid = False
+    while not valid:
+        text = input(ansi_stitching(player_info.player_dicts[player]['color'], f"Player {player}, where are you placing your road?") + "\n˚₊ · »-♡→ ").strip()
+        valid = check(text, grid, player_info, "road")
+        if text == 'cls':
+            clear_screen()
+            print_board(player_info, grid)
+    player_info.player_dicts[player]['roads'].append(text)
+    grid.roads[quick_reorder(text)]['display'] = ansi_stitching(player_info.player_dicts[player]['color'], grid.roads[quick_reorder(text)]['display'])
+    clear_screen()
+    print_board(player_info, grid)
+    
+    return player_info, grid
     
     
 def check(text : str, grid : Grid, player_info : PlayerInfo, mode : str) -> bool:
 	"""Checks if the settlement/road is eligible to be claimed"""
 
 	valid = True 
-
 	if mode == 'settlement':
 		settlement = text
 		try:
 			if grid.settlement_locs[settlement]['owner'] != 0:
 				print("This settlement is already taken. Pro tip: if it has a colour, it's not up for grabs.")
 				valid = False
-					
 			else:
 				related_roads = []
 				for road in grid.roads:
 					if settlement in road:
 						related_roads.append(road)
-				
 				related_settlements = []
 				for road in related_roads:
 					for place in road:
 						if place != settlement:
 							related_settlements.append(place)
-
 				for place in related_settlements:
 					if grid.settlement_locs[place]['owner'] != 0:
 						print(f"It looks like you're trying to place a settlement adjacent to another settlement, 'location {place}'. You must place it at least two roads away.")
 						valid = False
 						break
-	
 		except KeyError:
 			if settlement in grid.settlement_locs:
 				valid = True
@@ -618,15 +719,15 @@ def check(text : str, grid : Grid, player_info : PlayerInfo, mode : str) -> bool
 				valid = False
 
 		if player_info.game_stage != 1:
-				case = []
+				case = False
 				for road in grid.roads:
 						if settlement in road:
 								if grid.roads[road]['owner'] != 0:
 										owner = grid.roads[road]['owner']
 										if owner == player_info.player_turn:
-												case.append(road)
+												case = True
 
-				if len(case) != 0:
+				if case:
 						print("Congratulations on obtaining a new settlement.")
 				else:
 						print("You can only build next to a road that you own. Sorry.")
@@ -649,25 +750,25 @@ def check(text : str, grid : Grid, player_info : PlayerInfo, mode : str) -> bool
 					if owner != player_info.player_turn and grid.roads[text]['owner'] != 0:
 							print("That road already belongs to someone else.")
 							valid = False         
-					case = []
+					case = False
 					for settlement in text:
 							if grid.settlement_locs[settlement]['owner'] != 0:
 									owner = grid.settlement_locs[settlement]['owner']
 									if player_info.player_turn == owner:
-											case.append(settlement)
+											case = True
 
 							for road in grid.roads:
 									if settlement in road:
 											owner = grid.settlement_locs[settlement]['owner']
 											if player_info.player_turn == owner:
-													case.append(road)
+													case = True
 													
 							for road in player_info.player_dicts[player_info.player_turn]["roads"]:
 									for char in road:
 											if char in text:
-													case.append(road)
+													case = True
 					
-					if valid != False and len(case) != 0:
+					if valid != False and case:
 							print("Congratulations on paving a new road.")
 					else:
 							print("You don't own any settlements/roads next to that road, so you can't build it. Sorry.")
@@ -677,42 +778,63 @@ def check(text : str, grid : Grid, player_info : PlayerInfo, mode : str) -> bool
     
     
 def place_settlement(player_info : PlayerInfo, grid, game_bank):
-	"""Places down a settlement. Does not deduct any resources from the player, do this separately"""
-	
-	player = player_info.player_turn
-	valid = False
-	while not valid:
-		text = input(ansi_stitching(player_info.player_dicts[player]['color'], f"Player {player}, where would you like to place your settlement?") + "\n˚₊ · »-♡→ ").strip()
-		valid = check(text, grid, player_info, "settlement")
-	player_info.player_dicts[player]['settlements'].append(text)
-	print(grid.settlement_locs[text]['display'])
-	grid.settlement_locs[text]['display'] = ansi_stitching(player_info.player_dicts[player]['color'], grid.settlement_locs[text]['display'])
-	grid.settlement_locs[text]['owner'] = player
-	clear_screen()
-	print_board(player_info, grid, game_bank)
-	
-	return player_info, grid
+    """Places down a settlement. Does not deduct any resources from the player, do this separately"""
+
+    player = player_info.player_turn
+    valid = False
+    while not valid:
+        text = input(ansi_stitching(player_info.player_dicts[player]['color'], f"Player {player}, where would you like to place your settlement?") + "\n˚₊ · »-♡→ ").strip()
+        valid = check(text, grid, player_info, "settlement")
+        if text == 'cls':
+            clear_screen()
+            print_board(player_info, grid)
+    player_info.player_dicts[player]['settlements'].append(text)
+    print(grid.settlement_locs[text]['display'])
+    grid.settlement_locs[text]['display'] = ansi_stitching(player_info.player_dicts[player]['color'], grid.settlement_locs[text]['display'])
+    grid.settlement_locs[text]['owner'] = player
+    clear_screen()
+    print_board(player_info, grid)
+
+    return player_info, grid
     
     
-def print_board(player_info : PlayerInfo, grid : Grid, game_bank : dict):
-	"""Prints out basic information (visual display for what players need to see during their turns)"""
+def print_board(player_info : PlayerInfo, grid : Grid):
+    """Prints out basic information (visual display for what players need to see during their turns)"""
+
+    print("________ WELCOME TO THE WORLD OF CATAN. WHERE WILL YOU SETTLE TODAY? ________\n")
+    print(f"˗ˋˏ$ˎˊ˗ GAME BANK ˗ˋˏ$ˎˊ˗")
+    game_bank = player_info.game_bank
+    for resource in game_bank["resources"]:
+        print(f'{resource} : {game_bank["resources"][resource]}', end="  ||  ")
+    print("\n")
+    for dev_card in game_bank['dev_cards']:
+        print(f'{dev_card} : {game_bank["dev_cards"][dev_card]}', end="  ||  ")
+    print("\n")
+    for player in player_info.quick_key:
+        print(ansi_stitching(player_info.player_dicts[player]['color'], f"Player {player} ({player_info.player_dicts[player]['name']})"), end="  ||  ")
+    print("\n")
+
+    print_grid(grid)
+
+    print(f"The robber is currently pillaging the citizens of {grid.robber} and stealing all their {grid.tiles[grid.robber]['biome']}...")
 	
-	print("________ WELCOME TO THE WORLD OF CATAN. WHERE WILL YOU SETTLE TODAY? ________\n")
-	print(f"˗ˋˏ$ˎˊ˗ GAME BANK ˗ˋˏ$ˎˊ˗")
-	for resource in game_bank["resources"]:
-		print(f'{resource} : {game_bank["resources"][resource]}', end="  ||  ")
-	print("\n")
-	for dev_card in game_bank['dev_cards']:
-		print(f'{dev_card} : {game_bank["dev_cards"][dev_card]}', end="  ||  ")
-	print("\n")
-	for player in player_info.quick_key:
-		print(ansi_stitching(player_info.player_dicts[player]['color'], f"Player {player} ({player_info.player_dicts[player]['name']})"), end="  ||  ")
-	print("\n")
-	
-	print_grid(grid)
-	
-	print(f"The robber is currently pillaging the citizens of {grid.robber} and stealing all their {grid.tiles[grid.robber]['biome']}...")
-	
+def add_keys(player_info : PlayerInfo) -> dict:
+    """Adds keys to each existing player dictionary"""
+    player_dicts = player_info.player_dicts
+    
+    for player in player_info.quick_key:
+            
+        player_dicts[player]['roads'] = []
+        player_dicts[player]['settlements'] = []
+        player_dicts[player]['cities'] = []
+        player_dicts[player]['construct_bank'] = {"settlements": 5, "cities": 4, "roads": 15}
+        
+        player_dicts[player]['achievements'] = {"longest road" : 0, "largest army" : 0}
+        player_dicts[player]['knights_recruited'] = 0
+        player_dicts[player]['VP cards'] = 0
+            
+    return player_dicts
+    
     
 def make_biomes() -> list:
         """Creates a list of biomes"""
@@ -749,9 +871,13 @@ def create_classes() -> tuple[Grid, PlayerInfo, GameInfo]:
     
 def main():
     """Main code for the game, initially called"""
-    get_initial_inputs()
-    #the initial input loop ends as soon as the game starts, so the game is directly programmed into main.
-    grid, player_info, game_info = create_classes()
+    sys.exit()########remove this line if playing
+    get_initial_inputs()#the initial input loop ends as soon as the game starts
+    grid, player_info, game_info = create_classes()#assigns variables to the classes and makes them direct objects to call
+    player_info.player_dicts = add_colours(player_info)#gives each player colours
+    player_info.player_dicts = add_keys(player_info)#adds further keys to player dictionaries
+    player_info, grid = initial_loop(player_info, grid)#go through the initial loop for the game
+    
     
     
 
