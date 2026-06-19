@@ -472,15 +472,7 @@ def add_keys(player_info : PlayerInfo, game_info : GameInfo) -> dict:
     player_dicts = player_info.player_dicts
     
     for player in player_info.quick_key:
-            
-        player_dicts[player]['roads'] = []
-        player_dicts[player]['settlements'] = []
-        player_dicts[player]['cities'] = []
-        player_dicts[player]['construct_bank'] = {"settlements": 3, "cities": 4, "roads": 13}#technically they have more but they use it up initially - so it's easier to do this
-        
-        player_dicts[player]['achievements'] = {"longest road" : 0, "largest army" : 0}
-        player_dicts[player]['knights_recruited'] = 0
-        player_dicts[player]['VP cards'] = 0
+        player_dicts[player]['constructs'] = {"settlements": 3, "cities": 4, "roads": 13, "settlement list" : [], "city list" : [], "road list" : []}#technically they have more but they use it up initially - so it's easier to do this
         
         player_dicts[player]['resources'] = {}
         for resource in game_info.resources:
@@ -494,19 +486,20 @@ def add_keys(player_info : PlayerInfo, game_info : GameInfo) -> dict:
     
 
 def get_player_password() -> str:
-        """Gets a password and checks if it's valid."""
+    """Gets a password and checks if it's valid."""
+    
+    valid_password = False
+    while not valid_password:
+        password = input("Please enter a password; it'll be used to check for your consent later. Keep it short but memorable," + 
+                            "and make sure it's not a password you use for important sites.\n˚₊ · »-♡→ ")
         
-        valid_password = False
-        while not valid_password:
-                password = input("Please enter a password; it'll be used to check for your consent later. Keep it short but memorable," + 
-                                 "and make sure it's not a password you use for important sites.\n˚₊ · »-♡→ ")
-                
-                if len(password) > 7:
-                        print("That password is way too long. Keep it to 7 or below characters.")
-                else:
-                        valid_password = True
-        
-        return password
+        if len(password) > 7:
+            print("That password is way too long. Keep it to 7 or below characters.")
+        else:
+            print("Okay. At all costs, do NOT forget your password!")
+            valid_password = True
+    
+    return password
     
     
 ##GRID GENERATION
@@ -665,9 +658,9 @@ def create_game_bank(game_info : GameInfo):
     game_bank['cards'] = dev_bank
     
     #initialises construct number
-    game_bank['constructs'] = {'road' : 60,
-                     'settlement' : 20,
-                     'city' : 16
+    game_bank['constructs'] = {'roads' : 60,
+                     'settlements' : 20,
+                     'cities' : 16
     }
     
     #creates a bank of building costs that the game can directly access
@@ -752,13 +745,13 @@ def place_settlement(player_info : PlayerInfo, grid):
             clear_screen()
             print_board(player_info, grid)
             
-    player_info.player_dicts[player]['settlements'].append(text)#adds the new settlement to the player's list of settlements
+    player_info.player_dicts[player]['constructs']['settlement list'].append(text)#adds the new settlement to the player's list of settlements
     grid.settlement_locs[text]['display'] = ansi_stitching(player_info.player_dicts[player]['color'], grid.settlement_locs[text]['display'])
     grid.settlement_locs[text]['owner'] = player
     clear_screen()
     print_board(player_info, grid)
     
-    player_info.game_bank['constructs']['roads'][quick_reorder(text)] -= 1
+    player_info.game_bank['constructs']['roads'] -= 1
     return player_info, grid
     
 	
@@ -766,8 +759,13 @@ def place_settlement(player_info : PlayerInfo, grid):
 
 
 def force_password(player_info : PlayerInfo):
-    pass
-
+    while True:
+        attempt = input("Enter your password. (Turn your screen away from the other players).\n˚₊ · »-♡→ ")
+        if attempt == player_info.player_dicts[player_info.player_turn]['password']:
+            break
+        else:
+            print("Wrong password. Oh no, are we stuck in an infinite loop now? YOU WERE PROMPTED TO PUT SOMETHING MEMORABLE DOWN.")
+        
 
 def quick_reorder(road : str):
     """Reorders a 2-letter string based on ascii values (alphabetical order I suppose). 
@@ -805,6 +803,7 @@ def check_settlement(text : str, grid : Grid, player_info : PlayerInfo, initial 
             return True
     if initial:
         print("Congratulations on obtaining your free settlement!!")
+        return True
     else:
         print("You don't own a connected road - you must have a claim to the road. Sorry.")
         return False
@@ -827,9 +826,9 @@ def check_road(text : str, grid : Grid, player_info : PlayerInfo, initial : int=
         return False
     
     settlement_rights = []
-    for road in player_info.player_dicts[player_info.player_turn]['roads']:
+    for road in player_info.player_dicts[player_info.player_turn]['constructs']['road list']:
         settlement_rights.append(settlement for settlement in road)
-    for settlement in player_info.player_dicts[player_info.player_turn]['settlements']:
+    for settlement in player_info.player_dicts[player_info.player_turn]['constructs']['settlement list']:
         settlement_rights.append(settlement)
     
     for claim in settlement_rights:
@@ -952,11 +951,9 @@ def initial_loop(player_info : PlayerInfo, grid : Grid) -> tuple[PlayerInfo, Gri
     for i in range(2):
         for player in player_info.quick_key:
             player_info.player_turn = player
-            
             player_info, grid = place_settlement(player_info, grid)
             player_info, grid = place_road(player_info, grid)
                     
-
     player_info.player_turn = 1
     player_info.game_bank = game_bank
                     
@@ -1012,13 +1009,15 @@ def main_game(player_info, grid):
     
 def main():
     """Main code for the game, initially called"""
-    sys.exit()########remove this line if playing
-    get_initial_inputs()#the initial input loop ends as soon as the game starts
-    grid, player_info, game_info = create_classes()#assigns variables to the classes and makes them direct objects to call
-    player_info.player_dicts = add_colours(player_info)#gives each player colours
-    player_info.player_dicts = add_keys(player_info, game_info)#adds further keys to player dictionaries
-    player_info, grid = initial_loop(player_info, grid)#go through the initial loop for the game
-    print(player_info.player_dicts)#FLAGFLAGFLAG
+    while True:
+        sys.exit()########remove this line if playing
+        get_initial_inputs()#the initial input loop ends as soon as the game starts
+        grid, player_info, game_info = create_classes()#assigns variables to the classes and makes them direct objects to call
+        player_info.player_dicts = add_colours(player_info)#gives each player colours
+        player_info.player_dicts = add_keys(player_info, game_info)#adds further keys to player dictionaries
+        player_info, grid = initial_loop(player_info, grid)#go through the initial loop for the game
+        print(player_info.player_dicts)#FLAGFLAGFLAG
+        main_game(player_info, grid)
     
     
 ##DO NOT TOUCH
