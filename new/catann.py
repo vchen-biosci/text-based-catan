@@ -1,5 +1,7 @@
 import random, time, sys
 
+##CLASSES
+
 class GameInfo:
     """An object containing future variables that the program may reference"""
     def __init__(self):
@@ -42,8 +44,6 @@ class PlayerInfo:
         self.game_stage = 1
 
 
-
-
 class Grid:
     """An object to contain all the important information needed to render the grid or access its variables"""
     def __init__(self, robber, tiles, settlement_locs, roads, biomes):
@@ -61,11 +61,15 @@ class Grid:
 }
         self.biomes = biomes
     
-    
+
+##DISPLAY-RELATED
+
 def clear_screen():
     """Clears the screen with ansi code"""
     print("\033c", end="")
     
+
+##COLOURS
 
 def ansi_stitching(color : list, text : str) -> str:
 	"""Edits the string's value with an ANSI code that imbues it with pretty colours :3"""
@@ -179,7 +183,9 @@ def get_color(player_color : list) -> list:
                                     
     return player_color
     
-    
+
+##PLAYER DICTIONARIES
+  
 def create_player_info() -> tuple[list, dict]:
     """Obtains player information needed to initialise variables"""
     
@@ -206,6 +212,23 @@ def create_player_key(player_number : int) -> list:
     return quick_key
 
 
+def get_player_number() -> int:
+    """Gets the number of players, repeats until valid"""
+    
+    player_number = 0
+    while not player_number in [3, 4]:#only 3 and 4 players are accepted so I simply created a list to make the conditional shorter.
+        try:
+            player_number = int(input("How many people are playing? ⋆˚✿🍒𐙚⋆˚\n˚₊ · »-♡→ ").strip()) 
+            if not player_number in [3, 4]:
+                print("You can only play with 3 or 4 people.")
+                
+        except ValueError:#as not entering an integer would lead the 'int' to return a value error (the types do not align)
+            print("Enter an integer (3 or 4) please.")
+            
+    return player_number
+
+##GRID GENERATION
+
 def create_tiles() -> dict:
     """Creates one of each tile in a dictionary of tiles"""
         
@@ -228,14 +251,18 @@ def place_desert(tiles : dict) -> tuple[dict, str]:
     return tiles, robber
 
 
-def quick_reorder(road : str):
-    """Reorders a 2-letter string based on ascii values (alphabetical order I suppose). 
-        This allows me to standardise the way in which roads are called from the dictionary."""
-
-    if road[0] > road[1]:
-        road = road[1] + road[0]
-
-    return road
+def make_token_list() -> list:
+    """These are the possible tokens that can be assigned onto hexes."""
+        
+    number_tokens = []
+    for i in range(2,12): #the range is between 2 and 11 inclusive as 1 and 12 only appear once.
+        for x in range(2): #need to repeat this twice as these tokens appear twice.
+            number_tokens.append(i)
+        
+    number_tokens.append(1)
+    number_tokens.append(12)
+        
+    return number_tokens
 
 
 def create_roads() -> dict:
@@ -349,35 +376,9 @@ def create_game_bank():
     
     return game_bank
 
+ 
+ 
 
-def get_player_number() -> int:
-    """Gets the number of players, repeats until valid"""
-    
-    player_number = 0
-    while not player_number in [3, 4]:#only 3 and 4 players are accepted so I simply created a list to make the conditional shorter.
-        try:
-            player_number = int(input("How many people are playing? ⋆˚✿🍒𐙚⋆˚\n˚₊ · »-♡→ ").strip()) 
-            if not player_number in [3, 4]:
-                print("You can only play with 3 or 4 people.")
-                
-        except ValueError:#as not entering an integer would lead the 'int' to return a value error (the types do not align)
-            print("Enter an integer (3 or 4) please.")
-            
-    return player_number
- 
- 
-def make_token_list() -> list:
-    """These are the possible tokens that can be assigned onto hexes."""
-        
-    number_tokens = []
-    for i in range(2,12): #the range is between 2 and 11 inclusive as 1 and 12 only appear once.
-        for x in range(2): #need to repeat this twice as these tokens appear twice.
-            number_tokens.append(i)
-        
-    number_tokens.append(1)
-    number_tokens.append(12)
-        
-    return number_tokens
 
  
 def initialise_resource_cards() -> tuple[dict, dict]:
@@ -398,6 +399,15 @@ def initialise_resource_cards() -> tuple[dict, dict]:
     return resources, dev_bank
  
  
+def quick_reorder(road : str):
+    """Reorders a 2-letter string based on ascii values (alphabetical order I suppose). 
+        This allows me to standardise the way in which roads are called from the dictionary."""
+
+    if road[0] > road[1]:
+        road = road[1] + road[0]
+
+    return road
+
 def get_player_name(player : int, player_names : list) -> str:
     """Gets the name of the current player and checks the length and if it is composed of numbers."""
     
