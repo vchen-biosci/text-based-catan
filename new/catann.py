@@ -821,8 +821,11 @@ def check_road(text : str, grid : Grid, player_info : PlayerInfo, initial : int=
         return False
     
     owner = grid.roads[text]['owner']
-    if owner != player_info.player_turn and owner != 0:#checks if a player that's not the current one owns it
-        print(f"That road already belongs to player {owner}. Better luck next time.")
+    if owner != 0:#checks if a player that's not the current one owns it
+        if owner != player_info.player_turn:
+            print(f"That road already belongs to player {owner}. Better luck next time.")
+        else:
+            print("You already own that road.")
         return False
     
     settlement_rights = []
@@ -1016,7 +1019,6 @@ def main():
         player_info.player_dicts = add_colours(player_info)#gives each player colours
         player_info.player_dicts = add_keys(player_info, game_info)#adds further keys to player dictionaries
         player_info, grid = initial_loop(player_info, grid)#go through the initial loop for the game
-        print(player_info.player_dicts)#FLAGFLAGFLAG
         main_game(player_info, grid)
     
     
