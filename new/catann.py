@@ -416,6 +416,7 @@ def create_player_info() -> tuple[list, dict]:
         name = get_player_name(player, player_names)
         player_dicts[player]['name'] = name
         player_names.append(name)
+        player_dicts[player]['password'] = get_player_password()
     
     return quick_key, player_dicts
     
@@ -492,6 +493,22 @@ def add_keys(player_info : PlayerInfo, game_info : GameInfo) -> dict:
     return player_dicts
     
 
+def get_player_password() -> str:
+        """Gets a password and checks if it's valid."""
+        
+        valid_password = False
+        while not valid_password:
+                password = input("Please enter a password; it'll be used to check for your consent later. Keep it short but memorable," + 
+                                 "and make sure it's not a password you use for important sites.\n˚₊ · »-♡→ ")
+                
+                if len(password) > 7:
+                        print("That password is way too long. Keep it to 7 or below characters.")
+                else:
+                        valid_password = True
+        
+        return password
+    
+    
 ##GRID GENERATION
 
 
@@ -697,17 +714,21 @@ def place_road(player_info : PlayerInfo, grid : Grid) -> tuple[PlayerInfo, Grid]
     """Places down a road and changes player information accordingly, as well as the grid. Does not take resources from the player in the process."""
     
     player = player_info.player_turn
+    if player_info.player_dicts[player]['constructs']['roads'] < 1:
+        print("You've used up all your possible roads. Sorry.")
+        return player_info, grid
     
     valid = False
     while not valid:
         text = input(ansi_stitching(player_info.player_dicts[player]['color'], f"Player {player}, where are you placing your road?") + "\n˚₊ · »-♡→ ").strip()
-        valid = check(text, grid, player_info, "road")
+        valid = check_road(text, grid, player_info, 1)
         if text == 'cls':#allows player to clear their screen
             clear_screen()
             print_board(player_info, grid)
             
     player_info.player_dicts[player]['roads'].append(text)
     grid.roads[quick_reorder(text)]['display'] = ansi_stitching(player_info.player_dicts[player]['color'], grid.roads[quick_reorder(text)]['display'])
+    grid.roads[quick_reorder(text)]['owner'] = player
     clear_screen()
     print_board(player_info, grid)
     
@@ -715,28 +736,37 @@ def place_road(player_info : PlayerInfo, grid : Grid) -> tuple[PlayerInfo, Grid]
     return player_info, grid
 
 
-def place_settlement(player_info : PlayerInfo, grid, game_bank):
+def place_settlement(player_info : PlayerInfo, grid):
     """Places down a settlement. Does not deduct any resources from the player, do this separately"""
 
     player = player_info.player_turn
+    if player_info.player_dicts[player]['constructs']['settlements'] < 1:
+        print("You have no more settlements! Sorry.")
+        return player_info, grid#ends the subroutine early
+    
     valid = False
     while not valid:
         text = input(ansi_stitching(player_info.player_dicts[player]['color'], f"Player {player}, where would you like to place your settlement?") + "\n˚₊ · »-♡→ ").strip()
-        valid = check(text, grid, player_info, "settlement")
+        valid = check_settlement(text, grid, player_info, 1)
         if text == 'cls':
             clear_screen()
             print_board(player_info, grid)
-    player_info.player_dicts[player]['settlements'].append(text)
-    print(grid.settlement_locs[text]['display'])
+            
+    player_info.player_dicts[player]['settlements'].append(text)#adds the new settlement to the player's list of settlements
     grid.settlement_locs[text]['display'] = ansi_stitching(player_info.player_dicts[player]['color'], grid.settlement_locs[text]['display'])
     grid.settlement_locs[text]['owner'] = player
     clear_screen()
     print_board(player_info, grid)
-
+    
+    player_info.game_bank['constructs']['roads'][quick_reorder(text)] -= 1
     return player_info, grid
     
 	
 ##PROCESSING
+
+
+def force_password(player_info : PlayerInfo):
+    pass
 
 
 def quick_reorder(road : str):
@@ -749,58 +779,7 @@ def quick_reorder(road : str):
     return road
 
 
-def check(text : str, grid : Grid, player_info : PlayerInfo, mode : str) -> bool:
-	"""Checks if the settlement/road is eligible to be claimed"""
-
-	valid = True 
-	if mode == 'settlement':
-		settlement = text
-		try:
-			if grid.settlement_locs[settlement]['owner'] != 0:
-				print("This settlement is already taken. Pro tip: if it has a colour, it's not up for grabs.")
-				valid = False
-			else:
-				related_roads = []
-				for road in grid.roads:
-					if settlement in road:
-						related_roads.append(road)
-				related_settlements = []
-				for road in related_roads:
-					for place in road:
-						if place != settlement:
-							related_settlements.append(place)
-				for place in related_settlements:
-					if grid.settlement_locs[place]['owner'] != 0:
-						print(f"It looks like you're trying to place a settlement adjacent to another settlement, 'location {place}'. You must place it at least two roads away.")
-						valid = False
-						break
-		except KeyError:
-			if settlement in grid.settlement_locs:
-				valid = True
-			else:
-				print("That settlement doesn't exist.")
-				valid = False
-
-		if player_info.game_stage != 1:
-				case = False
-				for road in grid.roads:
-						if settlement in road:
-								if grid.roads[road]['owner'] != 0:
-										owner = grid.roads[road]['owner']
-										if owner == player_info.player_turn:
-												case = True
-
-				if case:
-						print("Congratulations on obtaining a new settlement.")
-				else:
-						print("You can only build next to a road that you own. Sorry.")
-						valid = False
-
-	return valid
-
-
-
-def check_settlement(text : str, grid : Grid, player_info : PlayerInfo):
+def check_settlement(text : str, grid : Grid, player_info : PlayerInfo, initial : int=0):
     if not text in grid.settlement_locs:
         print("That settlement doesn't exist.")
         return False
@@ -815,9 +794,23 @@ def check_settlement(text : str, grid : Grid, player_info : PlayerInfo):
     for road in grid.roads:
         if text in road:
             related_roads.append(road)
+    for road in related_roads:
+        adjacent_settlement = road.replace(text, '')
+        if grid.settlement_locs[adjacent_settlement]['owner']:
+            print(f"The adjacent settlement, '{adjacent_settlement}', is already owned. You can't build directly next to it.")
+            return False
+    for road in related_roads:
+        if grid.roads[road]['owner'] == player_info.player_turn:
+            print("Congratulations on building a new settlement!")
+            return True
+    if initial:
+        print("Congratulations on obtaining your free settlement!!")
+    else:
+        print("You don't own a connected road - you must have a claim to the road. Sorry.")
+        return False
 
 
-def check_road(text : str, grid : Grid, player_info : PlayerInfo) -> bool:
+def check_road(text : str, grid : Grid, player_info : PlayerInfo, initial : int=0) -> bool:
     try:
         text = quick_reorder(text)
     except IndexError:
@@ -844,8 +837,12 @@ def check_road(text : str, grid : Grid, player_info : PlayerInfo) -> bool:
             print("Congratulations on paving your new road!")
             return True
     
-    print("You don't own any settlements/roads next to that road, so you don't have ownership rights. Sorry.")
-    return False
+    if initial:
+        print("Congratulations on paving a free road!")
+        return True
+    else:
+        print("You don't own any settlements/roads next to that road, so you don't have ownership rights. Sorry.")
+        return False
 
 
 def create_classes() -> tuple[Grid, PlayerInfo, GameInfo]:
@@ -880,6 +877,38 @@ def allow_turn_end(roll_allowed : bool, player_info : PlayerInfo) -> bool:
         return turn
   
     
+def proceed(materials_needed : dict, player_info : PlayerInfo) -> bool:
+    for resource in materials_needed:
+        print("")
+        owned = player_info.player_dicts['resources'][resource]
+        if owned < materials_needed[resource]:
+            print(f"You don't have enough {resource}. Trade unsuccessful. You need {materials_needed[resource]} but only have {owned}.")
+            return False
+        else:
+            print(f"You have enough {resource} for the trade. (You have {owned}, {materials_needed[resource]} are required)")
+        time.sleep(0.1)
+            
+    while True:
+        action = input("You have enough of every resource. Would you like to proceed with the trade?\n˚₊ · »-♡→ ").strip().lower()
+        if action in ['no', 'x', 'cancel']:
+            print("OK, the trade is canceled.")
+            return False
+        elif action in ['yes', 'y', 'continue', 'proceed']:
+            print("OK, we will proceed to the checking stage to make sure you are eligible.")
+            return True
+        elif action == 'check':
+            print("""The possible commands you can use here are:
+> 'yes' to confirm the trade 
+> 'no' to end the trade
+> 'cls' to clear the screen
+> 'check' to check commands.
+Have fun trading~""")
+        elif action == 'cls':
+            clear_screen()
+        else:
+            print("Unsure of the commands? Use 'check' to see what you can input here.")
+
+
 ##PROGRAM STAGES
 
 
@@ -924,8 +953,8 @@ def initial_loop(player_info : PlayerInfo, grid : Grid) -> tuple[PlayerInfo, Gri
         for player in player_info.quick_key:
             player_info.player_turn = player
             
-            player_info, grid = place_settlement(player_info, grid, game_bank)
-            player_info, grid = place_road(player_info, grid, game_bank)
+            player_info, grid = place_settlement(player_info, grid)
+            player_info, grid = place_road(player_info, grid)
                     
 
     player_info.player_turn = 1
