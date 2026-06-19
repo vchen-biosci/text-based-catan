@@ -796,53 +796,30 @@ def check(text : str, grid : Grid, player_info : PlayerInfo, mode : str) -> bool
 						print("You can only build next to a road that you own. Sorry.")
 						valid = False
 
-
-	elif mode == 'road':
-
-			try:
-					text = quick_reorder(text)
-			except IndexError:
-					pass
-
-			if text not in grid.roads:
-					valid = False
-					print("That road doesn't exist.")
-
-			else:      
-					owner = grid.roads[text]['owner']
-					if owner != player_info.player_turn and grid.roads[text]['owner'] != 0:
-							print("That road already belongs to someone else.")
-							valid = False         
-					case = False
-					for settlement in text:
-							if grid.settlement_locs[settlement]['owner'] != 0:
-									owner = grid.settlement_locs[settlement]['owner']
-									if player_info.player_turn == owner:
-											case = True
-
-							for road in grid.roads:
-									if settlement in road:
-											owner = grid.settlement_locs[settlement]['owner']
-											if player_info.player_turn == owner:
-													case = True
-													
-							for road in player_info.player_dicts[player_info.player_turn]["roads"]:
-									for char in road:
-											if char in text:
-													case = True
-					
-					if valid != False and case:
-							print("Congratulations on paving a new road.")
-					else:
-							print("You don't own any settlements/roads next to that road, so you can't build it. Sorry.")
-							valid = False
-
 	return valid
+
+
+
+def check_settlement(text : str, grid : Grid, player_info : PlayerInfo):
+    if not text in grid.settlement_locs:
+        print("That settlement doesn't exist.")
+        return False
+    owner = grid.settlement_locs[text]['owner']
+    if owner != 0:#Checks if it's already owned. If so, then the players should not be allowed to obtain it.
+        if owner == player_info.player_turn:
+            print("You already own it!")
+        else:
+            print(f"This road is already owned by player {owner}. Pro tip: if it's coloured, it's not up for grabs.")
+        return False#Both statements will obtain false.
+    related_roads = []
+    for road in grid.roads:
+        if text in road:
+            related_roads.append(road)
 
 
 def check_road(text : str, grid : Grid, player_info : PlayerInfo) -> bool:
     try:
-        quick_reorder(text)
+        text = quick_reorder(text)
     except IndexError:
         print("Roads are two letters long. Please enter the settlements that you are stringing together!")
         return False
@@ -856,11 +833,19 @@ def check_road(text : str, grid : Grid, player_info : PlayerInfo) -> bool:
         print(f"That road already belongs to player {owner}. Better luck next time.")
         return False
     
-    for settlement in text:
-        owner = grid.settlement_locs[settlement]['owner']
-        if owner != 0
+    settlement_rights = []
+    for road in player_info.player_dicts[player_info.player_turn]['roads']:
+        settlement_rights.append(settlement for settlement in road)
+    for settlement in player_info.player_dicts[player_info.player_turn]['settlements']:
+        settlement_rights.append(settlement)
     
-    return False#FLAGFLAGFLAG
+    for claim in settlement_rights:
+        if claim in text:
+            print("Congratulations on paving your new road!")
+            return True
+    
+    print("You don't own any settlements/roads next to that road, so you don't have ownership rights. Sorry.")
+    return False
 
 
 def create_classes() -> tuple[Grid, PlayerInfo, GameInfo]:
@@ -998,7 +983,7 @@ def main_game(player_info, grid):
     
 def main():
     """Main code for the game, initially called"""
-    #sys.exit()########remove this line if playing
+    sys.exit()########remove this line if playing
     get_initial_inputs()#the initial input loop ends as soon as the game starts
     grid, player_info, game_info = create_classes()#assigns variables to the classes and makes them direct objects to call
     player_info.player_dicts = add_colours(player_info)#gives each player colours
