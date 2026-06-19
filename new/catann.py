@@ -488,6 +488,35 @@ def add_keys(player_info : PlayerInfo) -> dict:
     return player_dicts
     
 
+def setup_player_dicts(player_dicts, game_info) -> dict:
+        """Adds a bountiful multitude of keys to each player's dictionary"""
+        
+        resources = game_info.resources
+        player_names = []
+        player_dicts = create_player_dicts(quick_key)
+        for player in quick_key:
+                
+                name = get_player_name(player, player_names)
+                player_names.append(name)
+                player_dicts[player]['name'] = name
+                player_dicts[player]['password'] = get_player_password()
+                
+                player_dicts[player]["resources"] = {}
+                for resource in resources:
+                        player_dicts[player]["resources"][resource] = 0
+                player_dicts[player]["dev_cards"] = {}
+                
+                quick_dict = dict(zip(["knight", "year of plenty", "build road", "monopoly", "VP cards"], [14, 2, 2, 2, 5]))
+                for dev_card in quick_dict:
+                        player_dicts[player]["dev_cards"][dev_card] = quick_dict[dev_card]
+                        
+                player_dicts = add_keys(player_dicts, quick_key)
+                clear_screen()
+                
+        print_names(player_names, quick_key)
+        return player_dicts
+    
+
 ##GRID GENERATION
 
 
@@ -841,6 +870,21 @@ def create_classes() -> tuple[Grid, PlayerInfo, GameInfo]:
     return grid, player_info, game_info
 
 
+def allow_turn_end(roll_allowed : bool, player_info : PlayerInfo) -> bool:
+        """Checks if the turn can end and returns the turn"""
+        
+        if not roll_allowed:
+                if check_password(player_info.player_turn, player_info):
+                        print("Your turn has ended.")
+                        turn = False
+        else:
+                print("You must roll before you can end your turn."
+                      )
+                turn = True
+                
+        return turn
+  
+    
 ##PROGRAM STAGES
 
 
@@ -894,6 +938,54 @@ def initial_loop(player_info : PlayerInfo, grid : Grid) -> tuple[PlayerInfo, Gri
                     
     return player_info, grid
 
+
+
+def main_game(player_info, grid):
+    """The main input loop after initial resource setup"""
+    
+    game = True##begins the game
+    player_info.game_stage = 2
+    game_bank = player_info.game_bank
+
+    while player_info.game_mode == 2 and game:
+
+        for player in player_info.quick_key:
+            if not game:
+                print("Game has ended!")
+                break
+            
+            player_info.player_turn = player
+            turn = True
+            roll_allowed = True
+            while turn:
+                action = input(ansi_stitching(player_info.player_dicts[player]['color'], f"Player {player}, what's your move?") + "\n˚₊ · »-♡→ ").strip().lower()
+
+                if action == "end turn":
+                        turn = allow_turn_end(roll_allowed, player_info)
+
+                elif action == "build":
+                        build(player_info, game_bank)
+                
+                elif action == "trade":
+                        choice = call_trade(player_info, grid, game_bank)
+                        
+                elif action == "roll":
+                        game_bank, player_info = allow_roll(roll_allowed, player_info, grid, game_bank)
+                        
+                elif action == "cls":
+                        clear_screen()
+                        print_board(player_info, grid, game_bank)
+                        
+                else:
+                        print("That action doesn't exist.")
+                            
+                                    
+            game = check_if_game(calculate_VP(player_info), player_info)
+            clear_screen()
+            print_board(player_info, grid, game_bank)  
+                    
+    print("Game has ended :)")
+    
     
 def main():
     """Main code for the game, initially called"""
