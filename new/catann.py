@@ -28,11 +28,7 @@ class GameInfo:
     "S18": ["m", "n", "t", "y", "x", "s"],
     "S19": ["r", "s", "x", "+", "z", "w"]
     }
-   
-    
-class GameResources:
-    def __init__(self):
-        pass
+        self.cards = {'knight': 14, 'year of plenty': 2, 'build road': 2, 'monopoly': 2, 'VP cards': 5}
    
     
 class PlayerInfo:
@@ -278,8 +274,8 @@ def print_board(player_info : PlayerInfo, grid : Grid):
     for resource in game_bank["resources"]:
         print(f'{resource} : {game_bank["resources"][resource]}', end="  ||  ")
     print("\n")
-    for dev_card in game_bank['dev_cards']:
-        print(f'{dev_card} : {game_bank["dev_cards"][dev_card]}', end="  ||  ")
+    for dev_card in game_bank['cards']:
+        print(f'{dev_card} : {game_bank["cards"][dev_card]}', end="  ||  ")
     print("\n")
     for player in player_info.quick_key:
         print(ansi_stitching(player_info.player_dicts[player]['color'], f"Player {player} ({player_info.player_dicts[player]['name']})"), end="  ||  ")
@@ -470,7 +466,7 @@ def get_player_name(player : int, player_names : list) -> str:
     return player_name   
 
 
-def add_keys(player_info : PlayerInfo) -> dict:
+def add_keys(player_info : PlayerInfo, game_info : GameInfo) -> dict:
     """Adds keys to each existing player dictionary"""
     player_dicts = player_info.player_dicts
     
@@ -484,6 +480,15 @@ def add_keys(player_info : PlayerInfo) -> dict:
         player_dicts[player]['achievements'] = {"longest road" : 0, "largest army" : 0}
         player_dicts[player]['knights_recruited'] = 0
         player_dicts[player]['VP cards'] = 0
+        
+        player_dicts[player]['resources'] = {}
+        for resource in game_info.resources:
+            player_dicts[player]['resources'][resource] = 0
+            
+        player_dicts[player]['cards'] = {}
+        quick_dict = dict(zip(["knight", "year of plenty", "build road", "monopoly", "VP cards"], [14, 2, 2, 2, 5]))
+        for dev_card in quick_dict:
+            player_dicts[player]['cards'][dev_card] = 0
             
     return player_dicts
     
@@ -504,11 +509,11 @@ def setup_player_dicts(player_dicts, game_info) -> dict:
                 player_dicts[player]["resources"] = {}
                 for resource in resources:
                         player_dicts[player]["resources"][resource] = 0
-                player_dicts[player]["dev_cards"] = {}
+                player_dicts[player]["cards"] = {}
                 
                 quick_dict = dict(zip(["knight", "year of plenty", "build road", "monopoly", "VP cards"], [14, 2, 2, 2, 5]))
                 for dev_card in quick_dict:
-                        player_dicts[player]["dev_cards"][dev_card] = quick_dict[dev_card]
+                        player_dicts[player]["cards"][dev_card] = quick_dict[dev_card]
                         
                 player_dicts = add_keys(player_dicts, quick_key)
                 clear_screen()
@@ -670,7 +675,7 @@ def create_game_bank():
     #adds the dictionaries for asset values into the game bank
     resources, dev_bank = initialise_resource_cards()
     game_bank['resources'] = resources
-    game_bank['dev_cards'] = dev_bank
+    game_bank['cards'] = dev_bank
     
     #initialises construct number
     game_bank['constructs'] = {'road' : 60,
@@ -697,9 +702,9 @@ def initialise_resource_cards() -> tuple[dict, dict]:
         
     #creates the development card bank and initialises the number for each
     dev_bank = {}
-    dev_cards = ["knight", "year of plenty", "build road", "monopoly", "VP cards"]
+    cards = ["knight", "year of plenty", "build road", "monopoly", "VP cards"]
     dev_values = [14, 2, 2, 2, 5]
-    for dev_card, value in zip(dev_cards, dev_values):
+    for dev_card, value in zip(cards, dev_values):
         dev_bank[dev_card] = value
     
     return resources, dev_bank
@@ -939,7 +944,6 @@ def initial_loop(player_info : PlayerInfo, grid : Grid) -> tuple[PlayerInfo, Gri
     return player_info, grid
 
 
-
 def main_game(player_info, grid):
     """The main input loop after initial resource setup"""
     
@@ -993,7 +997,7 @@ def main():
     get_initial_inputs()#the initial input loop ends as soon as the game starts
     grid, player_info, game_info = create_classes()#assigns variables to the classes and makes them direct objects to call
     player_info.player_dicts = add_colours(player_info)#gives each player colours
-    player_info.player_dicts = add_keys(player_info)#adds further keys to player dictionaries
+    player_info.player_dicts = add_keys(player_info, game_info)#adds further keys to player dictionaries
     player_info, grid = initial_loop(player_info, grid)#go through the initial loop for the game
     
     
