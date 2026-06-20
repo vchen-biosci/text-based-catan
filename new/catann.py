@@ -39,6 +39,8 @@ class PlayerInfo:
         self.player_dicts = player_dicts
         self.player_turn = 1
         self.game_stage = 1
+        self.longest_road = [0, 0]
+        self.largest_army = [0, 0]
 
 
 class Grid:
@@ -1187,6 +1189,26 @@ def transfer_resources(player_info : PlayerInfo, resources : dict, player=0, add
     return player_info
 
 
+def evaluate_game(player_info : PlayerInfo) -> bool:
+    """Calculates victory points and determines if the game is still ongoing or if someone has won"""
+    
+    for player in player_info.player_dicts:
+        victory_points = 0
+        victory_points += player_info.player_dicts[player]['constructs']['settlements']
+        victory_points += player_info.player_dicts[player]['constructs']['cities'] * 2#every city is worth 2VPs
+        if player_info.longest_road[0] == player:
+            victory_points += 2
+        if player_info.largest_army[0] == player:
+            victory_points += 2
+        if victory_points >= 10:
+            winner = player
+            print(ansi_stitching(player_info.player_dicts[winner]['colour'], f"The game has ended!! Player {winner} IS VICTORIOUS!!"))
+            return True
+        
+    return False
+
+
+
 ##PROGRAM STAGES
 
 
@@ -1249,13 +1271,14 @@ def main_loop(player_info, grid):
             turn = True
             roll_allowed = True
             
-            while turn:
+            while turn and game:
                 action = input(ansi_stitching(player_info.player_dicts[player]['colour'], f"Player {player}, what's your move?") + "\n˚₊ · »-♡→ ").strip().lower()
                 if action in ['et', 'end turn']:
                     turn = allow_turn_end(roll_allowed, player_info)
                     
                 elif action in ['b', 'build']:
                     player_info, grid = build(player_info, grid)
+                    game = evaluate_game(player_info)
                     
                 elif action in ['t', 'trade']:
                     pass
@@ -1278,6 +1301,8 @@ def main_loop(player_info, grid):
                     
                 else:
                     print("That action doesn't exist. Type 'cmds' or 'c' if you're confused on what commands you can use here!")
+                    
+                
         
         
 def main_game(player_info, grid):
