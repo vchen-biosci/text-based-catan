@@ -810,16 +810,16 @@ def dice_roll(player_info : PlayerInfo, grid : Grid) -> tuple[PlayerInfo, Grid]:
     return player_info, grid
  
  
-def roll_die(roll_allowed, player_info, grid) -> tuple[PlayerInfo, Grid]:
-        """Roll die if roll is allowed"""
-        
-        if roll_allowed:
-                player_info, grid = dice_roll(player_info, grid)
-                roll_allowed = False
-        else:
-                print("You've already rolled this turn. You can only roll once per turn.") 
-                
-        return player_info, grid
+def roll_die(roll_allowed, player_info, grid) -> tuple[bool, PlayerInfo, Grid]:
+    """Roll die if roll is allowed"""
+    
+    if roll_allowed:
+        player_info, grid = dice_roll(player_info, grid)
+        roll_allowed = False
+    else:
+        print("You've already rolled this turn. You can only roll once per turn.") 
+            
+    return roll_allowed, player_info, grid
     
 
 def reward_rolls(roll : int, grid : Grid, tile : str, player_info : PlayerInfo, settlement : str) -> PlayerInfo:
@@ -917,6 +917,9 @@ Happy building!""")
             pass
         else:
             print("Looks like that's not a valid command. If you're confused, try using 'check' to see what you're allowed to enter here :)")
+            
+    clear_screen()
+    print_board(player_info, grid)
                     
     return player_info, grid
 
@@ -1115,9 +1118,9 @@ def allow_turn_end(roll_allowed : bool, player_info : PlayerInfo) -> bool:
 def proceed(materials_needed : dict, player_info : PlayerInfo) -> bool:
     """Checks if the player has enough of the resource, then asks the player if they'd like to continue the trade"""
     
+    force_password(player_info)
     for resource in materials_needed:
-        print("")
-        owned = player_info.player_dicts['resources'][resource]
+        owned = player_info.player_dicts[player_info.player_turn]['resources'][resource]
         if owned < materials_needed[resource]:
             print(f"You don't have enough {resource}. Trade unsuccessful. You need {materials_needed[resource]} but only have {owned}.")
             return False
@@ -1151,7 +1154,7 @@ def calculate_hand_size(player_info : PlayerInfo, player : int) -> int:
     
     hand_size = 0
     for resource in player_info.player_dicts[player]['resources']:
-        hand_size += player_info.player_dicts[player][resource]
+        hand_size += player_info.player_dicts[player]['resources'][resource]
         
     return hand_size
     
@@ -1247,13 +1250,13 @@ def main_game(player_info, grid):
                     turn = allow_turn_end(roll_allowed, player_info)
 
                 elif action == "build":
-                    build(player_info, grid)
+                    player_info, grid = build(player_info, grid)
                 
                 elif action == "trade":
                     choice = call_trade(player_info, grid, game_bank)
                         
                 elif action == "roll":
-                    player_info, grid = roll_die(roll_allowed, player_info, grid)
+                    roll_allowed, player_info, grid = roll_die(roll_allowed, player_info, grid)
                         
                 elif action == "cls":
                     clear_screen()
