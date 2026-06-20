@@ -689,7 +689,7 @@ def initialise_resource_cards(game_info : GameInfo) -> tuple[dict, dict]:
 ##CONSTRUCTS/ASSETS
 
 
-def build(player_info : PlayerInfo):
+def build(player_info : PlayerInfo, grid: Grid):
     """Asks the player what they would like to build, then builds it"""
     
     while True:
@@ -714,18 +714,18 @@ def place_road(player_info : PlayerInfo, grid : Grid) -> tuple[PlayerInfo, Grid]
     valid = False
     while not valid:
         text = input(ansi_stitching(player_info.player_dicts[player]['color'], f"Player {player}, where are you placing your road?") + "\n˚₊ · »-♡→ ").strip()
-        valid = check_road(text, grid, player_info, 1)
+        valid = check_road(text, grid, player_info)
         if text == 'cls':#allows player to clear their screen
             clear_screen()
             print_board(player_info, grid)
             
-    player_info.player_dicts[player]['roads'].append(text)
+    player_info.player_dicts[player]['constructs']['road list'].append(text)
     grid.roads[quick_reorder(text)]['display'] = ansi_stitching(player_info.player_dicts[player]['color'], grid.roads[quick_reorder(text)]['display'])
     grid.roads[quick_reorder(text)]['owner'] = player
-    clear_screen()
+    #clear_screen()
     print_board(player_info, grid)
     
-    player_info.game_bank['constructs']['roads'][quick_reorder(text)] -= 1
+    player_info.game_bank['constructs']['roads'] -= 1
     return player_info, grid
 
 
@@ -751,7 +751,7 @@ def place_settlement(player_info : PlayerInfo, grid):
     clear_screen()
     print_board(player_info, grid)
     
-    player_info.game_bank['constructs']['roads'] -= 1
+    player_info.game_bank['constructs']['settlements'] -= 1
     return player_info, grid
     
 	
@@ -809,7 +809,7 @@ def check_settlement(text : str, grid : Grid, player_info : PlayerInfo, initial 
         return False
 
 
-def check_road(text : str, grid : Grid, player_info : PlayerInfo, initial : int=0) -> bool:
+def check_road(text : str, grid : Grid, player_info : PlayerInfo) -> bool:
     try:
         text = quick_reorder(text)
     except IndexError:
@@ -830,21 +830,20 @@ def check_road(text : str, grid : Grid, player_info : PlayerInfo, initial : int=
     
     settlement_rights = []
     for road in player_info.player_dicts[player_info.player_turn]['constructs']['road list']:
-        settlement_rights.append(settlement for settlement in road)
+        for settlement in road:
+            settlement_rights.append(settlement)
     for settlement in player_info.player_dicts[player_info.player_turn]['constructs']['settlement list']:
         settlement_rights.append(settlement)
+    print(settlement_rights)
     
-    for claim in settlement_rights:
+    for claim in set(settlement_rights):
+        print(claim)
         if claim in text:
             print("Congratulations on paving your new road!")
             return True
     
-    if initial:
-        print("Congratulations on paving a free road!")
-        return True
-    else:
-        print("You don't own any settlements/roads next to that road, so you don't have ownership rights. Sorry.")
-        return False
+    print("You don't own any settlements/roads next to that road, so you don't have ownership rights. Sorry.")
+    return False
 
 
 def create_classes() -> tuple[Grid, PlayerInfo, GameInfo]:
@@ -987,7 +986,7 @@ def main_game(player_info, grid):
                     turn = allow_turn_end(roll_allowed, player_info)
 
                 elif action == "build":
-                    build(player_info)
+                    build(player_info, grid)
                 
                 elif action == "trade":
                     choice = call_trade(player_info, grid, game_bank)
@@ -997,7 +996,7 @@ def main_game(player_info, grid):
                         
                 elif action == "cls":
                     clear_screen()
-                    print_board(player_info, grid, game_bank)
+                    print_board(player_info, grid)
                         
                 else:
                     print("That action doesn't exist.")
@@ -1005,7 +1004,7 @@ def main_game(player_info, grid):
                                     
             game = check_if_game(calculate_VP(player_info), player_info)
             clear_screen()
-            print_board(player_info, grid, game_bank)
+            print_board(player_info, grid)
                     
     print("Game has ended :)")
     
