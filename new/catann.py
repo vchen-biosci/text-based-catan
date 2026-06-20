@@ -84,10 +84,10 @@ def clear_screen():
     print("\033c", end="")
     
     
-def print_grid(grid : Grid):##this is a very long function so keep it closed
-        """Prints out the grid. KEEP THIS SUBROUTINE FOLDED OR IT WILL BE A GIANT BLOCK OF TEXT"""
+def print_grid(grid : Grid):##this is a very long function so keep it closed.
+    """Prints out the grid. KEEP THIS SUBROUTINE FOLDED OR IT WILL BE A GIANT BLOCK OF TEXT"""
 
-        grid_part_1 = (
+    grid_part_1 = (
 #line 1
 (" " * 65) + "3: 1 port" + "\n" +
 #line 2
@@ -142,7 +142,7 @@ grid.kaomojis[grid.tiles["S5"]["biome"]] + (" " * 7) + grid.roads["IO"]['display
 + " " + grid.settlement_locs["Q"]["display"] + "\n"
 )
 
-        grid_part_2 = (
+    grid_part_2 = (
 #line 20
 (" " * 17) + grid.roads["LR"]['display'] + (" " * ((24 - len(str(grid.tiles["S4"]["biome"])))//2)) + grid.tiles["S4"]["biome"] + (" " * 10 if grid.tiles["S4"]["biome"] != "desert" else " " * 9) + grid.roads["MS"]['display'] + (" " * 14) + grid.roads["NT"]['display'] +
 (" " * ((22 - len(str(grid.tiles["S5"]["biome"])))//2)) + grid.tiles["S5"]["biome"] + (" " * 9 if grid.tiles["S5"]["biome"] != "desert" else " " * 8) + grid.roads["OU"]['display'] + (" " * 13) + grid.roads["PV"]['display'] +
@@ -185,10 +185,10 @@ grid.settlement_locs["a"]["display"] + " " + grid.roads["Ua"]['display'] + (" " 
 (" " * (((22-len(str(grid.tiles["S10"]["biome"])))//2) + (1 if len(str(grid.tiles["S10"]["biome"]))%2 != 0 else 0))) + grid.roads["ag"]['display'] + (" " * 13) + grid.roads["bh"]['display'] +
 (" " * ((22 - len(str(grid.tiles["S11"]["biome"])))//2)) + grid.tiles["S11"]["biome"] + 
 (" " * (((22-len(str(grid.tiles["S11"]["biome"])))//2) + (1 if len(str(grid.tiles["S11"]["biome"]))%2 != 0 else 0))) + grid.roads["ci"]['display'] + "\n"
-        
-        )
+    
+    )
 
-        grid_part_3 = (
+    grid_part_3 = (
 #line 31 & 32
 (" " * 18) + grid.roads["Xd"]['display'] + (" " * 10) + "S9" + (" " * 10) + grid.roads["Ye"]['display'] + (" " * 16) + grid.roads["Zf"]['display'] + (" " * 8) + "S10" + (" " * 9) + grid.roads["ag"]['display'] + (" " * 15) + grid.roads["bh"]['display'] + (" " * 8) + "S11" + (" " * 9) + grid.roads["ci"]['display'] + "\n\n" +
 #line 33
@@ -229,9 +229,9 @@ str(grid.tiles["S12"]["number"]) + (" " * 9 if len(str(grid.tiles["S12"]["number
 (" " * 3) + "\\" + "\n" +
 #line 42
 (" " * 13) + "/" + (" " * 107) + "\\" + "\n" 
-                )
+            )
 
-        grid_part_4 = (
+    grid_part_4 = (
 #line 43
 (" " * 12) + "/" + (" " * 7) + grid.roads['jp']['display'] + (" " * 18) + grid.roads['kq']['display'] + (" " * 7) + grid.kaomojis[grid.tiles["S17"]["biome"]] + 
 (" " * 7) + grid.roads['lr']['display'] + (" " * 16) + grid.roads['ms']['display'] + (" " * 6) + grid.kaomojis[grid.tiles["S18"]["biome"]] + (" " * 7)
@@ -273,13 +273,13 @@ grid.roads['sx']['display'] + " " + (grid.roads["xy"]['display'] + " ") * 4 + gr
 (" " * 45) + "2:1 ore port     " + grid.roads['wz']['display'] + grid.settlement_locs["z"]["display"] + " " + (grid.roads["+z"]['display'] + " ") * 4 + grid.settlement_locs["+"]["display"] 
 + "      3:1 port"
 
-        )
+    )
 
-        quick_grid_access = [grid_part_1, grid_part_2, grid_part_3, grid_part_4]
+    quick_grid_access = [grid_part_1, grid_part_2, grid_part_3, grid_part_4]
 
-        for grid in quick_grid_access:
-                print(grid, end="")
-        print("\n")
+    for grid in quick_grid_access:
+        print(grid, end="")
+    print("\n")
   
         
 def print_board(player_info : PlayerInfo, grid : Grid):
@@ -519,7 +519,20 @@ def get_player_password() -> str:
     return password
     
     
-##GRID GENERATION
+def print_deck(player_info, player=0):
+    """Prints the player's deck."""
+    
+    printee = player_info.player_turn if not player else player
+    
+    print("Your resources are as follows:")
+    for resource in player_info.player_dicts[printee]['resources']:
+        print(f"{resource} : {player_info.player_dicts[printee]['resources'][resource]}")
+    
+    
+def discard_resource():
+    pass
+    
+##GRID GENERATION/DYNAMIC BOARD
 
 
 def create_tiles() -> dict:
@@ -662,7 +675,39 @@ def make_biomes() -> list:
         return biomes
     
     
-##GAME ASSETS
+def place_robber(grid : Grid) -> str:
+    """Forces a valid placement of the robber according to the player's choosing (activated upon rolling a 7)"""
+    
+    error_message = "That tile doesn't exist. Please input as either the arabic numerals following the S or with the S."
+    
+    while True:
+        placement = input("Where would you like to place the robber?\n˚₊ · »-♡→ ")
+        if placement in grid.tiles.keys():
+            tile = placement
+            proceed = True
+        elif placement.isdigit():
+            if int(placement) <= 19:
+                    tile = "S" + str(placement)
+                    proceed = True
+            else:
+                    print(error_message)
+                    proceed = False
+        else:
+            print(error_message)
+            proceed = False
+                        
+        if proceed:
+            if grid.robber == tile:
+                print("You can't choose not to move it!")
+                    
+            else:
+                grid.robber = tile
+                break
+                                
+    return grid.robber
+    
+    
+##INITIALISING GAME ASSETS
 
 
 def create_game_bank(game_info : GameInfo):
@@ -717,8 +762,8 @@ def dice_roll(player_info : PlayerInfo, grid : Grid):
     print(f"As everyone watches with bated breath, you roll the die. You pray for a good result. They land as follows: |{dice_1}| |{dice_2}| ... {dice_1} + {dice_2} = {roll}. You've rolled a {roll}.")
     
     if roll == 7:
-        print(f"The robber has awakened and will now migrate to a hex of P{player_info.player_turn}'s choosing.")
-        grid.robber = rolled_a_seven(grid, player_info)
+        print(f"The robber will now migrate to a hex of P{player_info.player_turn}'s choosing.")
+        grid.robber = place_robber
         clear_screen()
         print_board(player_info, grid)
             
@@ -726,7 +771,6 @@ def dice_roll(player_info : PlayerInfo, grid : Grid):
         for settlement, tile in zip(player_dicts[player]['constructs']["settlement list"], grid.tiles):
             if settlement in grid.tiles[tile]["attached_settlements"]:
                 player_info = reward_rolls(roll, grid, tile, player_info, settlement)
-                            
     
     return player_info
  
@@ -772,6 +816,18 @@ def give_resources(resource : str, player_info : PlayerInfo, settlement) -> Play
     return player_info
     
     
+def halve_decks(player_info : PlayerInfo):
+    """Identifies players that must halve their hands and forces said halving"""
+    #Players that have more than 7 cards after rolling a 7 must discard half their cards
+    
+    for player in player_info.quick_key:
+        hand_size = calculate_hand_size(player_info, player)
+        if hand_size > 7:
+            required_size = hand_size//2
+            print(f"Pass the laptop to player {player}. \nYou currently have {hand_size} cards. You must discard your hand until you have {required_size} cards left.")
+            force_password(player_info, player)#ensure privacy
+
+
 ##BUILDING-RELATED
 
 
@@ -872,12 +928,14 @@ def change_construct_number(player_info : PlayerInfo, construct, add=0) -> Playe
 ##PROCESSING
 
 
-def force_password(player_info : PlayerInfo):
+def force_password(player_info : PlayerInfo, player=0):
     """Forces the player to input their password. The game breaks if they forget it. So it's very important for them to remember their password."""
+    
+    victim = player_info.player_turn if not player else player
     
     while True:
         attempt = input("Enter your password. (Turn your screen away from the other players).\n˚₊ · »-♡→ ")
-        if attempt == player_info.player_dicts[player_info.player_turn]['password']:
+        if attempt == player_info.player_dicts[victim]['password']:
             break
         else:
             print("Wrong password. Oh no, are we stuck in an infinite loop now? YOU WERE PROMPTED TO PUT SOMETHING MEMORABLE DOWN.")
@@ -1031,6 +1089,15 @@ Have fun trading~""")
 def transfer_materials():
     pass
 
+
+def calculate_hand_size(player_info : PlayerInfo, player : int) -> int:
+    """Calculates the hand size of a specified player"""
+    
+    hand_size = 0
+    for resource in player_info.player_dicts[player]['resources']:
+        hand_size += player_info.player_dicts[player][resource]
+        
+    return hand_size
     
     
 ##PROGRAM STAGES
