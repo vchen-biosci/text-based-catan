@@ -702,8 +702,77 @@ def initialise_resource_cards(game_info : GameInfo) -> tuple[dict, dict]:
     
     return resources, cards
 
+
+##ROLL MECHANICS
+
+
+def dice_roll(player_info : PlayerInfo, grid : Grid):
+    """Rolls the die"""
+        
+    player_dicts = player_info.player_dicts
+    
+    dice_1 = random.randint(1, 6)
+    dice_2 = random.randint(1, 6)
+    roll = dice_1 + dice_2
+    print(f"As everyone watches with bated breath, you roll the die. You pray for a good result. They land as follows: |{dice_1}| |{dice_2}| ... {dice_1} + {dice_2} = {roll}. You've rolled a {roll}.")
+    
+    if roll == 7:
+        print(f"The robber has awakened and will now migrate to a hex of P{player_info.player_turn}'s choosing.")
+        grid.robber = rolled_a_seven(grid, player_info)
+        clear_screen()
+        print_board(player_info, grid)
+            
+    for player in player_info.quick_key:
+        for settlement, tile in zip(player_dicts[player]['constructs']["settlement list"], grid.tiles):
+            if settlement in grid.tiles[tile]["attached_settlements"]:
+                player_info = reward_rolls(roll, grid, tile, player_info, settlement)
+                            
+    
+    return player_info
  
-##CONSTRUCTS/ASSETS
+ 
+def roll_die(roll_allowed, player_info, grid):
+        """Roll die if roll is allowed"""
+        
+        if roll_allowed:
+                game_bank, player_info = dice_roll(player_info, grid)
+                roll_allowed = False
+        else:
+                print("You've already rolled this turn. You can only roll once per turn.") 
+                
+        return game_bank, player_info
+    
+
+def reward_rolls(roll : int, grid : Grid, tile : str, player_info : PlayerInfo, settlement : str) -> PlayerInfo:
+    """Checks if robber is occupying the relevant tile; if not, hands out resources."""
+    
+    if roll == grid.tiles[tile]["number"]:
+        if grid.robber != tile:
+            player_info = give_resources(grid.tiles[tile]['biome'], player_info, settlement)
+        else:
+            print(f"The robber has prevented anyone from obtaining resources on {tile}")
+                    
+    return player_info 
+ 
+ 
+def give_resources(resource : str, player_info : PlayerInfo, settlement) -> PlayerInfo:
+    """Transfers resources from bank to players"""
+    
+    game_bank = player_info.game_bank
+    if game_bank['resources'][resource] != 0:
+        if settlement != "":
+            print(f"P{player_info.player_turn} has obtained {resource} from their settlement {settlement}.")
+                
+        game_bank['resources'][resource] -= 1
+        player_info.player_dicts[player_info.player_turn]['resources'][resource] += 1
+    else:
+        print(f"The bank has run out of {resource}! P{player_info.player_turn} is unable to obtain {resource} from their settlement {settlement}")
+        
+    player_info.game_bank = game_bank
+    return player_info
+    
+    
+##BUILDING-RELATED
 
 
 def build(player_info : PlayerInfo, grid: Grid) -> tuple[PlayerInfo, Grid]:
@@ -962,41 +1031,6 @@ Have fun trading~""")
 def transfer_materials():
     pass
 
-
-def allow_roll(roll_allowed, player_info, grid):
-        """Roll die if roll is allowed"""
-        
-        if roll_allowed:
-                game_bank, player_info = roll_die(player_info, grid)
-                roll_allowed = False
-        else:
-                print("You've already rolled this turn. You can only roll once per turn.") 
-                
-        return game_bank, player_info
-
-
-def roll_die(player_info : PlayerInfo, grid : Grid):
-        
-    player_dicts = player_info.player_dicts
-    
-    dice_1 = random.randint(1, 6)
-    dice_2 = random.randint(1, 6)
-    roll = dice_1 + dice_2
-    print(f"As everyone watches with bated breath, you roll the die. You pray for a good result. They land as follows: |{dice_1}| |{dice_2}| ... {dice_1} + {dice_2} = {roll}. You've rolled a {roll}.")
-    
-    if roll == 7:
-        print(f"The robber has awakened and will now migrate to a hex of P{player_info.player_turn}'s choosing.")
-        grid.robber = rolled_a_seven(grid, player_info)
-        clear_screen()
-        print_board(player_info, grid)
-            
-    for player in player_info.quick_key:
-        for settlement, tile in zip(player_dicts[player]['constructs']["settlement list"], grid.tiles):
-            if settlement in grid.tiles[tile]["attached_settlements"]:
-                game_bank, player_info = check_robber(roll, grid, tile, game_bank, player_info, settlement)
-                            
-    
-    return game_bank, player_info
     
     
 ##PROGRAM STAGES
@@ -1081,7 +1115,11 @@ def main_game(player_info, grid):
                     choice = call_trade(player_info, grid, game_bank)
                         
                 elif action == "roll":
-                    game_bank, player_info = allow_roll(roll_allowed, player_info, grid, game_bank)
+                    if roll_allowed:
+                        dice_roll(player_info, grid)
+                        roll_allowed = False
+                    else:
+                        print("You've already rolled this turn.")
                         
                 elif action == "cls":
                     clear_screen()
