@@ -529,8 +529,34 @@ def print_deck(player_info, player=0):
         print(f"{resource} : {player_info.player_dicts[printee]['resources'][resource]}")
     
     
-def discard_resource():
-    pass
+def discard_resource(player_info, player):
+    """Lets player choose a resource to discard"""
+    
+    while True:
+        action = input("Choose the resource you'd like to discard!\n˚₊ · »-♡→ ").strip().lower()
+        resources = list(player_info.player_dicts[player]['resources'])
+        try:
+            action = int(action)
+            if action <=5 and action > 0:
+                print(f"You have chosen to discard {resources[action]}.")
+            else:
+                print("Yes, you are allowed to enter a number - but it must correspond to the relevant resource. (Number between 1 and 5.)")
+        except TypeError:
+            if action in resources:
+                print(f"You have chosen to discard {action}.")
+            elif action == 'check':
+                print_deck(player_info, player)
+            elif action == 'cls':
+                clear_screen()
+            else:
+                print("That resource doesn't exist.")
+        owned = player_info.player_dicts[player]['resources'][action]
+        if owned > 0:
+            while True:
+                discard_num = input(f"How many would you like to discard?")
+                try:
+                    if int(discard_num) > owned:
+                        transfer_materials()
     
 ##GRID GENERATION/DYNAMIC BOARD
 
@@ -800,7 +826,7 @@ def reward_rolls(roll : int, grid : Grid, tile : str, player_info : PlayerInfo, 
  
  
 def give_resources(resource : str, player_info : PlayerInfo, settlement) -> PlayerInfo:
-    """Transfers resources from bank to players"""
+    """Transfers resources from bank to players based on rolls"""
     
     game_bank = player_info.game_bank
     if game_bank['resources'][resource] != 0:
@@ -1084,10 +1110,6 @@ Have fun trading~""")
             clear_screen()
         else:
             print("Unsure of the commands? Use 'check' to see what you can input here.")
-
-
-def transfer_materials():
-    pass
 
 
 def calculate_hand_size(player_info : PlayerInfo, player : int) -> int:
