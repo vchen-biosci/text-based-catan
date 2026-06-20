@@ -567,7 +567,7 @@ def execute_development_card(card, grid, player_info):
     elif card == 'monopoly':
         pass
     elif card == 'VP card':
-        player_info.player_dicts[player_info.player_turn]['VP card'] += 1
+        player_info.player_dicts[player_info.player_turn]['cards']['VP card'] += 1
 
 
 ##CARD TRANSFERS (RESOURCE CARDS)/TRADES
@@ -882,18 +882,6 @@ def roll_die(roll_allowed, player_info, grid) -> tuple[bool, PlayerInfo, Grid]:
         print("You've already rolled this turn. You can only roll once per turn.") 
             
     return roll_allowed, player_info, grid
-    
-
-def reward_rolls(roll : int, grid : Grid, tile : str, player_info : PlayerInfo, settlement : str) -> PlayerInfo:
-    """Checks if robber is occupying the relevant tile; if not, hands out resources."""
-    
-    if roll == grid.tiles[tile]["number"]:
-        if grid.robber != tile:
-            player_info = give_resources(grid.tiles[tile]['biome'], player_info, settlement)
-        else:
-            print(f"The robber has prevented anyone from obtaining resources on {tile}")
-                    
-    return player_info 
  
  
 def give_resources(resource : str, player_info : PlayerInfo, player, settlement) -> PlayerInfo:
@@ -941,6 +929,7 @@ def rolled_a_seven(player_info, grid) -> tuple[Grid, PlayerInfo]:
     
     print(f"Player {player_info.player_turn}, you must place the robber.")
     grid.robber = place_robber(grid)
+    steal_card()
     clear_screen()
     print_board(player_info, grid)
     player_info = halve_decks(player_info)
@@ -1049,6 +1038,25 @@ def change_construct_number(player_info : PlayerInfo, construct, add=0) -> Playe
         
     return player_info
 
+
+def steal_card(player_info, grid):
+    tile = grid.robber
+    steal_list = []
+    for settlement in grid.tiles[tile]['attached_settlements']:
+        if grid.settlement_locs[settlement]['owner'] != 0 and grid.settlement_locs[settlement]['owner'] != player_info.player_turn:
+            steal_list.append(grid.settlement_locs[settlement]['owner'])
+    steal_list = set(sorted(steal_list))
+    if steal_list == []:
+        return player_info
+    while True:
+        print("These are the players that you can steal from:")
+        for player in steal_list:
+            print(f"Player {player} (aka '{player_info.player_dicts[player]['name']}')")
+        action = input("Please select a player to steal from!\n˚₊ · »-♡→ ")
+        if action.isdigit:
+            if int(action) > 0 and int(action) < len(steal_list) + 1:
+                victim = int(action)
+        elif action ==
 	
 ##PROCESSING
 
