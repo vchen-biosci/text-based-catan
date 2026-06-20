@@ -1192,22 +1192,27 @@ def transfer_resources(player_info : PlayerInfo, resources : dict, player=0, add
 def evaluate_game(player_info : PlayerInfo) -> bool:
     """Calculates victory points and determines if the game is still ongoing or if someone has won"""
     
-    for player in player_info.player_dicts:
-        victory_points = 0
-        victory_points += player_info.player_dicts[player]['constructs']['settlements']
-        victory_points += player_info.player_dicts[player]['constructs']['cities'] * 2#every city is worth 2VPs
-        if player_info.longest_road[0] == player:
-            victory_points += 2
-        if player_info.largest_army[0] == player:
-            victory_points += 2
-        if victory_points >= 10:
-            winner = player
-            print(ansi_stitching(player_info.player_dicts[winner]['colour'], f"The game has ended!! Player {winner} IS VICTORIOUS!!"))
-            return True
+    if calculate_points(player_info, player_info.player_turn) >= 10:
+        winner = player_info.player_turn
+        print(ansi_stitching(player_info.player_dicts[winner]['colour'], f"The game has ended!! Player {winner} IS VICTORIOUS!!"))
+        return False
+    
+    else:
+        return True
+
+
+def calculate_points(player_info, player) -> int:
+    """Calculates the given player's victory points"""
+    
+    victory_points = 0
+    victory_points += player_info.player_dicts[player]['constructs']['settlements']
+    victory_points += player_info.player_dicts[player]['constructs']['cities'] * 2#every city is worth 2VPs
+    if player_info.longest_road[0] == player:
+        victory_points += 2
+    if player_info.largest_army[0] == player:
+        victory_points += 2
         
-    return False
-
-
+    return victory_points
 
 ##PROGRAM STAGES
 
@@ -1294,15 +1299,13 @@ def main_loop(player_info, grid):
                     print("These are the commands available to you:")
                     
                 elif action in ['d', 'draw']:
-                    pass
+                    game = evaluate_game(player_info)
                 
                 elif action in ['i', 'info']:
                     pass
                     
                 else:
-                    print("That action doesn't exist. Type 'cmds' or 'c' if you're confused on what commands you can use here!")
-                    
-                
+                    print("That action doesn't exist. Type 'cmds' or 'c' if you're confused on what commands you can use here!")               
         
         
 def main_game(player_info, grid):
