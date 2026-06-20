@@ -1239,6 +1239,47 @@ def initial_loop(player_info : PlayerInfo, grid : Grid) -> tuple[PlayerInfo, Gri
     return player_info, grid
 
 
+def main_loop(player_info, grid):
+    game = True
+    player_info.game_stage = 2
+    
+    while game:
+        for player in player_info.quick_key:
+            
+            turn = True
+            roll_allowed = True
+            
+            while turn:
+                action = input(ansi_stitching(player_info.player_dicts[player]['colour'], f"Player {player}, what's your move?") + "\n˚₊ · »-♡→ ").strip().lower()
+                if action in ['et', 'end turn']:
+                    turn = allow_turn_end(roll_allowed, player_info)
+                    
+                elif action in ['b', 'build']:
+                    player_info, grid = build(player_info, grid)
+                    
+                elif action in ['t', 'trade']:
+                    pass
+                
+                elif action in ['r', 'roll']:
+                    roll_allowed, player_info, grid = roll_die(roll_allowed, player_info, grid)
+                    
+                elif action in ['cls', 'clear screen']:
+                    clear_screen()
+                    print_board(player_info, grid)
+                    
+                elif action in ['c', 'cmds']:
+                    print("These are the commands available to you:")
+                    
+                elif action in ['d', 'draw']:
+                    pass
+                
+                elif action in ['i', 'info']:
+                    pass
+                    
+                else:
+                    print("That action doesn't exist. Type 'cmds' or 'c' if you're confused on what commands you can use here!")
+        
+        
 def main_game(player_info, grid):
     """The main input loop after initial resource setup"""
     
