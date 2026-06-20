@@ -729,7 +729,7 @@ def place_road(player_info : PlayerInfo, grid : Grid) -> tuple[PlayerInfo, Grid]
     return player_info, grid
 
 
-def place_settlement(player_info : PlayerInfo, grid):
+def place_settlement(player_info : PlayerInfo, grid) -> tuple[PlayerInfo, Grid]:
     """Places down a settlement. Does not deduct any resources from the player, do this separately"""
 
     player = player_info.player_turn
@@ -754,11 +754,25 @@ def place_settlement(player_info : PlayerInfo, grid):
     player_info.game_bank['constructs']['settlements'] -= 1
     return player_info, grid
     
+
+def change_construct_number(player_info : PlayerInfo, construct, add=0) -> PlayerInfo:
+    """Adds or subtracts the construct from the player's bank when they place something down"""
+    
+    player = player_info.player_turn
+    if add:
+        player_info.player_dicts[player]['constructs'][construct] +=1
+    else:
+        player_info.player_dicts[player]['constructs'][construct] -= 1
+        
+    return player_info
+
 	
 ##PROCESSING
 
 
 def force_password(player_info : PlayerInfo):
+    """Forces the player to input their password. The game breaks if they forget it. So it's very important for them to remember their password."""
+    
     while True:
         attempt = input("Enter your password. (Turn your screen away from the other players).\n˚₊ · »-♡→ ")
         if attempt == player_info.player_dicts[player_info.player_turn]['password']:
@@ -1012,6 +1026,7 @@ def main_game(player_info, grid):
 def main():
     """Main code for the game, initially called"""
     while True:
+        print("If you're playing the game, remove line 1030")
         sys.exit()########remove this line if playing
         get_initial_inputs()#the initial input loop ends as soon as the game starts
         grid, player_info, game_info = create_classes()#assigns variables to the classes and makes them direct objects to call
