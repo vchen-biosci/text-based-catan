@@ -963,6 +963,42 @@ def transfer_materials():
     pass
 
 
+def allow_roll(roll_allowed, player_info, grid):
+        """Roll die if roll is allowed"""
+        
+        if roll_allowed:
+                game_bank, player_info = roll_die(player_info, grid)
+                roll_allowed = False
+        else:
+                print("You've already rolled this turn. You can only roll once per turn.") 
+                
+        return game_bank, player_info
+
+
+def roll_die(player_info : PlayerInfo, grid : Grid):
+        
+    player_dicts = player_info.player_dicts
+    
+    dice_1 = random.randint(1, 6)
+    dice_2 = random.randint(1, 6)
+    roll = dice_1 + dice_2
+    print(f"As everyone watches with bated breath, you roll the die. You pray for a good result. They land as follows: |{dice_1}| |{dice_2}| ... {dice_1} + {dice_2} = {roll}. You've rolled a {roll}.")
+    
+    if roll == 7:
+        print(f"The robber has awakened and will now migrate to a hex of P{player_info.player_turn}'s choosing.")
+        grid.robber = rolled_a_seven(grid, player_info)
+        clear_screen()
+        print_board(player_info, grid)
+            
+    for player in player_info.quick_key:
+        for settlement, tile in zip(player_dicts[player]['constructs']["settlement list"], grid.tiles):
+            if settlement in grid.tiles[tile]["attached_settlements"]:
+                game_bank, player_info = check_robber(roll, grid, tile, game_bank, player_info, settlement)
+                            
+    
+    return game_bank, player_info
+    
+    
 ##PROGRAM STAGES
 
 
