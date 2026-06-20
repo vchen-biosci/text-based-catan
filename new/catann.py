@@ -59,6 +59,23 @@ class Grid:
         self.biomes = biomes
 
 
+class NormalFunctions:
+    def cls(self, player_info, grid):
+        clear_screen()
+        print_board(player_info, grid)
+    def ru(self, player_info, grid):
+        print("""This is how you play catan: 
+PS: if this text is too long, feel free to clear the screen with 'cls'.""")
+    def cmds(self, player_info, grid):
+        print("""These are the possible normal commands available to you:
+> 'cmds' displays commands.
+> 'cls' reprints the board without the other text.
+> 'ru' displays the rules of Catan.
+> 'lb' displays the leaderboard of VPs""")
+    def lb(self, player_info, grid):
+        print("""Here is the leaderboard:""")
+    
+
 ##DISPLAY-RELATED
 
 
@@ -278,7 +295,7 @@ def print_board(player_info : PlayerInfo, grid : Grid):
         print(f'{dev_card} : {game_bank["cards"][dev_card]}', end="  ||  ")
     print("\n")
     for player in player_info.quick_key:
-        print(ansi_stitching(player_info.player_dicts[player]['color'], f"Player {player} ({player_info.player_dicts[player]['name']})"), end="  ||  ")
+        print(ansi_stitching(player_info.player_dicts[player]['colour'], f"Player {player} ({player_info.player_dicts[player]['name']})"), end="  ||  ")
     print("\n")
 
     print_grid(grid)
@@ -289,82 +306,82 @@ def print_board(player_info : PlayerInfo, grid : Grid):
 ##COLOURS
 
 
-def ansi_stitching(color : list, text : str) -> str:
+def ansi_stitching(colour : list, text : str) -> str:
 	"""Edits the string's value with an ANSI code that imbues it with pretty colours :3"""
 	
-	colored_ver = "\x1b[38;2;"
+	coloured_ver = "\x1b[38;2;"
 	reps = 0
-	for value in color:
-		colored_ver += str(value)
+	for value in colour:
+		coloured_ver += str(value)
 		reps += 1
 		if reps < 3:
-			colored_ver += ";"
+			coloured_ver += ";"
 	
-	colored_ver += "m" + text + "\x1b[0m"
+	coloured_ver += "m" + text + "\x1b[0m"
 
-	return colored_ver
+	return coloured_ver
     
     
 def add_colours(player_info) -> tuple[list, dict]:
         """Calls all the functions initially needed for the initialising of player dictionaries"""
         quick_key, player_dicts = player_info.quick_key, player_info.player_dicts
         
-        player_colors = assign_player_colors(quick_key)
-        for player, color in zip(player_dicts, player_colors):
-                player_dicts[player]["color"] = color
+        player_colours = assign_player_colours(quick_key)
+        for player, colour in zip(player_dicts, player_colours):
+                player_dicts[player]["colour"] = colour
         
         return player_dicts
     
     
-def assign_player_colors(quick_key : list) -> list:
+def assign_player_colours(quick_key : list) -> list:
     """Iterates through each player and makes sure they have a colour assigned"""
     
-    preset_colors = [[1, 201, 184], [252, 210, 1], [252, 84, 1], [210, 1, 252]]#this variable only needs to be temporary
-    player_colors = []
-    new_color = False
+    preset_colours = [[1, 201, 184], [252, 210, 1], [252, 84, 1], [210, 1, 252]]#this variable only needs to be temporary
+    player_colours = []
+    new_colour = False
     for player in quick_key:#iterates through players
         action = ""
         while not action in ["y", "n"]:#indefinite iteration
-            print(' We strongly recommend making your own, since the default may be similar to the color someone else has chosen.' if new_color else '')
-            action = input("Would you like to customise your own color? (If not, you'll get a premade one!)" + 
+            print(' We strongly recommend making your own, since the default may be similar to the colour someone else has chosen.' if new_colour else '')
+            action = input("Would you like to customise your own colour? (If not, you'll get a premade one!)" + 
 " Type 'Y' for yes and 'N' for no.\n˚₊ · »-♡→ ").strip().lower()#a prompt, as the default may be too similar and undifferentiable from a pre-chosen colour
             if action == "y":
-                player_colors.append(choose_color())
-                new_color = True
+                player_colours.append(choose_colour())
+                new_colour = True
             elif action == "n":
-                print(ansi_stitching(preset_colors[player - 1], "This is your assigned color!"))
-                player_colors.append(preset_colors[player - 1])
+                print(ansi_stitching(preset_colours[player - 1], "This is your assigned colour!"))
+                player_colours.append(preset_colours[player - 1])
                 time.sleep(0.3)
             else:
                 print("Sorry, please either type 'y' or 'n'.")
         clear_screen()
                             
-    print_player_colors(quick_key, player_colors)
-    return player_colors   
+    print_player_colours(quick_key, player_colours)
+    return player_colours   
     
     
-def choose_color() -> list:
-    """Get a player's colors by iterating through red, blue, and green."""
+def choose_colour() -> list:
+    """Get a player's colours by iterating through red, blue, and green."""
     
-    player_color = []
+    player_colour = []
     satisfied = False
     while not satisfied:
-        get_color(player_color)   
+        get_colour(player_colour)   
                                 
         confirmed = False
         while not confirmed:
-            confirmed, satisfied = confirm_color(player_color, satisfied, confirmed)
+            confirmed, satisfied = confirm_colour(player_colour, satisfied, confirmed)
 
     clear_screen()
-    return player_color
+    return player_colour
     
     
-def confirm_color(player_color, satisfied, confirmed) -> tuple[bool, bool]:
-        confirm = input(ansi_stitching(player_color, """This is what your color looks like - are you sure you want it? 
+def confirm_colour(player_colour, satisfied, confirmed) -> tuple[bool, bool]:
+        confirm = input(ansi_stitching(player_colour, """This is what your colour looks like - are you sure you want it? 
 Type 'Y' for yes and 'N' for no. 
-Please make sure all other players can see this color.\n""") + "> ").strip()
+Please make sure all other players can see this colour.\n""") + "> ").strip()
         if confirm == "N":
-                player_color = []
+                player_colour = []
                 confirmed = True
         elif confirm == "Y":
                 satisfied = True
@@ -375,23 +392,23 @@ Please make sure all other players can see this color.\n""") + "> ").strip()
         return confirmed, satisfied
     
     
-def print_player_colors(quick_key, player_colors):
+def print_player_colours(quick_key, player_colours):
         """Prints the colour for each player"""
         
         for player in quick_key:
-                print(ansi_stitching(player_colors[player - 1], f"Player {player}, this is your color."))
+                print(ansi_stitching(player_colours[player - 1], f"Player {player}, this is your colour."))
                 time.sleep(0.3)
                 
                 
-def get_color(player_color : list) -> list:
-    color_codes = {"red" : [255, 0, 0], "green" : [0, 255, 0], "blue" : [0, 0, 255]}
-    for color in color_codes:#iterate through colours               
+def get_colour(player_colour : list) -> list:
+    colour_codes = {"red" : [255, 0, 0], "green" : [0, 255, 0], "blue" : [0, 0, 255]}
+    for colour in colour_codes:#iterate through colours               
         valid_input = False
         while not valid_input:#makes sure that it doesn't end without getting the right colour
-            action = input(ansi_stitching(color_codes[color], f"‧₊˚♪ 𝄞₊˚⊹ What value would you like to use for {color}? ‧₊˚♪ 𝄞₊˚⊹\n˚₊ · »-♡→ ")).strip().lower()
+            action = input(ansi_stitching(colour_codes[colour], f"‧₊˚♪ 𝄞₊˚⊹ What value would you like to use for {colour}? ‧₊˚♪ 𝄞₊˚⊹\n˚₊ · »-♡→ ")).strip().lower()
             try:
                 if int(action) <= 255:
-                    player_color.append(int(action))
+                    player_colour.append(int(action))
                     valid_input = True
                 else:
                     print("Sorry; RGB values only go up to 255.")
@@ -399,7 +416,7 @@ def get_color(player_color : list) -> list:
             except ValueError:
                 print("Please input a valid integer, in arabic numerals, within the range of 0 to 255.")
                                     
-    return player_color
+    return player_colour
     
 
 ##PLAYER INFORMATION/DICTIONARIES
@@ -729,14 +746,14 @@ def place_road(player_info : PlayerInfo, grid : Grid) -> tuple[PlayerInfo, Grid]
     
     valid = False
     while not valid:
-        text = input(ansi_stitching(player_info.player_dicts[player]['color'], f"Player {player}, where are you placing your road?") + "\n˚₊ · »-♡→ ").strip()
+        text = input(ansi_stitching(player_info.player_dicts[player]['colour'], f"Player {player}, where are you placing your road?") + "\n˚₊ · »-♡→ ").strip()
         valid = check_road(text, grid, player_info)
         if text == 'cls':#allows player to clear their screen
             clear_screen()
             print_board(player_info, grid)
             
     player_info.player_dicts[player]['constructs']['road list'].append(text)
-    grid.roads[quick_reorder(text)]['display'] = ansi_stitching(player_info.player_dicts[player]['color'], grid.roads[quick_reorder(text)]['display'])
+    grid.roads[quick_reorder(text)]['display'] = ansi_stitching(player_info.player_dicts[player]['colour'], grid.roads[quick_reorder(text)]['display'])
     grid.roads[quick_reorder(text)]['owner'] = player
     #clear_screen()
     print_board(player_info, grid)
@@ -755,14 +772,14 @@ def place_settlement(player_info : PlayerInfo, grid) -> tuple[PlayerInfo, Grid]:
     
     valid = False
     while not valid:
-        text = input(ansi_stitching(player_info.player_dicts[player]['color'], f"Player {player}, where would you like to place your settlement?") + "\n˚₊ · »-♡→ ").strip()
+        text = input(ansi_stitching(player_info.player_dicts[player]['colour'], f"Player {player}, where would you like to place your settlement?") + "\n˚₊ · »-♡→ ").strip()
         valid = check_settlement(text, grid, player_info, 1)
         if text == 'cls':
             clear_screen()
             print_board(player_info, grid)
             
     player_info.player_dicts[player]['constructs']['settlement list'].append(text)#adds the new settlement to the player's list of settlements
-    grid.settlement_locs[text]['display'] = ansi_stitching(player_info.player_dicts[player]['color'], grid.settlement_locs[text]['display'])
+    grid.settlement_locs[text]['display'] = ansi_stitching(player_info.player_dicts[player]['colour'], grid.settlement_locs[text]['display'])
     grid.settlement_locs[text]['owner'] = player
     clear_screen()
     print_board(player_info, grid)
@@ -1016,7 +1033,7 @@ def main_game(player_info, grid):
             turn = True
             roll_allowed = True
             while turn:
-                action = input(ansi_stitching(player_info.player_dicts[player]['color'], f"Player {player}, what's your move?") + "\n˚₊ · »-♡→ ").strip().lower()
+                action = input(ansi_stitching(player_info.player_dicts[player]['colour'], f"Player {player}, what's your move?") + "\n˚₊ · »-♡→ ").strip().lower()
 
                 if action == "end turn":
                     turn = allow_turn_end(roll_allowed, player_info)
@@ -1048,10 +1065,12 @@ def main_game(player_info, grid):
 def main():
     """Main code for the game, initially called"""
     while True:
+        function_list = NormalFunctions()
         print("If you're playing the game, remove line 1030")
         sys.exit()########remove this line if playing
         get_initial_inputs()#the initial input loop ends as soon as the game starts
         grid, player_info, game_info = create_classes()#assigns variables to the classes and makes them direct objects to call
+        function_list.ru(player_info, grid)
         player_info.player_dicts = add_colours(player_info)#gives each player colours
         player_info.player_dicts = add_keys(player_info, game_info)#adds further keys to player dictionaries
         player_info, grid = initial_loop(player_info, grid)#go through the initial loop for the game
