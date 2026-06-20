@@ -994,17 +994,28 @@ def change_construct_number(player_info : PlayerInfo, construct, add=0) -> Playe
 ##PROCESSING
 
 
+def check_password(player_info, player=0) -> bool:
+    """Checks the player's password"""
+    
+    victim = player_info.player_turn if not player else player
+    attempt = input("Enter your password. (Turn your screen away from the other players).\n˚₊ · »-♡→ ")
+    if attempt == player_info.player_dicts[victim]['password']:
+        return True
+    else:
+        print("Wrong password.")
+        return False
+
+
 def force_password(player_info : PlayerInfo, player=0):
     """Forces the player to input their password. The game breaks if they forget it. So it's very important for them to remember their password."""
     
     victim = player_info.player_turn if not player else player
     
-    while True:
-        attempt = input("Enter your password. (Turn your screen away from the other players).\n˚₊ · »-♡→ ")
-        if attempt == player_info.player_dicts[victim]['password']:
-            break
-        else:
-            print("Wrong password. Oh no, are we stuck in an infinite loop now? YOU WERE PROMPTED TO PUT SOMETHING MEMORABLE DOWN.")
+    correct_password = False
+    while not correct_password:
+        correct_password = check_password(player_info, player)
+        if not correct_password:
+            print("This is bad. You're stuck in an infinite loop now :P")
         
 
 def quick_reorder(road : str):
@@ -1107,12 +1118,11 @@ def allow_turn_end(roll_allowed : bool, player_info : PlayerInfo) -> bool:
         """Checks if the turn can end and returns the turn"""
         
         if not roll_allowed:
-                if check_password(player_info.player_turn, player_info):
+                if check_password(player_info):
                         print("Your turn has ended.")
                         turn = False
         else:
-                print("You must roll before you can end your turn."
-                      )
+                print("You must roll before you can end your turn.")
                 turn = True
                 
         return turn
