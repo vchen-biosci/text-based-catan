@@ -664,7 +664,7 @@ def create_game_bank(game_info : GameInfo):
     }
     
     #creates a bank of building costs that the game can directly access
-    game_bank['building_costs'] = {'road' : {'brick' : 1, 'wood' : 1},
+    game_bank['costs'] = {'road' : {'brick' : 1, 'wood' : 1},
                          'settlement' : {'brick' : 1, 'wood' : 1, 'grain' : 1, 'sheep' : 1},
                          'city' : {'grain' : 2, 'ores' : 3},
                          'dev card': {'sheep' : 1, 'grain' : 1, 'ores' : 1}}
@@ -689,7 +689,7 @@ def initialise_resource_cards(game_info : GameInfo) -> tuple[dict, dict]:
 ##CONSTRUCTS/ASSETS
 
 
-def build(player_info : PlayerInfo, grid: Grid):
+def build(player_info : PlayerInfo, grid: Grid) -> tuple[PlayerInfo, Grid]:
     """Asks the player what they would like to build, then builds it"""
     
     while True:
@@ -697,10 +697,26 @@ def build(player_info : PlayerInfo, grid: Grid):
         
         if action in ['x', 'cancel']:
             break
-        elif action == 'road':
-            place_road(player_info, grid)
+        elif action == 'check':
+            print("""Enter:
+> 'x' or 'cancel' to escape the building site
+> 'road', '1', or 'r' to build a road
+> 'settlement', '2', or 's' to build a settlement
+> 'city', '3', or 'c' to upgrade to a settlement
+Happy building!""")
+        elif action in ['road', '1', 'r']:
+            if proceed(player_info.game_bank['costs']['road'], player_info):
+                player_info, grid = place_road(player_info, grid)
+        elif action in ['settlement', '2', 's']:
+            if proceed(player_info.game_bank['costs']['settlement'], player_info):
+                player_info, grid = place_settlement(player_info, grid)
+        elif action in ['city', '3', 'c']:
+            #I'll work on this later... I might not even implement it at all tbh
+            pass
+        else:
+            print("Looks like that's not a valid command. If you're confused, try using 'check' to see what you're allowed to enter here :)")
                     
-    return player_info
+    return player_info, grid
 
     
 def place_road(player_info : PlayerInfo, grid : Grid) -> tuple[PlayerInfo, Grid]:
@@ -893,6 +909,8 @@ def allow_turn_end(roll_allowed : bool, player_info : PlayerInfo) -> bool:
   
     
 def proceed(materials_needed : dict, player_info : PlayerInfo) -> bool:
+    """Checks if the player has enough of the resource, then asks the player if they'd like to continue the trade"""
+    
     for resource in materials_needed:
         print("")
         owned = player_info.player_dicts['resources'][resource]
@@ -922,6 +940,10 @@ Have fun trading~""")
             clear_screen()
         else:
             print("Unsure of the commands? Use 'check' to see what you can input here.")
+
+
+def transfer_materials():
+    pass
 
 
 ##PROGRAM STAGES
