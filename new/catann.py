@@ -28,7 +28,7 @@ class GameInfo:
     "S18": ["m", "n", "t", "y", "x", "s"],
     "S19": ["r", "s", "x", "+", "z", "w"]
     }
-        self.cards = {'knight': 14, 'year of plenty': 2, 'build road': 2, 'monopoly': 2, 'VP cards': 5}
+        self.cards = {'knight': 14, 'year of plenty': 2, 'build road': 2, 'monopoly': 2, 'VP card': 5}
    
     
 class PlayerInfo:
@@ -500,6 +500,7 @@ def add_keys(player_info : PlayerInfo, game_info : GameInfo) -> dict:
         player_dicts[player]['cards'] = {}
         for dev_card in game_info.cards:
             player_dicts[player]['cards'][dev_card] = 0
+        player_dicts[player]['army'] = 0
             
     return player_dicts
     
@@ -517,6 +518,8 @@ def get_player_password() -> str:
         else:
             print("Okay. At all costs, do NOT forget your password!")
             valid_password = True
+            
+    clear_screen()#Clears screen for privacy
     
     return password
     
@@ -530,7 +533,46 @@ def print_deck(player_info, player=0):
     for resource in player_info.player_dicts[printee]['resources']:
         print(f"{resource} : {player_info.player_dicts[printee]['resources'][resource]}")
     
+
+##DEVELOPMENT CARDS
+
+
+def draw_development_card(player_info) -> tuple[str, PlayerInfo]:
+    """Draws a development card from the game bank with a simple pop method"""
     
+    cards = []
+    for card in player_info.game_bank['cards']:
+        if player_info.game_bank['cards'][card] != 0:
+            cards.append(card)
+    random.shuffle(cards)
+    card = cards.pop()
+    player_info.game_bank['cards'][card] -= 1
+    
+    return card, player_info
+
+
+def execute_development_card(card, grid, player_info):
+    """Executes development card based on the card drawn"""
+    
+    if card == 'knight':
+        place_robber(grid)
+        player_info.player_dicts[player_info.player_turn]['army'] += 1
+        print("Your army has grown. Congratulations, settler!")
+    elif card == 'build road':
+        for i in range(2):
+            print(f"Free road no.{i}")
+            player_info, grid = place_road(player_info, grid)
+    elif card == 'year of plenty':
+        pass
+    elif card == 'monopoly':
+        pass
+    elif card == 'VP card':
+        player_info.player_dicts[player_info.player_turn]['VP card'] += 1
+
+
+##CARD TRANSFERS (RESOURCE CARDS)/TRADES
+
+
 def discard_resource(player_info, player) -> PlayerInfo:
     """Lets player choose a resource to discard"""
     
@@ -569,6 +611,21 @@ def discard_resource(player_info, player) -> PlayerInfo:
         player_info = transfer_resources(player_info, resources, player)
         break
                                     
+    return player_info
+
+
+def transfer_resources(player_info : PlayerInfo, resources : dict, player=0, add=0) -> PlayerInfo:
+    """Gives/takes resources to/from players. Pass the resources into this function as follows: {Resource : number}. Automatically assumes that you are subtracting if nothing is passed into the function."""
+    
+    player=player_info.player_turn if not player else player
+    for resource in resources:
+        if add:
+            player_info.player_dicts[player]['resources'][resource] += resources[resource]
+            player_info.game_bank['resources'][resource] -= resources[resource]
+        else:
+            player_info.player_dicts[player]['resources'][resource] -= resources[resource]
+            player_info.game_bank['resources'][resource] += resources[resource]
+            
     return player_info
 
     
@@ -808,7 +865,7 @@ def dice_roll(player_info : PlayerInfo, grid : Grid) -> tuple[PlayerInfo, Grid]:
                 for player in player_info.quick_key:
                     for settlement in player_info.player_dicts[player]['constructs']['settlement list']:
                         if settlement in grid.tiles[tile]['attached_settlements']:
-                            player_info = give_resources(grid.tiles[tile]['biome'], player_info, settlement)
+                            player_info = give_resources(grid.tiles[tile]['biome'], player_info, player, settlement)
             else:
                 print(f"The robber has prevented anyone from obtaining resources on {tile}")
     
@@ -839,18 +896,18 @@ def reward_rolls(roll : int, grid : Grid, tile : str, player_info : PlayerInfo, 
     return player_info 
  
  
-def give_resources(resource : str, player_info : PlayerInfo, settlement) -> PlayerInfo:
+def give_resources(resource : str, player_info : PlayerInfo, player, settlement) -> PlayerInfo:
     """Transfers resources from bank to players based on rolls"""
     
     game_bank = player_info.game_bank
     if game_bank['resources'][resource] != 0:
         if settlement != "":
-            print(f"P{player_info.player_turn} has obtained {resource} from their settlement {settlement}.")
+            print(f"P{player} has obtained {resource} from their settlement {settlement}.")
                 
         game_bank['resources'][resource] -= 1
-        player_info.player_dicts[player_info.player_turn]['resources'][resource] += 1
+        player_info.player_dicts[player]['resources'][resource] += 1
     else:
-        print(f"The bank has run out of {resource}! P{player_info.player_turn} is unable to obtain {resource} from their settlement {settlement}")
+        print(f"The bank has run out of {resource}! P{player} is unable to obtain {resource} from their settlement {settlement}")
         
     player_info.game_bank = game_bank
     return player_info
@@ -1117,17 +1174,19 @@ def create_classes() -> tuple[Grid, PlayerInfo, GameInfo]:
 
 
 def allow_turn_end(roll_allowed : bool, player_info : PlayerInfo) -> bool:
-        """Checks if the turn can end and returns the turn"""
-        
-        if not roll_allowed:
-                if check_password(player_info):
-                        print("Your turn has ended.")
-                        turn = False
+    """Checks if the turn can end and returns the turn"""
+    
+    if not roll_allowed:
+        if check_password(player_info):
+            print("Your turn has ended.")
+            turn = False
         else:
-                print("You must roll before you can end your turn.")
-                turn = True
-                
-        return turn
+            turn = True
+    else:
+        print("You must roll before you can end your turn.")
+        turn = True
+            
+    return turn
   
     
 def proceed(materials_needed : dict, player_info : PlayerInfo) -> bool:
@@ -1172,21 +1231,6 @@ def calculate_hand_size(player_info : PlayerInfo, player : int) -> int:
         hand_size += player_info.player_dicts[player]['resources'][resource]
         
     return hand_size
-    
-    
-def transfer_resources(player_info : PlayerInfo, resources : dict, player=0, add=0) -> PlayerInfo:
-    """Gives/takes resources to/from players. Pass the resources into this function as follows: {Resource : number}. Automatically assumes that you are subtracting if nothing is passed into the function."""
-    
-    player=player_info.player_turn if not player else player
-    for resource in resources:
-        if add:
-            player_info.player_dicts[player]['resources'][resource] += resources[resource]
-            player_info.game_bank['resources'][resource] -= resources[resource]
-        else:
-            player_info.player_dicts[player]['resources'][resource] -= resources[resource]
-            player_info.game_bank['resources'][resource] += resources[resource]
-            
-    return player_info
 
 
 def evaluate_game(player_info : PlayerInfo) -> bool:
@@ -1205,14 +1249,16 @@ def calculate_points(player_info, player) -> int:
     """Calculates the given player's victory points"""
     
     victory_points = 0
-    victory_points += player_info.player_dicts[player]['constructs']['settlements']
-    victory_points += player_info.player_dicts[player]['constructs']['cities'] * 2#every city is worth 2VPs
+    victory_points += len(player_info.player_dicts[player]['constructs']['settlement list'])
+    victory_points += len(player_info.player_dicts[player]['constructs']['city list']) * 2#every city is worth 2VPs
+    victory_points += player_info.player_dicts[player]['cards']['VP card']
     if player_info.longest_road[0] == player:
         victory_points += 2
     if player_info.largest_army[0] == player:
         victory_points += 2
         
     return victory_points
+
 
 ##PROGRAM STAGES
 
@@ -1266,7 +1312,9 @@ def initial_loop(player_info : PlayerInfo, grid : Grid) -> tuple[PlayerInfo, Gri
     return player_info, grid
 
 
-def main_loop(player_info, grid):
+def main_game(player_info, grid):
+    """The very time consuming main stage of the game"""
+    
     game = True
     player_info.game_stage = 2
     
@@ -1305,61 +1353,17 @@ def main_loop(player_info, grid):
                     pass
                     
                 else:
-                    print("That action doesn't exist. Type 'cmds' or 'c' if you're confused on what commands you can use here!")               
-        
-        
-def main_game(player_info, grid):
-    """The main input loop after initial resource setup"""
-    
-    game = True##begins the game
-    player_info.game_stage = 2#enters main game. stage 2 is just the stage ykwim
-    game_bank = player_info.game_bank
-
-    while player_info.game_stage == 2 and game:
-
-        for player in player_info.quick_key:
-            if not game:
-                print("Game has ended!")
-                break
-            
-            player_info.player_turn = player
-            turn = True
-            roll_allowed = True
-            while turn:
-                action = input(ansi_stitching(player_info.player_dicts[player]['colour'], f"Player {player}, what's your move?") + "\n˚₊ · »-♡→ ").strip().lower()
-
-                if action == "end turn":
-                    turn = allow_turn_end(roll_allowed, player_info)
-
-                elif action == "build":
-                    player_info, grid = build(player_info, grid)
-                
-                elif action == "trade":
-                    choice = call_trade(player_info, grid, game_bank)
-                        
-                elif action == "roll":
-                    roll_allowed, player_info, grid = roll_die(roll_allowed, player_info, grid)
-                        
-                elif action == "cls":
-                    clear_screen()
-                    print_board(player_info, grid)
-                        
-                else:
-                    print("That action doesn't exist.")
-                            
-                                    
-            game = check_if_game(calculate_VP(player_info), player_info)
-            clear_screen()
-            print_board(player_info, grid)
+                    print("That action doesn't exist. Type 'cmds' or 'c' if you're confused on what commands you can use here!")
                     
-    print("Game has ended :)")
-    
+            clear_screen()
+            print_board(player_info, grid)          
+        
     
 def main():
     """Main code for the game, initially called"""
     while True:
         function_list = NormalFunctions()
-        print("If you're playing the game, remove line 1030")
+        print("If you're playing the game, remove line 1369")
         sys.exit()########remove this line if playing
         get_initial_inputs()#the initial input loop ends as soon as the game starts
         grid, player_info, game_info = create_classes()#assigns variables to the classes and makes them direct objects to call
