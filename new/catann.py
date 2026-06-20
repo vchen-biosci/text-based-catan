@@ -791,8 +791,6 @@ def initialise_resource_cards(game_info : GameInfo) -> tuple[dict, dict]:
 
 def dice_roll(player_info : PlayerInfo, grid : Grid) -> tuple[PlayerInfo, Grid]:
     """Rolls the die"""
-        
-    player_dicts = player_info.player_dicts
     
     dice_1 = random.randint(1, 6)
     dice_2 = random.randint(1, 6)
@@ -802,10 +800,15 @@ def dice_roll(player_info : PlayerInfo, grid : Grid) -> tuple[PlayerInfo, Grid]:
     if roll == 7:
         grid, player_info = rolled_a_seven(player_info, grid)
             
-    for player in player_info.quick_key:
-        for settlement, tile in zip(player_dicts[player]['constructs']["settlement list"], grid.tiles):
-            if settlement in grid.tiles[tile]["attached_settlements"]:
-                player_info = reward_rolls(roll, grid, tile, player_info, settlement)
+    for tile in grid.tiles:
+        if grid.tiles[tile]['number'] == roll:
+            if grid.robber != tile:
+                for player in player_info.quick_key:
+                    for settlement in player_info.player_dicts[player]['constructs']['settlement list']:
+                        if settlement in grid.tiles[tile]['attached_settlements']:
+                            player_info = give_resources(grid.tiles[tile]['biome'], player_info, settlement)
+            else:
+                print(f"The robber has prevented anyone from obtaining resources on {tile}")
     
     return player_info, grid
  
