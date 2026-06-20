@@ -529,7 +529,7 @@ def print_deck(player_info, player=0):
         print(f"{resource} : {player_info.player_dicts[printee]['resources'][resource]}")
     
     
-def discard_resource(player_info, player):
+def discard_resource(player_info, player) -> PlayerInfo:
     """Lets player choose a resource to discard"""
     
     while True:
@@ -553,10 +553,22 @@ def discard_resource(player_info, player):
         owned = player_info.player_dicts[player]['resources'][action]
         if owned > 0:
             while True:
-                discard_num = input(f"How many would you like to discard?")
-                try:
+                discard_num = input(f"How many would you like to discard?\n˚₊ · »-♡→ ").strip()
+                if not discard_num.isdigit:
+                    print("Write your POSITIVE number in arabic numerals.")
+                else:
                     if int(discard_num) > owned:
-                        transfer_materials()
+                        print("That number's too large!")
+                    else:
+                        break
+        
+        print("Confirmed. Transferring resources to the bank...")
+        resources = {action : discard_num}
+        player_info = transfer_resources(player_info, resources, player)
+        break
+                                    
+    return player_info
+
     
 ##GRID GENERATION/DYNAMIC BOARD
 
@@ -777,7 +789,7 @@ def initialise_resource_cards(game_info : GameInfo) -> tuple[dict, dict]:
 ##ROLL MECHANICS
 
 
-def dice_roll(player_info : PlayerInfo, grid : Grid):
+def dice_roll(player_info : PlayerInfo, grid : Grid) -> tuple[PlayerInfo, Grid]:
     """Rolls the die"""
         
     player_dicts = player_info.player_dicts
@@ -788,29 +800,26 @@ def dice_roll(player_info : PlayerInfo, grid : Grid):
     print(f"As everyone watches with bated breath, you roll the die. You pray for a good result. They land as follows: |{dice_1}| |{dice_2}| ... {dice_1} + {dice_2} = {roll}. You've rolled a {roll}.")
     
     if roll == 7:
-        print(f"The robber will now migrate to a hex of P{player_info.player_turn}'s choosing.")
-        grid.robber = place_robber
-        clear_screen()
-        print_board(player_info, grid)
+        grid, player_info = rolled_a_seven(player_info, grid)
             
     for player in player_info.quick_key:
         for settlement, tile in zip(player_dicts[player]['constructs']["settlement list"], grid.tiles):
             if settlement in grid.tiles[tile]["attached_settlements"]:
                 player_info = reward_rolls(roll, grid, tile, player_info, settlement)
     
-    return player_info
+    return player_info, grid
  
  
-def roll_die(roll_allowed, player_info, grid):
+def roll_die(roll_allowed, player_info, grid) -> tuple[PlayerInfo, Grid]:
         """Roll die if roll is allowed"""
         
         if roll_allowed:
-                game_bank, player_info = dice_roll(player_info, grid)
+                player_info, grid = dice_roll(player_info, grid)
                 roll_allowed = False
         else:
                 print("You've already rolled this turn. You can only roll once per turn.") 
                 
-        return game_bank, player_info
+        return player_info, grid
     
 
 def reward_rolls(roll : int, grid : Grid, tile : str, player_info : PlayerInfo, settlement : str) -> PlayerInfo:
@@ -842,16 +851,41 @@ def give_resources(resource : str, player_info : PlayerInfo, settlement) -> Play
     return player_info
     
     
-def halve_decks(player_info : PlayerInfo):
+def halve_decks(player_info : PlayerInfo) -> PlayerInfo:
     """Identifies players that must halve their hands and forces said halving"""
     #Players that have more than 7 cards after rolling a 7 must discard half their cards
     
     for player in player_info.quick_key:
         hand_size = calculate_hand_size(player_info, player)
         if hand_size > 7:
-            required_size = hand_size//2
             print(f"Pass the laptop to player {player}. \nYou currently have {hand_size} cards. You must discard your hand until you have {required_size} cards left.")
             force_password(player_info, player)#ensure privacy
+            required_size = hand_size//2
+        else:
+            required_size = hand_size
+            print(f"Player {player} has a satisfactory hand size.")
+            
+        while hand_size > required_size:
+            player_info = discard_resource(player_info, player)
+            hand_size = calculate_hand_size(player_info, player)
+            
+        clear_screen()
+            
+    return player_info
+
+
+def rolled_a_seven(player_info, grid) -> tuple[Grid, PlayerInfo]:
+    """Moves the robber and halves the decks."""
+    
+    print(f"Player {player_info.player_turn}, you must place the robber.")
+    grid.robber = place_robber(grid)
+    clear_screen()
+    print_board(player_info, grid)
+    player_info = halve_decks(player_info)
+    print("Now everyone can look back at the screen :D")
+    print_board(player_info, grid)
+    
+    return grid, player_info
 
 
 ##BUILDING-RELATED
@@ -1122,6 +1156,21 @@ def calculate_hand_size(player_info : PlayerInfo, player : int) -> int:
     return hand_size
     
     
+def transfer_resources(player_info : PlayerInfo, resources : dict, player=0, add=0) -> PlayerInfo:
+    """Gives/takes resources to/from players. Pass the resources into this function as follows: {Resource : number}. Automatically assumes that you are subtracting if nothing is passed into the function."""
+    
+    player=player_info.player_turn if not player else player
+    for resource in resources:
+        if add:
+            player_info.player_dicts[player]['resources'][resource] += resources[resource]
+            player_info.game_bank['resources'][resource] -= resources[resource]
+        else:
+            player_info.player_dicts[player]['resources'][resource] -= resources[resource]
+            player_info.game_bank['resources'][resource] += resources[resource]
+            
+    return player_info
+
+
 ##PROGRAM STAGES
 
 
@@ -1204,11 +1253,7 @@ def main_game(player_info, grid):
                     choice = call_trade(player_info, grid, game_bank)
                         
                 elif action == "roll":
-                    if roll_allowed:
-                        dice_roll(player_info, grid)
-                        roll_allowed = False
-                    else:
-                        print("You've already rolled this turn.")
+                    player_info, grid = roll_die(roll_allowed, player_info, grid)
                         
                 elif action == "cls":
                     clear_screen()
