@@ -784,11 +784,16 @@ def trade_bank(player_info, grid, trade): #-> tuple[PlayerInfo, bool]:
         else:
             print("That's not a valid input. Either type the number of the port you want to select, its name, or 'x' to leave.")
     if port[0] == '4':
-        player_info, trade = default_trade(player_info, 4)
+        player_info = default_trade(player_info, 4)
     elif port[0] == '3':
-        player_info, trade = default_trade(player_info, 3)
+        player_info = default_trade(player_info, 3)
+    else:
+        player_info = specialised_trade(player_info, port)
+      
         
-def default_trade(player_info, num):
+def default_trade(player_info, num) -> PlayerInfo:
+    """Allows 4:1 and 3:1 trades"""
+    
     resource_list = []
     for resource in player_info.player_dicts[player_info.player_turn]['resources']:
         if player_info.player_dicts[player_info.player_turn]['resources'][resource] >= num:
@@ -799,11 +804,11 @@ def default_trade(player_info, num):
             bank.append(resource)
     if resource_list == []:
         print(f"You don't have enough resource cards to make a default trade. You need {num}.")
-        return player_info, False
+        return player_info
     elif bank == []:
         print("The bank is broke and so can't fund anything... Sorry~")
         print("Trade canceled forcibly!")
-        return player_info, False
+        return player_info
     else:
         while True:
             print("The resources that you can trade with the bank for are:")
@@ -815,13 +820,12 @@ def default_trade(player_info, num):
             action = input("Would you like to confirm the trade? Warning: you can't leave after you say yes, so be absolutely sure. Type 'y' for yes, and 'n' for no.\n˚₊ · »-♡→ ").strip().lower()
             if action in ['x', 'cancel', 'no', 'n']:
                 print("Okay, good choice!")
-                return player_info, False
+                return player_info
             elif action in ['y', 'yes', 'continue']:
                 break
             else:
                 print("Invalid input. Check for spelling errors?")
         give = choose_resource(player_info, "Choose the resource you'd like to give away.\n˚₊ · »-♡→ ", resource_list)
-        
         
         obtain = choose_resource(player_info, "Choose the resource the bank will reward you with:\n˚₊ · »-♡→ ", bank)
         player_info.player_dicts[player_info.player_turn]['resources'][give] -= num
@@ -829,7 +833,40 @@ def default_trade(player_info, num):
         player_info.player_dicts[player_info.player_turn]['resources'][obtain] += 1
         player_info.game_bank['resources'][obtain] -= 1
         
-        return player_info, True
+        return player_info
+
+
+def specialised_trade(player_info, port) -> PlayerInfo:
+    """Facilitates 2:1 trade"""
+    
+    for resource in player_info.resources:
+        if resource[:3] in port:
+            give = resource
+    available_resources = []
+    for resource in player_info.game_bank['resources']:
+        if player_info.game_bank['resources'][resource] >= 1:
+            available_resources.append(resource)
+    if give in available_resources:
+        available_resources.remove(give)
+    if available_resources == []:
+        print("The bank is broke and so can't fund anything... Sorry~")
+        print("Trade canceled forcibly!")
+        return player_info
+    trader = player_info.player_turn
+            
+    if player_info.player_dicts[trader]['resources'][give] < 2:
+        print(f"You actually don't have enough {give}; you have {player_info.player_dicts[trader]['resources'][give]} only.")
+        print("Trade unsuccessful - better luck next time~")
+        return player_info
+    obtain = choose_resource(player_info, "Choose the resource the bank will reward you with:\n˚₊ · »-♡→ ", available_resources)
+    
+    player_info.player_dicts[trader]['resources'][give] -= 2
+    player_info.game_bank['resources'][give] += 2
+    player_info.player_dicts[trader]['resources'][obtain] += 1
+    player_info.game_bank['resources'][obtain] -= 1
+    
+    return player_info
+
 
 ##GRID GENERATION/DYNAMIC BOARD
 
