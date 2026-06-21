@@ -443,10 +443,10 @@ def get_player_number() -> int:
 
 def get_player_name(player : int, player_names : list) -> str:
     """Gets the name of the current player and checks the length and if it is composed of numbers."""
-    
+    blacklist = ['cancel', 'x', '1', '2', '3', '4', '0', 'esc', 'g', 'b', 'bank', 'game bank']
     valid_name = False
     while not valid_name:
-        player_name = input(f"Player {player}, enter your name!\n˚₊ · »-♡→ ").strip()
+        player_name = input(f"Player {player}, enter your name!\n˚₊ · »-♡→ ").strip().lower()
         if player_name in player_names:
             #checks if name has already been created by accessing past names
             print("... That name's already owned. Choose something else.")
@@ -455,7 +455,10 @@ def get_player_name(player : int, player_names : list) -> str:
         elif len(player_name) > 8:
             print("Please set a shorter name. Sorry if your name is really that long, but it's hard to display.")
         else:
-            valid_name = True
+            if player_name in blacklist:
+                print("That name is blacklisted.")
+            else:
+                valid_name = True
             
     return player_name   
 
@@ -526,8 +529,7 @@ def draw_development_card(player_info, grid) -> PlayerInfo:
     print(f"You've drawn a {card} card!")
     player_info.player_dicts[player_info.player_turn]['cards'][card] += 1
     if card == 'VP card':
-        print("Your VP card must immediately be played.")
-        player_info, grid = execute_development_card(card, grid, player_info)
+        print("You gained one secret VP.")
     
     return player_info
 
@@ -536,22 +538,23 @@ def execute_development_card(card, grid, player_info) -> tuple[PlayerInfo, Grid]
     """Executes development card based on the card chosen"""
     
     if card == 'knight':
-        place_robber(grid)
+        grid.robber = place_robber(grid)
         player_info = steal_card(player_info, grid)
         player_info.player_dicts[player_info.player_turn]['army'] += 1
         print("Your army has grown. Congratulations, settler!")
     elif card == 'build road':
         for i in range(2):
             print(f"Free road no.{i}:")
-            player_info, grid = place_road(player_info, grid)
+            player_info, grid, trade = place_road(player_info, grid)
     elif card == 'year of plenty':
         player_info = year_of_plenty(player_info)
     elif card == 'monopoly':
         player_info = monopoly(player_info)
     elif card == 'VP card':
-        player_info.player_dicts[player_info.player_turn]['VP card'] += 1
+        print("VP cards cannot be played.")
         
-    player_info.player_dicts[player_info.player_turn]['cards'][card] -=1
+    if card != 'VP card':
+        player_info.player_dicts[player_info.player_turn]['cards'][card] -=1
     
     return player_info, grid
 
@@ -599,18 +602,19 @@ def monopoly(player_info) -> PlayerInfo:
     return player_info
     
             
-def choose_resource(player_info, message):
+def choose_resource(player_info, message, list=[]) -> str:
+    list = player_info.resources if list==[] else list
     while True:
         print("Here are the cards you can choose:")
-        for resource in player_info.resources:
-            print(f"{player_info.resources.find(resource)}. {resource}")
+        for resource in list:
+            print(f"{list.find(resource)}. {resource}")
         action = input(message).strip().lower()
         if action.isdigit():
-            if int(action) >= 1 and int(action) <= len(player_info.resources):
-                return player_info.resources[int(action) - 1]
+            if int(action) >= 1 and int(action) <= len(list.resources):
+                return list.resources[int(action) - 1]
             else:
                 print("Not a valid integer selection")
-        elif action in player_info.resources:
+        elif action in list:
             return action
         else:
             print("Oops, not a valid resource!")
@@ -656,7 +660,7 @@ def discard_resource(player_info, player) -> PlayerInfo:
         if owned > 0:
             while True:
                 discard_num = input(f"How many would you like to discard?\n˚₊ · »-♡→ ").strip()
-                if not discard_num.isdigit:
+                if not discard_num.isdigit():
                     print("Write your POSITIVE number in arabic numerals.")
                 else:
                     if int(discard_num) > owned:
@@ -723,6 +727,110 @@ def steal_one(player_info, victim) -> str:
                 print("Please enter your chosen number in arabic numerals.")
                 
                 
+def choose_trade(player_info, grid):
+    print("Looks like you want to make a trade?")
+    force_password(player_info)
+    while True:
+        for player in player_info.quick_key:
+            if player != player_info.player_turn:
+                print(f"Player {player} (aka '{player_info.player_dicts[player]['name']}')")
+        print("Or type 'g' for the game bank.")
+        names_list = []
+        for player in player_info.quick_key:
+            if player != player_info.player_turn:
+                names_list.append(player_info.player_dicts[player]['name'])
+        action = input("˚₊ · »-♡→ ")
+        if action.isdigit():
+            if int(action) in player_info.quick_key:
+                return int(action)
+            else:
+                print("Invalid player")
+        elif action in names_list:
+            if action == 'g':
+                trader = "bank"
+            else:
+                for player in player_info.quick_key:
+                    if player_info.player_dicts[player]['name'] == action:
+                        trader = player
+        elif action == 'cancel':
+            pass
+        else:
+            print("Not eligible. Try again.")
+
+
+def trade_bank(player_info, grid, trade): #-> tuple[PlayerInfo, bool]:
+    port_claims = []
+    player = player_info.player_turn
+    for settlement in player_info.player_dicts[player]['constructs']['settlement list']:
+        if grid.settlement_locs[settlement]['port']:
+            port_claims.append(grid.settlement_locs[settlement]['port'])
+    port_claims = list(set(port_claims))
+    port_claims.append("4:1 trade")
+    while True:
+        for port in port_claims:
+            print(f"{port_claims.index(port) + 1}. {port}")
+        action = input("Select a port:\n˚₊ · »-♡→ ")
+        if action.isdigit():
+            if int(action) > 0 and int(action) <= len(port_claims):
+                port = port_claims[int(action) - 1]
+                break
+            else:
+                print("Invalid integer selection.")
+        elif action in port_claims:
+            port = action
+            break
+        elif action in ['x', 'cancel']:
+            return player_info, False
+        else:
+            print("That's not a valid input. Either type the number of the port you want to select, its name, or 'x' to leave.")
+    if port[0] == '4':
+        player_info, trade = default_trade(player_info, 4)
+    elif port[0] == '3':
+        player_info, trade = default_trade(player_info, 3)
+        
+def default_trade(player_info, num):
+    resource_list = []
+    for resource in player_info.player_dicts[player_info.player_turn]['resources']:
+        if player_info.player_dicts[player_info.player_turn]['resources'][resource] >= num:
+            resource_list.append(resource)
+    bank = []
+    for resource in player_info.game_bank['resources']:
+        if player_info.game_bank['resources'][resource] >= 1:
+            bank.append(resource)
+    if resource_list == []:
+        print(f"You don't have enough resource cards to make a default trade. You need {num}.")
+        return player_info, False
+    elif bank == []:
+        print("The bank is broke and so can't fund anything... Sorry~")
+        print("Trade canceled forcibly!")
+        return player_info, False
+    else:
+        while True:
+            print("The resources that you can trade with the bank for are:")
+            for resource in resource_list:
+                print(resource)
+            print("The resources that the bank can reward you with are:")
+            for resource in bank:
+                print(resource)
+            action = input("Would you like to confirm the trade? Warning: you can't leave after you say yes, so be absolutely sure. Type 'y' for yes, and 'n' for no.\n˚₊ · »-♡→ ").strip().lower()
+            if action in ['x', 'cancel', 'no', 'n']:
+                print("Okay, good choice!")
+                return player_info, False
+            elif action in ['y', 'yes', 'continue']:
+                break
+            else:
+                print("Invalid input. Check for spelling errors?")
+        give = choose_resource(player_info, "Choose the resource you'd like to give away.\n˚₊ · »-♡→ ", resource_list)
+        
+        
+        obtain = choose_resource(player_info, "Choose the resource the bank will reward you with:\n˚₊ · »-♡→ ", bank)
+        player_info.player_dicts[player_info.player_turn]['resources'][give] -= num
+        player_info.game_bank['resources'][give] += num
+        player_info.player_dicts[player_info.player_turn]['resources'][obtain] += 1
+        player_info.game_bank['resources'][obtain] -= 1
+        
+        return player_info, True
+
 ##GRID GENERATION/DYNAMIC BOARD
 
 
@@ -752,11 +860,13 @@ def make_token_list() -> list:
     """These are the possible tokens that can be assigned onto hexes."""
         
     number_tokens = []
-    for i in range(2,12): #the range is between 2 and 11 inclusive as 1 and 12 only appear once.
+    for i in range(3,12): #the range is between 2 and 11 inclusive as 1 and 12 only appear once.
         for x in range(2): #need to repeat this twice as these tokens appear twice.
             number_tokens.append(i)
-        
-    number_tokens.append(1)
+    
+    for i in range(2):
+        number_tokens.remove(7)
+        number_tokens.append(2)
     number_tokens.append(12)
         
     return number_tokens
@@ -1058,13 +1168,20 @@ def build(player_info : PlayerInfo, grid: Grid) -> tuple[PlayerInfo, Grid]:
 Happy building!""")
         elif action in ['road', '1', 'r']:
             if proceed(player_info.game_bank['costs']['road'], player_info):
-                player_info, grid = place_road(player_info, grid)
+                player_info, grid, trade = place_road(player_info, grid)
+                if trade:
+                    transfer_resources(player_info, player_info.game_bank['costs']['road'])
+                
         elif action in ['settlement', '2', 's']:
             if proceed(player_info.game_bank['costs']['settlement'], player_info):
-                player_info, grid = place_settlement(player_info, grid)
+                player_info, grid, trade = place_settlement(player_info, grid)
+                if trade:
+                    transfer_resources(player_info, player_info.game_bank['costs']['settlement'])
         elif action in ['city', '3', 'c']:
             if proceed(player_info.game_bank['costs']['city'], player_info):
-                player_info, grid = upgrade_to_city(player_info, grid)
+                player_info, grid, trade = upgrade_to_city(player_info, grid)
+                if trade:
+                    transfer_resources(player_info, player_info.game_bank['costs']['city'])
         else:
             print("Looks like that's not a valid command. If you're confused, try using 'check' to see what you're allowed to enter here :)")
             
@@ -1074,13 +1191,13 @@ Happy building!""")
     return player_info, grid
 
     
-def place_road(player_info : PlayerInfo, grid : Grid) -> tuple[PlayerInfo, Grid]:
+def place_road(player_info : PlayerInfo, grid : Grid) -> tuple[PlayerInfo, Grid, bool]:
     """Places down a road and changes player information accordingly, as well as the grid. Does not take resources from the player in the process."""
     
     player = player_info.player_turn
     if player_info.player_dicts[player]['constructs']['roads'] < 1:
         print("You've used up all your possible roads. Sorry.")
-        return player_info, grid
+        return player_info, grid, False
     
     valid = False
     while not valid:
@@ -1097,16 +1214,16 @@ def place_road(player_info : PlayerInfo, grid : Grid) -> tuple[PlayerInfo, Grid]
     print_board(player_info, grid)
     
     player_info.game_bank['constructs']['roads'] -= 1
-    return player_info, grid
+    return player_info, grid, True
 
 
-def place_settlement(player_info : PlayerInfo, grid) -> tuple[PlayerInfo, Grid]:
+def place_settlement(player_info : PlayerInfo, grid) -> tuple[PlayerInfo, Grid, bool]:
     """Places down a settlement. Does not deduct any resources from the player, do this separately"""
 
     player = player_info.player_turn
     if player_info.player_dicts[player]['constructs']['settlements'] < 1:
         print("You have no more settlements! Sorry.")
-        return player_info, grid#ends the subroutine early
+        return player_info, grid, False#ends the subroutine early
     
     valid = False
     while not valid:
@@ -1123,7 +1240,7 @@ def place_settlement(player_info : PlayerInfo, grid) -> tuple[PlayerInfo, Grid]:
     print_board(player_info, grid)
     
     player_info.game_bank['constructs']['settlements'] -= 1
-    return player_info, grid
+    return player_info, grid, True
     
 
 def change_construct_number(player_info : PlayerInfo, construct, add=0) -> PlayerInfo:
@@ -1190,7 +1307,7 @@ def upgrade_to_city(player_info, grid):
     settlements = player_info.player_dicts[player_info.player_turn]['constructs']['settlement list']
     if settlements == []:
         print("You don't have any settlements to upgrade.")
-        return player_info, grid
+        return player_info, grid, False
     
     while True:
         action = input("Select a settlement. It's case sensitive, by the way!\n˚₊ · »-♡→ ")
@@ -1199,15 +1316,14 @@ def upgrade_to_city(player_info, grid):
             print(settlement, end=(", " if settlement != settlements[-1] else "."))
         if action in ['esc', 'cancel']:
             print("Okay, escaping the city upgrade site...")
-            break
+            return player_info, grid, False
         elif action in settlements:
-            player_info.player_dicts[player_info.player_turn]['constructs']['city list'].append(settlements.pop(action))
+            player_info.player_dicts[player_info.player_turn]['constructs']['city list'].append(action)
+            settlements.remove(action)
             print("Congrats on upgrading to a settlement!")
-            break
+            return player_info, grid, True
         else:
             print("That's not a valid settlement. If you want to leave, please type 'esc' or 'cancel'! (x will place something at x so...)")
-            
-    return player_info, grid
                 
  
 ##PROCESSING
@@ -1432,7 +1548,7 @@ def calculate_points(player_info, player) -> int:
     victory_points = 0
     victory_points += len(player_info.player_dicts[player]['constructs']['settlement list'])
     victory_points += len(player_info.player_dicts[player]['constructs']['city list']) * 2#every city is worth 2VPs
-    victory_points += player_info.player_dicts[player]['VP card']
+    victory_points += player_info.player_dicts[player]['cards']['VP card']
     if player_info.longest_road[0] == player:
         victory_points += 2
     if player_info.largest_army[0] == player:
@@ -1484,12 +1600,12 @@ def initial_loop(player_info : PlayerInfo, grid : Grid) -> tuple[PlayerInfo, Gri
     
     for player in player_info.quick_key:
         player_info.player_turn = player
-        player_info, grid = place_settlement(player_info, grid)
-        player_info, grid = place_road(player_info, grid)
-    for player in player_info.quick_key.reversed():
+        player_info, grid, trade = place_settlement(player_info, grid)
+        player_info, grid, trade = place_road(player_info, grid)
+    for player in reversed(player_info.quick_key):
         player_info.player_turn = player
-        player_info, grid = place_settlement(player_info, grid)
-        player_info, grid = place_road(player_info, grid)
+        player_info, grid, trade = place_settlement(player_info, grid)
+        player_info, grid, trade = place_road(player_info, grid)
                     
     player_info.player_turn = 1
     player_info.game_bank = game_bank
@@ -1541,7 +1657,9 @@ def main_game(player_info, grid):
 'costs' lets you see how much each action will cost.""")
                     
                 elif action in ['d', 'draw']:
-                    player_info = draw_development_card(player_info, grid)
+                    if proceed(player_info.game_bank['costs']['dev card'], player_info):
+                        player_info = draw_development_card(player_info, grid)
+                        transfer_resources(player_info, player_info.game_bank['costs']['dev card'])
                     print("Type 'cls' to hide the card you drew.")
                     game = evaluate_game(player_info)
                 
