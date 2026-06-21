@@ -13,8 +13,6 @@ class PlayerInfo:
         self.game_stage = 1
         self.longest_road = [0, 0]
         self.largest_army = [0, 0]
-        self.resources = ["ores", "grain", "wood", "brick", "sheep"]
-        self.cards = {'knight': 14, 'year of plenty': 2, 'build road': 2, 'monopoly': 2, 'VP card': 5}
 
 
 class Grid:
@@ -24,16 +22,81 @@ class Grid:
         self.tiles = tiles
         self.settlement_locs = settlement_locs
         self.roads = roads
-        self.kaomojis = {
+        self.biomes = biomes
+    
+
+##CONSTANTS
+
+
+INFO_MESSAGE = """List of omissions:
+> Player-player trades not implemented
+> You won't obtain the resources from your second settlement
+> Longest road and largest army haven't been coded yet
+> Your second road can also be attached to an existing road (it's more fun like that)
+> You can build past someone else's settlement as long as you have a road connected to it (I didn't have time to code against that)
+> Cities aren't explicitly shown, so please use your imagination :D - however they'll still be displayed in terms of victory points.
+> There are probably more - please let me know if you see any when testing!"""
+
+COSTS = """The costs for actions as follows:
+ROAD: 1x brick, 1x wood
+SETTLEMENT: 1x brick, 1x wood, 1x grain, 1x sheep
+CITY (upgrades from settlement): 2x grain, 3x ores
+DEVELOPMENT CARD (type 'draw'): 1x sheep, 1x grain, 1x ores
+Development cards can include:
+- victory point cards (secret victory points)
+- year of plenty (get 2 free cards from bank)
+- monopoly (get all copies of a specific card from players)
+- knight cards (move robber)
+- build road cards (place 2 free roads).
+Is this information too long? Type 'cls' to clear :)"""
+
+COMMANDS = """These are the commands available to you:
+'et' ends your turn - you have to roll first. This is password protected!
+'b' allows you to build, should you have enough resources!
+'t' allows you to trade with a player or port.
+'r' lets you roll for resources- you can do this once a turn.
+'cls' clears some text in case you have too much on your screen
+'d' allows you to draw a development card.
+'i' prints out the adaptations made here from the original game of Catan.
+'pod' or 'deck' allows you to see your deck. This is under password protection.
+'costs' lets you see how much each action will cost."""
+
+ERROR_MESSAGE = "That action doesn't exist. Type 'cmds' or 'c' if you're confused on what commands you can use here!"
+    
+RESOURCES = ["ores", "grain", "wood", "brick", "sheep"]
+    
+CARDS = {'knight': 14, 'year of plenty': 2, 'build road': 2, 'monopoly': 2, 'VP card': 5}
+
+ASSOCIATED_SETTLEMENTS = {
+    "S1": ["A", "B", "E", "I", "H", "D"],
+    "S2": ["C", "D", "H", "N", "M", "G"],
+    "S3": ["E", "F", "J", "P", "O", "I"],
+    "S4": ["$", "G", "M", "S", "R", "L"],
+    "S5": ["H", "I", "O", "U", "T", "N"],
+    "S6": ["J", "K", "Q", "W", "V", "P"],
+    "S7": ["M", "N", "T", "Z", "Y", "S"],
+    "S8": ["O", "P", "V", "b", "a", "U"],
+    "S9": ["R", "S", "Y", "e", "d", "X"],
+    "S10": ["T", "U", "a", "g", "f", "Z"],
+    "S11": ["V", "W", "c", "i", "h", "b"],
+    "S12": ["Y", "Z", "f", "l", "k", "e"],
+    "S13": ["a", "b", "h", "n", "m", "g"],
+    "S14": ["d", "e", "k", "q", "p", "j"],
+    "S15": ["f", "g", "m", "s", "r", "l"],
+    "S16": ["h", "i", "o", "u", "t", "n"],
+    "S17": ["k", "l", "r", "w", "v", "q"],
+    "S18": ["m", "n", "t", "y", "x", "s"],
+    "S19": ["r", "s", "x", "+", "z", "w"]
+    }
+
+KAOMOJIS = {
         "ores": "‧₊˚🗻`",
         "brick": "↟↟↟↟↟↟",
         "grain": "˚ʚ🌱₊˚",
         "wood": " ݁˖𓂃.𖠰.",
         "sheep": ":3 ^^~", 
-        "desert": " ⛰︎ ོ ༄-"
-}
-        self.biomes = biomes
-    
+        "desert": " ⛰︎ ོ ༄-"}
+
 
 ##DISPLAY-RELATED
 
@@ -60,7 +123,7 @@ def print_grid(grid : Grid):##this is a very long function so keep it closed.
 #line 6 & 7
 (" " * 60) + grid.roads["AD"]['display'] + "                " + grid.roads["BE"]['display'] + "\n\n" +
 #line 8
-(" " * 35) + ("2:1 grain port") + (" " * 9) + grid.roads["AD"]['display'] + (" " * 7) + grid.kaomojis[grid.tiles["S1"]["biome"]] + (" "* 7) + grid.roads["BE"]['display'] + (" " * 16) + "3:1 port" + "\n" +
+(" " * 35) + ("2:1 grain port") + (" " * 9) + grid.roads["AD"]['display'] + (" " * 7) + KAOMOJIS[grid.tiles["S1"]["biome"]] + (" "* 7) + grid.roads["BE"]['display'] + (" " * 16) + "3:1 port" + "\n" +
 #line 9
 (" " * 36) + "|    " + "\\" + "   " + (grid.roads["CD"]['display'] + " ") * 4 + grid.roads["AD"]['display'] + (" " * 10) + str(grid.tiles["S1"]["number"]) 
 + (" " * 11 if len(str(grid.tiles["S1"]["number"])) == 1 else " " * 10) + grid.roads["BE"]['display'] + " " + (grid.roads["EF"]['display'] + " ") * 4 + "   /  |\n" +
@@ -75,8 +138,8 @@ grid.roads["FJ"]['display'] + "    |" + "\n" +
 #line 12
 (" " * 36) + "|" + (" " * 63) + "|" + "\n" +
 #line 13
-(" " * 36) + "|" + "  " + grid.roads["CG"]['display'] + (" " * 7) + grid.kaomojis[grid.tiles["S2"]["biome"]] + (" " * 7) + grid.roads["DH"]['display'] 
-+ (" " * 16) + grid.roads["EI"]['display'] + " "  + (" " * 6) + (grid.kaomojis[grid.tiles["S3"]["biome"]]) 
+(" " * 36) + "|" + "  " + grid.roads["CG"]['display'] + (" " * 7) + KAOMOJIS[grid.tiles["S2"]["biome"]] + (" " * 7) + grid.roads["DH"]['display'] 
++ (" " * 16) + grid.roads["EI"]['display'] + " "  + (" " * 6) + (KAOMOJIS[grid.tiles["S3"]["biome"]]) 
 + (" " * 6) + grid.roads["FJ"]['display'] +"  |\n" +
 #line 14
 (" " * 21) + grid.settlement_locs["$"]["display"] + " " + (grid.roads[quick_reorder("G$")]['display'] + " ") * 4 + grid.settlement_locs["G"]["display"] + "  " + grid.roads["CG"]['display'] + (" " * 10) + str(grid.tiles["S2"]["number"]) + 
@@ -91,9 +154,9 @@ grid.roads["FJ"]['display'] + "    |" + "\n" +
 (" " * 20) + grid.roads[quick_reorder("L$")]['display'] + (" " * 18) + grid.roads["GM"]['display'] + (" " * 9) + "S2" + (" " * 9) + grid.roads["HN"]['display'] + (" " * 16) + grid.roads["IO"]['display'] + (" " * 8) + "S3" + (" " * 9) + grid.roads["JP"]['display'] + 
 (" " * 16) + grid.roads["KQ"]['display'] + "\n\n" +
 #line 18
-(" " * 18) + grid.roads[quick_reorder("L$")]['display'] + (" " * 8) + grid.kaomojis[grid.tiles["S4"]["biome"]] + (" " * 8) + grid.roads["GM"]['display'] + (" " * 16) + grid.roads["HN"]['display'] + (" " * 7) + 
-grid.kaomojis[grid.tiles["S5"]["biome"]] + (" " * 7) + grid.roads["IO"]['display']
-+ (" " * 15) + grid.roads["JP"]['display'] + (" " * 7) + grid.kaomojis[grid.tiles["S6"]["biome"]] + (" " * 7) + grid.roads["KQ"]['display'] + "\n" + 
+(" " * 18) + grid.roads[quick_reorder("L$")]['display'] + (" " * 8) + KAOMOJIS[grid.tiles["S4"]["biome"]] + (" " * 8) + grid.roads["GM"]['display'] + (" " * 16) + grid.roads["HN"]['display'] + (" " * 7) + 
+KAOMOJIS[grid.tiles["S5"]["biome"]] + (" " * 7) + grid.roads["IO"]['display']
++ (" " * 15) + grid.roads["JP"]['display'] + (" " * 7) + KAOMOJIS[grid.tiles["S6"]["biome"]] + (" " * 7) + grid.roads["KQ"]['display'] + "\n" + 
 #line 19
 (" " * 15) + grid.settlement_locs["L"]["display"] + " " + grid.roads[quick_reorder("L$")]['display'] + (" " * 11) + str(grid.tiles["S4"]["number"]) + (" " * (10 if len(str(grid.tiles["S4"]["number"])) == 1 else 9)) + grid.settlement_locs["M"]["display"] +
 " " + grid.roads["GM"]['display'] + "  " + (grid.roads["MN"]['display'] + " ") * 4 + grid.roads["HN"]['display'] + grid.settlement_locs["N"]["display"] + (" " * 9) + str(grid.tiles["S5"]["number"]) + (" " * 9 if len(str(grid.tiles["S5"]["number"])) == 1 else " " * 8) + grid.settlement_locs["O"]["display"] +
@@ -110,7 +173,7 @@ grid.kaomojis[grid.tiles["S5"]["biome"]] + (" " * 7) + grid.roads["IO"]['display
 (" " * 18) + grid.roads["LR"]['display'] + (" " * 10) + "S4" + (" " * 10) + grid.roads["MS"]['display'] + (" " * 16) + grid.roads["NT"]['display'] + (" " * 9) + "S5" + (" " * 9) + grid.roads["OU"]['display'] + (" " * 15) + grid.roads["PV"]['display'] 
 + (" " * 9) + "S6" + (" " * 9) + grid.roads["QW"]['display'] + "\n\n" +
 #line 23
-(" " * 20) + grid.roads["LR"]['display'] + (" " * 18) + grid.roads["MS"]['display'] + (" " * 7) + grid.kaomojis[grid.tiles["S7"]["biome"]] + (" " * 7) + grid.roads["NT"]['display'] + (" " * 16) + grid.roads["OU"]['display'] + (" " * 7) + grid.kaomojis[grid.tiles["S8"]["biome"]]  + (" " * 6) + grid.roads["PV"]['display'] +
+(" " * 20) + grid.roads["LR"]['display'] + (" " * 18) + grid.roads["MS"]['display'] + (" " * 7) + KAOMOJIS[grid.tiles["S7"]["biome"]] + (" " * 7) + grid.roads["NT"]['display'] + (" " * 16) + grid.roads["OU"]['display'] + (" " * 7) + KAOMOJIS[grid.tiles["S8"]["biome"]]  + (" " * 6) + grid.roads["PV"]['display'] +
 (" " * 16) + grid.roads["QW"]['display'] + "\n" +
 #line 24
 (" " * 3) + "2:1 wood port - " + grid.settlement_locs["R"]["display"] + " " + grid.roads["LR"]['display'] + "  " + (grid.roads["RS"]['display'] + " ") * 4 + grid.settlement_locs["S"]["display"] + " " + grid.roads["MS"]['display'] + (" " * 10) + str(grid.tiles["S7"]["number"]) + 
@@ -128,9 +191,9 @@ grid.roads["Vb"]['display'] + (" " * 16) + grid.roads["Wc"]['display'] + "      
 #line 27
 (" " * 10) + "\\" + (" " * 110) + "/" + "\n" +
 #line 28
-(" " * 11) + "\\" + (" " * 6) + grid.roads["RX"]['display'] + (" " * 8) + grid.kaomojis[grid.tiles["S9"]["biome"]] + (" " * 8) + grid.roads["SY"]['display'] + (" " * 16) + 
-grid.roads["TZ"]['display'] + (" " * 6) + grid.kaomojis[grid.tiles["S10"]["biome"]] + (" " * 8) + grid.roads["Ua"]['display']
-+ (" " * 15) + grid.roads["Vb"]['display'] + (" " * 7) + grid.kaomojis[grid.tiles["S11"]["biome"]] + (" " * 7) + grid.roads["Wc"]['display'] + "   /" + "\n" +
+(" " * 11) + "\\" + (" " * 6) + grid.roads["RX"]['display'] + (" " * 8) + KAOMOJIS[grid.tiles["S9"]["biome"]] + (" " * 8) + grid.roads["SY"]['display'] + (" " * 16) + 
+grid.roads["TZ"]['display'] + (" " * 6) + KAOMOJIS[grid.tiles["S10"]["biome"]] + (" " * 8) + grid.roads["Ua"]['display']
++ (" " * 15) + grid.roads["Vb"]['display'] + (" " * 7) + KAOMOJIS[grid.tiles["S11"]["biome"]] + (" " * 7) + grid.roads["Wc"]['display'] + "   /" + "\n" +
 #line 29
 (" " * 12) + "\\  " + grid.settlement_locs["X"]["display"] + " " + grid.roads["RX"]['display'] + (" " * 12) + str(grid.tiles["S9"]["number"]) + 
 (" " * 9 if len(str(grid.tiles["S9"]["number"])) == 1 else " " * 8) 
@@ -151,7 +214,7 @@ grid.settlement_locs["a"]["display"] + " " + grid.roads["Ua"]['display'] + (" " 
 #line 31 & 32
 (" " * 18) + grid.roads["Xd"]['display'] + (" " * 10) + "S9" + (" " * 10) + grid.roads["Ye"]['display'] + (" " * 16) + grid.roads["Zf"]['display'] + (" " * 8) + "S10" + (" " * 9) + grid.roads["ag"]['display'] + (" " * 15) + grid.roads["bh"]['display'] + (" " * 8) + "S11" + (" " * 9) + grid.roads["ci"]['display'] + "\n\n" +
 #line 33
-(" " * 20) + grid.roads["Xd"]['display'] + (" " * 18) + grid.roads["Ye"]['display'] + (" " * 7) + grid.kaomojis[grid.tiles["S12"]["biome"]] + (" " * 7) + grid.roads["Zf"]['display'] + (" " * 16) + grid.roads["ag"]['display'] + (" " * 6) + grid.kaomojis[grid.tiles["S13"]["biome"]] + (" " * 7) + 
+(" " * 20) + grid.roads["Xd"]['display'] + (" " * 18) + grid.roads["Ye"]['display'] + (" " * 7) + KAOMOJIS[grid.tiles["S12"]["biome"]] + (" " * 7) + grid.roads["Zf"]['display'] + (" " * 16) + grid.roads["ag"]['display'] + (" " * 6) + KAOMOJIS[grid.tiles["S13"]["biome"]] + (" " * 7) + 
 grid.roads["bh"]['display'] + (" " * 16) + grid.roads["ci"]['display']
 + "\n" +
 #line 34
@@ -167,8 +230,8 @@ str(grid.tiles["S12"]["number"]) + (" " * 9 if len(str(grid.tiles["S12"]["number
 #line 36 & 37
 (" " * 20) + grid.roads["dj"]['display'] + (" " * 18) + grid.roads['ek']['display'] + (" " * 8) + "S12" + (" " * 9) + grid.roads['fl']['display'] + (" " * 16) + grid.roads['gm']['display'] + (" " * 8) + "S13" + (" " * 8) + grid.roads['hn']['display'] + (" " * 16) + grid.roads['io']['display'] + "\n\n" +
 #line 38 
-(" " * 18) + grid.roads['dj']['display'] + (" " * 8) + grid.kaomojis[grid.tiles["S14"]["biome"]] + (" " * 8) + grid.roads['ek']['display'] + (" " * 16) + grid.roads['fl']['display'] + 
-(" " * 7) + grid.kaomojis[grid.tiles["S15"]["biome"]] + (" " * 7) + grid.roads['gm']['display'] + (" " * 15) + grid.roads['hn']['display'] + (" " * 7) + grid.kaomojis[grid.tiles["S16"]["biome"]] + (" " * 7)
+(" " * 18) + grid.roads['dj']['display'] + (" " * 8) + KAOMOJIS[grid.tiles["S14"]["biome"]] + (" " * 8) + grid.roads['ek']['display'] + (" " * 16) + grid.roads['fl']['display'] + 
+(" " * 7) + KAOMOJIS[grid.tiles["S15"]["biome"]] + (" " * 7) + grid.roads['gm']['display'] + (" " * 15) + grid.roads['hn']['display'] + (" " * 7) + KAOMOJIS[grid.tiles["S16"]["biome"]] + (" " * 7)
 + grid.roads['io']['display'] + "\n" +
 #line 39
 (" " * 15) + grid.settlement_locs["j"]["display"] + " " + grid.roads['dj']['display'] + (" " * 11) + str(grid.tiles["S14"]["number"]) + (" " * 10 if len(str(grid.tiles["S14"]["number"])) == 1 else " " * 9) + grid.settlement_locs["k"]["display"]
@@ -192,8 +255,8 @@ str(grid.tiles["S12"]["number"]) + (" " * 9 if len(str(grid.tiles["S12"]["number
 
     grid_part_4 = (
 #line 43
-(" " * 12) + "/" + (" " * 7) + grid.roads['jp']['display'] + (" " * 18) + grid.roads['kq']['display'] + (" " * 7) + grid.kaomojis[grid.tiles["S17"]["biome"]] + 
-(" " * 7) + grid.roads['lr']['display'] + (" " * 16) + grid.roads['ms']['display'] + (" " * 6) + grid.kaomojis[grid.tiles["S18"]["biome"]] + (" " * 7)
+(" " * 12) + "/" + (" " * 7) + grid.roads['jp']['display'] + (" " * 18) + grid.roads['kq']['display'] + (" " * 7) + KAOMOJIS[grid.tiles["S17"]["biome"]] + 
+(" " * 7) + grid.roads['lr']['display'] + (" " * 16) + grid.roads['ms']['display'] + (" " * 6) + KAOMOJIS[grid.tiles["S18"]["biome"]] + (" " * 7)
 + grid.roads['nt']['display'] + (" " * 16) + grid.roads['ou']['display'] + (" " * 7) + "\\" + "\n" +
 #line 44
 " 2:1 brick port _  " + grid.settlement_locs["p"]["display"] + " " + grid.roads['jp']['display'] + " " + (grid.roads["pq"]['display'] + " ") * 4 + " " 
@@ -212,7 +275,7 @@ grid.settlement_locs["u"]["display"] + "  _ _ 3:1 port" + "\n" +
 (" " * 39) + grid.roads['qv']['display'] + (" " * 8)  + "S17" + (" " * 9) + grid.roads['rw']['display'] + (" " * 16) + grid.roads['sx']['display'] + 
 (" " * 8) + "S18" + (" " * 8) + grid.roads['ty']['display'] + "\n\n" +
 #line 48
-(" " * 41) + grid.roads['qv']['display'] + (" " * 16) + grid.roads['rw']['display'] + (" " * 7) + grid.kaomojis[grid.tiles["S19"]["biome"]] + (" " * 7) + 
+(" " * 41) + grid.roads['qv']['display'] + (" " * 16) + grid.roads['rw']['display'] + (" " * 7) + KAOMOJIS[grid.tiles["S19"]["biome"]] + (" " * 7) + 
 grid.roads['sx']['display'] + (" " * 15) + grid.roads['ty']['display'] + "\n" +
 #line 49
 (" " * 42) + grid.roads['qv']['display'] + grid.settlement_locs["v"]["display"] + " " + (grid.roads["vw"]['display'] + " ") * 4 + grid.settlement_locs["w"]["display"] + 
@@ -250,8 +313,8 @@ def print_board(player_info : PlayerInfo, grid : Grid):
     for resource in game_bank["resources"]:
         print(f'{resource} : {game_bank["resources"][resource]}', end="  ||  ")
     print("\n")
-    for dev_card in game_bank['cards']:
-        print(f'{dev_card} : {game_bank["cards"][dev_card]}', end="  ||  ")
+    for card in CARDS:
+        print(f'{card} : {game_bank["cards"].count(card)}', end="  ||  ")
     print("\n")
     for player in player_info.quick_key:
         print(ansi_stitching(player_info.player_dicts[player]['colour'], f"Player {player} ({player_info.player_dicts[player]['name']}) : {calculate_points(player_info, player, 1)} public VPs, {calculate_hand_size(player_info, player)} resource cards"), end="  ||  ")
@@ -448,17 +511,18 @@ def get_player_name(player : int, player_names : list) -> str:
 
 def add_keys(player_info : PlayerInfo) -> dict:
     """Adds keys to each existing player dictionary"""
-    player_dicts = player_info.player_dicts
     
+    player_dicts = player_info.player_dicts
+
     for player in player_info.quick_key:
-        player_dicts[player]['constructs'] = {"settlements": 3, "cities": 4, "roads": 13, "settlement list" : [], "city list" : [], "road list" : []}#technically they have more but they use it up initially - so it's easier to do this
+        player_dicts[player]['constructs'] = {"settlement": 3, "city": 4, "road": 13, "settlement list" : [], "city list" : [], "road list" : []}#technically they have more but they use it up initially - so it's easier to do this
         
         player_dicts[player]['resources'] = {}
-        for resource in player_info.resources:
+        for resource in RESOURCES:
             player_dicts[player]['resources'][resource] = 0
             
         player_dicts[player]['cards'] = {}
-        for dev_card in player_info.cards:
+        for dev_card in CARDS:
             player_dicts[player]['cards'][dev_card] = 0
         player_dicts[player]['army'] = 0
             
@@ -493,28 +557,30 @@ def print_deck(player_info, player=0):
     for resource in player_info.player_dicts[printee]['resources']:
         print(f"{resource} : {player_info.player_dicts[printee]['resources'][resource]}")
     print("---DEVELOPMENT CARDS---")
-    for card in player_info.player_dicts[printee]['dev cards']:
-        print(f"{card} : {player_info.player_dicts[printee]['dev cards'][card]}")
+    for card in player_info.player_dicts[printee]['cards']:
+        print(f"{card} : {player_info.player_dicts[printee]['cards'][card]}")
     
 
 ##DEVELOPMENT CARDS
 
 
-def draw_development_card(player_info) -> PlayerInfo:
+def draw_development_card(player_info) -> tuple[PlayerInfo, bool]:
     """Draws a development card from the game bank with a simple pop method"""
     
     force_password(player_info)
     print("Make everyone else look away.")
     cards = player_info.game_bank['cards']
+    if cards == []:
+        print("The game bank has no more development cards. Sorry, you can't buy any!")
+        return player_info, False
     random.shuffle(cards)
     card = cards.pop()
-    player_info.game_bank['cards'].remove(card)
     print(f"You've drawn a {card} card!")
     player_info.player_dicts[player_info.player_turn]['cards'][card] += 1
     if card == 'VP card':
         print("You gained one secret VP.")
     
-    return player_info
+    return player_info, True
 
 
 def execute_development_card(card, grid, player_info) -> tuple[PlayerInfo, Grid]:
@@ -548,8 +614,8 @@ def choose_development_card(player_info) -> str:
     player = player_info.player_turn
     force_password(player_info)
     player_cards = []
-    for card in player_info.player_dicts[player]['dev cards']:
-        if player_info.player_dicts[player]['dev cards'][card] >= 1:
+    for card in player_info.player_dicts[player]['cards']:
+        if player_info.player_dicts[player]['cards'][card] >= 1:
             player_cards.append(card)
     if player_cards == []:
         print("You actually don't have any development cards, lols")
@@ -564,7 +630,7 @@ def choose_development_card(player_info) -> str:
         else:
             print("You seem to be a bit mentally challenged right now. Type 'x' to leave or 'y' to continue ^^")
     
-    card = choose_resource(player_info, "Choose the card you'll play:\n˚₊ · »-♡→ ", player_cards)
+    card = choose_resource("Choose the card you'll play:\n˚₊ · »-♡→ ", player_cards)
     return card
 
 
@@ -604,23 +670,23 @@ def monopoly(player_info) -> PlayerInfo:
     """Forcibly steals all of a chosen resource card from all players"""
     
     print("You've just stumbled on one of the most powerful cards in the game! Announce 1 of any resource to steal all copies of it from all players!")
-    resource = choose_resource(player_info, "Choose the resource you'd like to monopolise! (PS enter either the name of the resource or its number)\n˚₊ · »-♡→ ")
+    resource = choose_resource("Choose the resource you'd like to monopolise! (PS enter either the name of the resource or its number)\n˚₊ · »-♡→ ")
     tax_resources(player_info, resource)
     print("Forced collection complete. Returning now :)")
     
     return player_info
     
             
-def choose_resource(player_info, message, list=[]) -> str:
-    list = player_info.resources if list==[] else list
+def choose_resource(message, list=[]) -> str:
+    list = RESOURCES if list==[] else list
     while True:
         print("Here are the cards you can choose:")
         for resource in list:
             print(f"{list.index(resource)}. {resource}")
         action = input(message).strip().lower()
         if action.isdigit():
-            if int(action) >= 1 and int(action) <= len(list.resources):
-                return list.resources[int(action) - 1]
+            if int(action) >= 1 and int(action) <= len(list):
+                return list[int(action) - 1]
             else:
                 print("Not a valid integer selection")
         elif action in list:
@@ -656,7 +722,7 @@ def discard_resource(player_info, player) -> PlayerInfo:
                 print(f"You have chosen to discard {resources[action]}.")
             else:
                 print("Yes, you are allowed to enter a number - but it must correspond to the relevant resource. (Number between 1 and 5.)")
-        except TypeError:
+        except ValueError:
             if action in resources:
                 print(f"You have chosen to discard {action}.")
             elif action == 'check':
@@ -750,6 +816,7 @@ def choose_trade(player_info, grid) -> PlayerInfo:
         for player in player_info.quick_key:
             if player != player_info.player_turn:
                 names_list.append(player_info.player_dicts[player]['name'])
+        names_list.append('g')
         action = input("˚₊ · »-♡→ ")
         if action.isdigit():
             if int(action) in player_info.quick_key:
@@ -843,9 +910,9 @@ def default_trade(player_info, num) -> PlayerInfo:
                 break
             else:
                 print("Invalid input. Check for spelling errors?")
-        give = choose_resource(player_info, "Choose the resource you'd like to give away.\n˚₊ · »-♡→ ", resource_list)
+        give = choose_resource("Choose the resource you'd like to give away.\n˚₊ · »-♡→ ", resource_list)
         
-        obtain = choose_resource(player_info, "Choose the resource the bank will reward you with:\n˚₊ · »-♡→ ", bank)
+        obtain = choose_resource("Choose the resource the bank will reward you with:\n˚₊ · »-♡→ ", bank)
         player_info.player_dicts[player_info.player_turn]['resources'][give] -= num
         player_info.game_bank['resources'][give] += num
         player_info.player_dicts[player_info.player_turn]['resources'][obtain] += 1
@@ -857,7 +924,7 @@ def default_trade(player_info, num) -> PlayerInfo:
 def specialised_trade(player_info, port) -> PlayerInfo:
     """Facilitates 2:1 trade"""
     
-    for resource in player_info.resources:
+    for resource in RESOURCES:
         if resource[:3] in port:
             give = resource
     available_resources = []
@@ -876,7 +943,7 @@ def specialised_trade(player_info, port) -> PlayerInfo:
         print(f"You actually don't have enough {give}; you have {player_info.player_dicts[trader]['resources'][give]} only.")
         print("Trade unsuccessful - better luck next time~")
         return player_info
-    obtain = choose_resource(player_info, "Choose the resource the bank will reward you with:\n˚₊ · »-♡→ ", available_resources)
+    obtain = choose_resource("Choose the resource the bank will reward you with:\n˚₊ · »-♡→ ", available_resources)
     
     player_info.player_dicts[trader]['resources'][give] -= 2
     player_info.game_bank['resources'][give] += 2
@@ -1071,7 +1138,7 @@ def create_game_bank(player_info : PlayerInfo):
     
     game_bank = {}
     #adds the dictionaries for asset values into the game bank
-    resources, dev_bank = initialise_resource_cards(player_info)
+    resources, dev_bank = initialise_resource_cards()
     game_bank['resources'] = resources
     game_bank['cards'] = dev_bank
     
@@ -1090,18 +1157,18 @@ def create_game_bank(player_info : PlayerInfo):
     return game_bank
 
  
-def initialise_resource_cards(player_info : PlayerInfo) -> tuple[dict, list]:
+def initialise_resource_cards() -> tuple[dict, list]:
     """Initialises the dictionary for each resource to be passed into the game bank"""
     
     #Initialises 19 of each resource
     resources = {}
-    for resource in player_info.resources:
+    for resource in RESOURCES:
         resources[resource] = 19
         
     #creates the development card bank
     cards = []
-    for card in player_info.cards:
-        cards.extend([card] * player_info.cards[card])
+    for card in CARDS:
+        cards.extend([card] * CARDS[card])
     
     return resources, cards
 
@@ -1194,12 +1261,10 @@ def rolled_a_seven(player_info, grid) -> tuple[Grid, PlayerInfo]:
     print(f"Player {player_info.player_turn}, you must place the robber.")
     grid.robber = place_robber(grid)
     player_info = steal_card(player_info, grid)
-    time.sleep(5)
+    player_info = halve_decks(player_info)
     clear_screen()
     print_board(player_info, grid)
-    player_info = halve_decks(player_info)
     print("Now everyone can look back at the screen :D")
-    time.sleep(2)
     print_board(player_info, grid)
     
     return grid, player_info
@@ -1212,7 +1277,7 @@ def build(player_info : PlayerInfo, grid: Grid) -> tuple[PlayerInfo, Grid]:
     """Asks the player what they would like to build, then builds it"""
     
     while True:
-        action = input("What would you like to build?\n˚₊ · »-♡→ ").strip().lower()
+        action = input("What would you like to build? Hint: type 'check' to see the input format.\n˚₊ · »-♡→ ").strip().lower()
         
         if action in ['x', 'cancel']:
             break
@@ -1256,7 +1321,7 @@ def place_road(player_info : PlayerInfo, grid : Grid) -> tuple[PlayerInfo, Grid,
     """Places down a road and changes player information accordingly, as well as the grid. Does not take resources from the player in the process."""
     
     player = player_info.player_turn
-    if player_info.player_dicts[player]['constructs']['roads'] < 1:
+    if player_info.player_dicts[player]['constructs']['road'] < 1:
         print("You've used up all your possible roads. Sorry.")
         return player_info, grid, False
     
@@ -1274,7 +1339,7 @@ def place_road(player_info : PlayerInfo, grid : Grid) -> tuple[PlayerInfo, Grid,
     #clear_screen()
     print_board(player_info, grid)
     
-    player_info.player_dicts[player_info.player_turn]['constructs']['roads'] -= 1
+    player_info.player_dicts[player_info.player_turn]['constructs']['road'] -= 1
     return player_info, grid, True
 
 
@@ -1282,7 +1347,7 @@ def place_settlement(player_info : PlayerInfo, grid) -> tuple[PlayerInfo, Grid, 
     """Places down a settlement. Does not deduct any resources from the player, do this separately"""
 
     player = player_info.player_turn
-    if player_info.player_dicts[player]['constructs']['settlements'] < 1:
+    if player_info.player_dicts[player]['constructs']['settlement'] < 1:
         print("You have no more settlements! Sorry.")
         return player_info, grid, False#ends the subroutine early
     
@@ -1300,7 +1365,7 @@ def place_settlement(player_info : PlayerInfo, grid) -> tuple[PlayerInfo, Grid, 
     clear_screen()
     print_board(player_info, grid)
     
-    player_info.game_bank['constructs']['settlements'] -= 1
+    player_info.game_bank['constructs']['settlement'] -= 1
     return player_info, grid, True
     
 
@@ -1371,6 +1436,8 @@ def upgrade_to_city(player_info, grid):
     if settlements == []:
         print("You don't have any settlements to upgrade.")
         return player_info, grid, False
+    if player_info.player_dicts[player_info.player_turn]['constructs']['city'] < 1:
+        return player_info, grid, False
     
     while True:
         action = input("Select a settlement. It's case sensitive, by the way!\n˚₊ · »-♡→ ")
@@ -1382,6 +1449,7 @@ def upgrade_to_city(player_info, grid):
             return player_info, grid, False
         elif action in settlements:
             player_info.player_dicts[player_info.player_turn]['constructs']['city list'].append(action)
+            player_info.player_dicts[player_info.player_turn]['constructs']['city'] -= 1
             settlements.remove(action)
             print("Congrats on upgrading to a settlement!")
             return player_info, grid, True
@@ -1497,34 +1565,14 @@ def check_road(text : str, grid : Grid, player_info : PlayerInfo) -> bool:
 
 def create_classes() -> tuple[Grid, PlayerInfo]:
     """Sets up class variables for later use"""
-    associated_settlements = {
-    "S1": ["A", "B", "E", "I", "H", "D"],
-    "S2": ["C", "D", "H", "N", "M", "G"],
-    "S3": ["E", "F", "J", "P", "O", "I"],
-    "S4": ["$", "G", "M", "S", "R", "L"],
-    "S5": ["H", "I", "O", "U", "T", "N"],
-    "S6": ["J", "K", "Q", "W", "V", "P"],
-    "S7": ["M", "N", "T", "Z", "Y", "S"],
-    "S8": ["O", "P", "V", "b", "a", "U"],
-    "S9": ["R", "S", "Y", "e", "d", "X"],
-    "S10": ["T", "U", "a", "g", "f", "Z"],
-    "S11": ["V", "W", "c", "i", "h", "b"],
-    "S12": ["Y", "Z", "f", "l", "k", "e"],
-    "S13": ["a", "b", "h", "n", "m", "g"],
-    "S14": ["d", "e", "k", "q", "p", "j"],
-    "S15": ["f", "g", "m", "s", "r", "l"],
-    "S16": ["h", "i", "o", "u", "t", "n"],
-    "S17": ["k", "l", "r", "w", "v", "q"],
-    "S18": ["m", "n", "t", "y", "x", "s"],
-    "S19": ["r", "s", "x", "+", "z", "w"]
-    }
+    
     number_tokens = make_token_list()
     biomes = make_biomes()
     quick_key, player_dicts = create_player_info()
     player_info = PlayerInfo({}, quick_key, player_dicts)
     game_bank = create_game_bank(player_info)
     player_info.game_bank = game_bank
-    tiles, robber, settlement_locs, roads = make_grid(biomes, number_tokens, associated_settlements)
+    tiles, robber, settlement_locs, roads = make_grid(biomes, number_tokens, ASSOCIATED_SETTLEMENTS)
     
     grid = Grid(robber, tiles, settlement_locs, roads, biomes)
     
@@ -1563,9 +1611,10 @@ def proceed(construct : str, player_info : PlayerInfo) -> bool:
         else:
             print(f"You have enough {resource} for the trade. (You have {owned}, {materials_needed[resource]} are required)")
         time.sleep(0.1)
-        if player_info.player_dicts[player_info.player_turn]['constructs'][construct] < 1:
-            print("You don't have enough constructs to build anything!")
-            return False
+        if construct != 'dev card':
+            if player_info.player_dicts[player_info.player_turn]['constructs'][construct] < 1:
+                print("You don't have enough constructs to build anything!")
+                return False
             
     while True:
         action = input("You have enough of every resource. Would you like to proceed with the trade?\n˚₊ · »-♡→ ").strip().lower()
@@ -1684,38 +1733,6 @@ def initial_loop(player_info : PlayerInfo, grid : Grid) -> tuple[PlayerInfo, Gri
 
 def main_game(player_info, grid):
     """The very time consuming main stage of the game"""
-    
-    INFO_MESSAGE = """List of omissions:
-> Player-player trades not implemented
-> You won't obtain the resources from your second settlement
-> Longest road and largest army haven't been coded yet
-> Cities aren't explicitly shown, so please use your imagination :D - however they'll still be displayed in terms of victory points."""
-
-    COSTS = """The costs for actions as follows:
-ROAD: 1x brick, 1x wood
-SETTLEMENT: 1x brick, 1x wood, 1x grain, 1x sheep
-CITY (upgrades from settlement): 2x grain, 3x ores
-DEVELOPMENT CARD (type 'draw'): 1x sheep, 1x grain, 1x ores
-Development cards can include:
-- victory point cards (secret victory points)
-- year of plenty (get 2 free cards from bank)
-- monopoly (get all copies of a specific card from players)
-- knight cards (move robber)
-- build road cards (place 2 free roads).
-Is this information too long? Type 'cls' to clear :)"""
-
-    COMMANDS = """These are the commands available to you:
-'et' ends your turn - you have to roll first. This is password protected!
-'b' allows you to build, should you have enough resources!
-'t' allows you to trade with a player or port.
-'r' lets you roll for resources- you can do this once a turn.
-'cls' clears some text in case you have too much on your screen
-'d' allows you to draw a development card.
-'i' lets you check general information about the game.
-'pod' or 'deck' allows you to see your deck. This is under password protection.
-'costs' lets you see how much each action will cost."""
-
-    ERROR_MESSAGE = "That action doesn't exist. Type 'cmds' or 'c' if you're confused on what commands you can use here!"
 
     game = True
     player_info.game_stage = 2
@@ -1749,10 +1766,11 @@ Is this information too long? Type 'cls' to clear :)"""
                     print(COMMANDS)
                     
                 elif action in ['d', 'draw']:
-                    if proceed(player_info.game_bank['costs']['dev card'], player_info):
-                        player_info = draw_development_card(player_info)
-                        transfer_resources(player_info, player_info.game_bank['costs']['dev card'])
-                    print("Type 'cls' to hide the card you drew.")
+                    if proceed('dev card', player_info):
+                        player_info, bought = draw_development_card(player_info)
+                        if bought:
+                            transfer_resources(player_info, player_info.game_bank['costs']['dev card'])
+                    print("Type 'cls', then turn the screen back so everyone can see.")
                     game = evaluate_game(player_info)
                 
                 elif action in ['i', 'info']:
