@@ -511,9 +511,11 @@ def print_deck(player_info, player=0):
 ##DEVELOPMENT CARDS
 
 
-def draw_development_card(player_info) -> tuple[str, PlayerInfo]:
+def draw_development_card(player_info, grid) -> PlayerInfo:
     """Draws a development card from the game bank with a simple pop method"""
     
+    force_password(player_info)
+    print("Make everyone else look away.")
     cards = []
     for card in player_info.game_bank['cards']:
         if player_info.game_bank['cards'][card] != 0:
@@ -521,11 +523,16 @@ def draw_development_card(player_info) -> tuple[str, PlayerInfo]:
     random.shuffle(cards)
     card = cards.pop()
     player_info.game_bank['cards'][card] -= 1
+    print(f"You've drawn a {card} card!")
+    player_info.player_dicts[player_info.player_turn]['cards'][card] += 1
+    if card == 'VP card':
+        print("Your VP card must immediately be played.")
+        player_info, grid = execute_development_card(card, grid, player_info)
     
-    return card, player_info
+    return player_info
 
 
-def execute_development_card(card, grid, player_info):
+def execute_development_card(card, grid, player_info) -> tuple[PlayerInfo, Grid]:
     """Executes development card based on the card chosen"""
     
     if card == 'knight':
@@ -542,7 +549,11 @@ def execute_development_card(card, grid, player_info):
     elif card == 'monopoly':
         player_info = monopoly(player_info)
     elif card == 'VP card':
-        player_info.player_dicts[player_info.player_turn]['cards']['VP card'] += 1
+        player_info.player_dicts[player_info.player_turn]['VP card'] += 1
+        
+    player_info.player_dicts[player_info.player_turn]['cards'][card] -=1
+    
+    return player_info, grid
 
 
 def year_of_plenty(player_info) -> PlayerInfo:
@@ -1396,7 +1407,7 @@ def calculate_points(player_info, player) -> int:
     victory_points = 0
     victory_points += len(player_info.player_dicts[player]['constructs']['settlement list'])
     victory_points += len(player_info.player_dicts[player]['constructs']['city list']) * 2#every city is worth 2VPs
-    victory_points += player_info.player_dicts[player]['cards']['VP card']
+    victory_points += player_info.player_dicts[player]['VP card']
     if player_info.longest_road[0] == player:
         victory_points += 2
     if player_info.largest_army[0] == player:
@@ -1492,6 +1503,8 @@ def main_game(player_info, grid):
                     print("These are the commands available to you:")
                     
                 elif action in ['d', 'draw']:
+                    player_info = draw_development_card(player_info, grid)
+                    print("Type 'cls' to hide the card you drew.")
                     game = evaluate_game(player_info)
                 
                 elif action in ['i', 'info']:
