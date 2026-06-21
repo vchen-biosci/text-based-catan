@@ -615,7 +615,7 @@ def discard_resource(player_info, player) -> PlayerInfo:
 
 
 def transfer_resources(player_info : PlayerInfo, resources : dict, player=0, add=0) -> PlayerInfo:
-    """Gives/takes resources to/from players. Pass the resources into this function as follows: {Resource : number}. Automatically assumes that you are subtracting if nothing is passed into the function."""
+    """Gives/takes resources to/from players to game bank. Pass the resources into this function as follows: {Resource : number}. Automatically assumes that you are subtracting if nothing is passed into the function."""
     
     player=player_info.player_turn if not player else player
     for resource in resources:
@@ -628,6 +628,9 @@ def transfer_resources(player_info : PlayerInfo, resources : dict, player=0, add
             
     return player_info
 
+
+def trade_resources(player_info : PlayerInfo, resources : dict, recipient, donor=0) -> PlayerInfo:
+    pass
     
 ##GRID GENERATION/DYNAMIC BOARD
 
@@ -1040,24 +1043,70 @@ def change_construct_number(player_info : PlayerInfo, construct, add=0) -> Playe
 
 
 def steal_card(player_info, grid):
-    tile = grid.robber
+    steal_list, steal_names = find_steal_victims(player_info, grid)
+    
+    if steal_list == []:
+        print("'You didn't place the robber next to anybody else's settlement, so you can't steal anything.")
+        return player_info
+    victim = identify_victim(steal_list, steal_names, player_info)
+    resource_to_steal = steal_one(player_info, victim)
+        
+            
+            
+def find_steal_victims(player_info, grid) -> tuple[list, list]:
     steal_list = []
-    for settlement in grid.tiles[tile]['attached_settlements']:
+    for settlement in grid.tiles[grid.robber]['attached_settlements']:
         if grid.settlement_locs[settlement]['owner'] != 0 and grid.settlement_locs[settlement]['owner'] != player_info.player_turn:
             steal_list.append(grid.settlement_locs[settlement]['owner'])
-    steal_list = set(sorted(steal_list))
-    if steal_list == []:
-        return player_info
+    steal_set = set(sorted(steal_list))
+    steal_list.append(*steal_set)
+    steal_names = []
+    for player in steal_list:
+        steal_names.append(player_info.player_dicts[player]['name'])
+    return steal_list, steal_names
+
+
+def identify_victim(steal_list, steal_names, player_info) -> int:
+    """Forces a loop to identify a player to steal from"""
+    
     while True:
         print("These are the players that you can steal from:")
         for player in steal_list:
             print(f"Player {player} (aka '{player_info.player_dicts[player]['name']}')")
-        action = input("Please select a player to steal from!\n˚₊ · »-♡→ ")
+        action = input("Please select a player to steal from.\n˚₊ · »-♡→ ").strip().lower()
         if action.isdigit:
-            if int(action) > 0 and int(action) < len(steal_list) + 1:
-                victim = int(action)
-        elif action ==
-	
+            if int(action) in steal_list:
+                return int(action)
+            else:
+                print("Invalid player")
+        elif action in steal_names:
+            return steal_list[steal_names.index(action)] 
+        else:
+            print("Not eligible. Try again.")
+
+
+def steal_one(player_info, victim) -> str:
+    """Randomises the victim's hand and forces the player to select one."""
+    
+    hand_list = []
+    for resource in player_info.player_dicts[victim]['resources']:
+        hand_list.extend([resource] * player_info.player_dicts[victim]['resources'][resource])
+    if hand_list == []:
+        print("The victim you've chosen has an empty hand!")
+        return ""
+    else:
+        random.shuffle(hand_list)
+        while True:
+            action = input(f"Pick a number from 1 to {len(hand_list)}.\n˚₊ · »-♡→ ").strip().lower()
+            try:
+                if int(action) >= 1 and int(action) <= len(hand_list):
+                    return hand_list[int(action) - 1]
+                else:
+                    print("Not a valid number. Follow the prompt please.")
+            except ValueError:
+                print("Please enter your chosen number in arabic numerals.")
+                
+ 
 ##PROCESSING
 
 

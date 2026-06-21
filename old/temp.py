@@ -1,1 +1,1 @@
-print(dict(zip(["knight", "year of plenty", "build road", "monopoly", "VP cards"], [14, 2, 2, 2, 5])))
+print(set([1, 2, 3])[0])
