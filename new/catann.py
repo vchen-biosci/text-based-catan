@@ -607,7 +607,7 @@ def choose_resource(player_info, message, list=[]) -> str:
     while True:
         print("Here are the cards you can choose:")
         for resource in list:
-            print(f"{list.find(resource)}. {resource}")
+            print(f"{list.index(resource)}. {resource}")
         action = input(message).strip().lower()
         if action.isdigit():
             if int(action) >= 1 and int(action) <= len(list.resources):
@@ -1213,21 +1213,25 @@ def build(player_info : PlayerInfo, grid: Grid) -> tuple[PlayerInfo, Grid]:
 > 'city', '3', or 'c' to upgrade to a settlement
 Happy building!""")
         elif action in ['road', '1', 'r']:
-            if proceed(player_info.game_bank['costs']['road'], player_info):
+            if proceed('road', player_info):
                 player_info, grid, trade = place_road(player_info, grid)
                 if trade:
                     transfer_resources(player_info, player_info.game_bank['costs']['road'])
+                    player_info.player_dicts[player_info.player_turn]['constructs']['road'] -=1
                 
         elif action in ['settlement', '2', 's']:
-            if proceed(player_info.game_bank['costs']['settlement'], player_info):
+            if proceed('settlement', player_info):
                 player_info, grid, trade = place_settlement(player_info, grid)
                 if trade:
                     transfer_resources(player_info, player_info.game_bank['costs']['settlement'])
+                    player_info.player_dicts[player_info.player_turn]['constructs']['settlement'] -=1
+                    
         elif action in ['city', '3', 'c']:
-            if proceed(player_info.game_bank['costs']['city'], player_info):
+            if proceed('city', player_info):
                 player_info, grid, trade = upgrade_to_city(player_info, grid)
                 if trade:
                     transfer_resources(player_info, player_info.game_bank['costs']['city'])
+                    player_info.player_dicts[player_info.player_turn]['constructs']['city'] -=1
         else:
             print("Looks like that's not a valid command. If you're confused, try using 'check' to see what you're allowed to enter here :)")
             
@@ -1259,7 +1263,7 @@ def place_road(player_info : PlayerInfo, grid : Grid) -> tuple[PlayerInfo, Grid,
     #clear_screen()
     print_board(player_info, grid)
     
-    player_info.game_bank['constructs']['roads'] -= 1
+    player_info.player_dicts[player_info.player_turn]['constructs']['roads'] -= 1
     return player_info, grid, True
 
 
@@ -1311,6 +1315,8 @@ def steal_card(player_info, grid) -> PlayerInfo:
         return player_info
     victim = identify_victim(steal_list, steal_names, player_info)
     resource_to_steal = steal_one(player_info, victim)
+    if resource_to_steal == '':
+        return player_info
     player_info = trade_resources(player_info, {resource_to_steal : 1}, player_info.player_turn, victim)
     print(f"You have stolen one of player {victim}'s {resource_to_steal}. Returning to the mainframe now...")
     
@@ -1532,8 +1538,10 @@ def allow_turn_end(roll_allowed : bool, player_info : PlayerInfo) -> bool:
     return turn
   
     
-def proceed(materials_needed : dict, player_info : PlayerInfo) -> bool:
+def proceed(construct : str, player_info : PlayerInfo) -> bool:
     """Checks if the player has enough of the resource, then asks the player if they'd like to continue the trade"""
+    
+    materials_needed = player_info.game_bank['costs'][construct]
     
     force_password(player_info)
     for resource in materials_needed:
@@ -1544,6 +1552,9 @@ def proceed(materials_needed : dict, player_info : PlayerInfo) -> bool:
         else:
             print(f"You have enough {resource} for the trade. (You have {owned}, {materials_needed[resource]} are required)")
         time.sleep(0.1)
+        if player_info.player_dicts[player_info.player_turn]['constructs'][construct] < 1:
+            print("You don't have enough constructs to build anything!")
+            return False
             
     while True:
         action = input("You have enough of every resource. Would you like to proceed with the trade?\n˚₊ · »-♡→ ").strip().lower()
@@ -1681,7 +1692,7 @@ def main_game(player_info, grid):
                     game = evaluate_game(player_info)
                     
                 elif action in ['t', 'trade']:
-                    pass
+                    player_info = choose_trade(player_info, grid)
                 
                 elif action in ['r', 'roll']:
                     roll_allowed, player_info, grid = roll_die(roll_allowed, player_info, grid)
