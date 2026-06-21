@@ -701,6 +701,28 @@ def trade_resources(player_info : PlayerInfo, resources : dict, recipient, donor
     return player_info
     
     
+def steal_one(player_info, victim) -> str:
+    """Randomises the victim's hand and forces the player to select one."""
+    
+    hand_list = []
+    for resource in player_info.player_dicts[victim]['resources']:
+        hand_list.extend([resource] * player_info.player_dicts[victim]['resources'][resource])
+    if hand_list == []:
+        print("The victim you've chosen has an empty hand!")
+        return ""
+    else:
+        random.shuffle(hand_list)
+        while True:
+            action = input(f"Pick a number from 1 to {len(hand_list)}.\n˚₊ · »-♡→ ").strip().lower()
+            try:
+                if int(action) >= 1 and int(action) <= len(hand_list):
+                    return hand_list[int(action) - 1]
+                else:
+                    print("Not a valid number. Follow the prompt please.")
+            except ValueError:
+                print("Please enter your chosen number in arabic numerals.")
+                
+                
 ##GRID GENERATION/DYNAMIC BOARD
 
 
@@ -1041,8 +1063,8 @@ Happy building!""")
             if proceed(player_info.game_bank['costs']['settlement'], player_info):
                 player_info, grid = place_settlement(player_info, grid)
         elif action in ['city', '3', 'c']:
-            #I'll work on this later... I might not even implement it at all tbh
-            pass
+            if proceed(player_info.game_bank['costs']['city'], player_info):
+                player_info, grid = upgrade_to_city(player_info, grid)
         else:
             print("Looks like that's not a valid command. If you're confused, try using 'check' to see what you're allowed to enter here :)")
             
@@ -1164,26 +1186,28 @@ def identify_victim(steal_list, steal_names, player_info) -> int:
             print("Not eligible. Try again.")
 
 
-def steal_one(player_info, victim) -> str:
-    """Randomises the victim's hand and forces the player to select one."""
+def upgrade_to_city(player_info, grid):
+    settlements = player_info.player_dicts[player_info.player_turn]['constructs']['settlement list']
+    if settlements == []:
+        print("You don't have any settlements to upgrade.")
+        return player_info, grid
     
-    hand_list = []
-    for resource in player_info.player_dicts[victim]['resources']:
-        hand_list.extend([resource] * player_info.player_dicts[victim]['resources'][resource])
-    if hand_list == []:
-        print("The victim you've chosen has an empty hand!")
-        return ""
-    else:
-        random.shuffle(hand_list)
-        while True:
-            action = input(f"Pick a number from 1 to {len(hand_list)}.\n˚₊ · »-♡→ ").strip().lower()
-            try:
-                if int(action) >= 1 and int(action) <= len(hand_list):
-                    return hand_list[int(action) - 1]
-                else:
-                    print("Not a valid number. Follow the prompt please.")
-            except ValueError:
-                print("Please enter your chosen number in arabic numerals.")
+    while True:
+        action = input("Select a settlement. It's case sensitive, by the way!\n˚₊ · »-♡→ ")
+        for settlement in settlements:
+            print(f"The settlement{'s' if len(settlements) > 1 else ''} you have available to you are: ")
+            print(settlement, end=(", " if settlement != settlements[-1] else "."))
+        if action in ['esc', 'cancel']:
+            print("Okay, escaping the city upgrade site...")
+            break
+        elif action in settlements:
+            player_info.player_dicts[player_info.player_turn]['constructs']['city list'].append(settlements.pop(action))
+            print("Congrats on upgrading to a settlement!")
+            break
+        else:
+            print("That's not a valid settlement. If you want to leave, please type 'esc' or 'cancel'! (x will place something at x so...)")
+            
+    return player_info, grid
                 
  
 ##PROCESSING
