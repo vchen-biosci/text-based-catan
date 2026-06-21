@@ -1,34 +1,7 @@
 import random, time, sys
 
 ##CLASSES
-
-
-class GameInfo:
-    """An object containing future variables that the program may reference"""
-    def __init__(self):
-        self.resources = ["ores", "grain", "wood", "brick", "sheep"]#this is a constant but it's ugly so I don't want to write it as full caps
-        self.associated_settlements = {
-    "S1": ["A", "B", "E", "I", "H", "D"],
-    "S2": ["C", "D", "H", "N", "M", "G"],
-    "S3": ["E", "F", "J", "P", "O", "I"],
-    "S4": ["$", "G", "M", "S", "R", "L"],
-    "S5": ["H", "I", "O", "U", "T", "N"],
-    "S6": ["J", "K", "Q", "W", "V", "P"],
-    "S7": ["M", "N", "T", "Z", "Y", "S"],
-    "S8": ["O", "P", "V", "b", "a", "U"],
-    "S9": ["R", "S", "Y", "e", "d", "X"],
-    "S10": ["T", "U", "a", "g", "f", "Z"],
-    "S11": ["V", "W", "c", "i", "h", "b"],
-    "S12": ["Y", "Z", "f", "l", "k", "e"],
-    "S13": ["a", "b", "h", "n", "m", "g"],
-    "S14": ["d", "e", "k", "q", "p", "j"],
-    "S15": ["f", "g", "m", "s", "r", "l"],
-    "S16": ["h", "i", "o", "u", "t", "n"],
-    "S17": ["k", "l", "r", "w", "v", "q"],
-    "S18": ["m", "n", "t", "y", "x", "s"],
-    "S19": ["r", "s", "x", "+", "z", "w"]
-    }
-        self.cards = {'knight': 14, 'year of plenty': 2, 'build road': 2, 'monopoly': 2, 'VP card': 5}
+        
    
     
 class PlayerInfo:
@@ -41,6 +14,8 @@ class PlayerInfo:
         self.game_stage = 1
         self.longest_road = [0, 0]
         self.largest_army = [0, 0]
+        self.resources = ["ores", "grain", "wood", "brick", "sheep"]
+        self.cards = {'knight': 14, 'year of plenty': 2, 'build road': 2, 'monopoly': 2, 'VP card': 5}
 
 
 class Grid:
@@ -486,7 +461,7 @@ def get_player_name(player : int, player_names : list) -> str:
     return player_name   
 
 
-def add_keys(player_info : PlayerInfo, game_info : GameInfo) -> dict:
+def add_keys(player_info : PlayerInfo) -> dict:
     """Adds keys to each existing player dictionary"""
     player_dicts = player_info.player_dicts
     
@@ -494,11 +469,11 @@ def add_keys(player_info : PlayerInfo, game_info : GameInfo) -> dict:
         player_dicts[player]['constructs'] = {"settlements": 3, "cities": 4, "roads": 13, "settlement list" : [], "city list" : [], "road list" : []}#technically they have more but they use it up initially - so it's easier to do this
         
         player_dicts[player]['resources'] = {}
-        for resource in game_info.resources:
+        for resource in player_info.resources:
             player_dicts[player]['resources'][resource] = 0
             
         player_dicts[player]['cards'] = {}
-        for dev_card in game_info.cards:
+        for dev_card in player_info.cards:
             player_dicts[player]['cards'][dev_card] = 0
         player_dicts[player]['army'] = 0
             
@@ -564,19 +539,17 @@ def execute_development_card(card, grid, player_info):
             print(f"Free road no.{i}")
             player_info, grid = place_road(player_info, grid)
     elif card == 'year of plenty':
-        pass
+        player_info = year_of_plenty(player_info)
     elif card == 'monopoly':
         pass
     elif card == 'VP card':
         player_info.player_dicts[player_info.player_turn]['cards']['VP card'] += 1
 
 
-def year_of_plenty(player_info):
+def year_of_plenty(player_info) -> PlayerInfo:
     """This mechanic allows a player to take any 2 resource cards from the bank"""
-    print("The bank has the following resources:")
     
-    """print(f"{resource} : {player_info.game_bank['resources'][resource]}")"""
-    while True:
+    for i in range(2):
         possible_resources = []
         for resource in player_info.game_bank['resources']:
             if player_info.game_bank['resources'][resource] != 0:
@@ -584,14 +557,54 @@ def year_of_plenty(player_info):
         if possible_resources == []:
             print("Sorry, the bank is kinda broke so you can't take a resource")
             return player_info
-        print("The bank has the following resources:")
-        print(f"{resource} : {player_info.game_bank['resources'][resource]}")
-        action = input("Which resource would you like to take from the bank?\n˚₊ · »-♡→ ")
+        while True:
+            action = input("Which resource would you like to take from the bank?\n˚₊ · »-♡→ ").strip().lower()
+            if action in possible_resources:
+                print("Alright - you will now obtain 1 free card from the bank!")
+                player_info = transfer_resources(player_info, {action : 1}, 0, 1)
+                break
+            elif action.isdigit():
+                if int(action) >= 1 and int(action) <= len(possible_resources):
+                    player_info = transfer_resources(player_info, {possible_resources[int(action) - 1] : 1}, 0, 1)
+                    break
+                else:
+                    print("Not a valid number. Try entering the name of the resource.")
+            elif action == 'l':
+                for resource in possible_resources:
+                    print(f"{possible_resources.index(resource) + 1}. {resource} : {player_info.game_bank['resources'][resource]}")
+            else:
+                print("Invalid entry. You can either enter the number on the list or the name of the resource you want. Type 'l' to see the possible trades.")
         
+    return player_info
 
+
+def monopoly(player_info):
+    print("You've just stumbled on one of the most powerful cards in the game! Announce 1 of any resource to steal all copies of it from all players!")
+    resource = choose_resource(player_info, "Choose the resource you'd like to monopolise! (PS enter either the name of the resource or its number)\n˚₊ · »-♡→ ")
+    
+            
+def choose_resource(player_info, message):
+    while True:
+        print("Here are the cards you can choose:")
+        for resource in player_info.resources:
+            print(f"{player_info.resources.find(resource)}. {resource}")
+        action = input(message).strip().lower()
+        if action.isdigit():
+            if int(action) >= 1 and int(action) <= len(player_info.resources):
+                return player_info.resources[int(action) - 1]
+            else:
+                print("Not a valid integer selection")
+        elif action in player_info.resources:
+            return action
+        else:
+            print("Oops, not a valid resource!")
+
+
+def tax_resources(player_info):
+    
 
 ##CARD TRANSFERS (RESOURCE CARDS)/TRADES
-
+    
 
 def discard_resource(player_info, player) -> PlayerInfo:
     """Lets player choose a resource to discard"""
@@ -840,12 +853,12 @@ def place_robber(grid : Grid) -> str:
 ##INITIALISING GAME ASSETS
 
 
-def create_game_bank(game_info : GameInfo):
+def create_game_bank(player_info : PlayerInfo):
     """Calls the functions needed to set up the game bank"""
     
     game_bank = {}
     #adds the dictionaries for asset values into the game bank
-    resources, dev_bank = initialise_resource_cards(game_info)
+    resources, dev_bank = initialise_resource_cards(player_info)
     game_bank['resources'] = resources
     game_bank['cards'] = dev_bank
     
@@ -864,16 +877,16 @@ def create_game_bank(game_info : GameInfo):
     return game_bank
 
  
-def initialise_resource_cards(game_info : GameInfo) -> tuple[dict, dict]:
+def initialise_resource_cards(player_info : PlayerInfo) -> tuple[dict, dict]:
     """Initialises the dictionary for each resource to be passed into the game bank"""
     
     #Initialises 19 of each resource
     resources = {}
-    for resource in game_info.resources:
+    for resource in player_info.resources:
         resources[resource] = 19
         
     #creates the development card bank
-    cards = game_info.cards
+    cards = player_info.cards
     
     return resources, cards
 
@@ -1250,21 +1263,42 @@ def check_road(text : str, grid : Grid, player_info : PlayerInfo) -> bool:
     return False
 
 
-def create_classes() -> tuple[Grid, PlayerInfo, GameInfo]:
+def create_classes() -> tuple[Grid, PlayerInfo]:
     """Sets up class variables for later use"""
-    game_info = GameInfo()
+    associated_settlements = {
+    "S1": ["A", "B", "E", "I", "H", "D"],
+    "S2": ["C", "D", "H", "N", "M", "G"],
+    "S3": ["E", "F", "J", "P", "O", "I"],
+    "S4": ["$", "G", "M", "S", "R", "L"],
+    "S5": ["H", "I", "O", "U", "T", "N"],
+    "S6": ["J", "K", "Q", "W", "V", "P"],
+    "S7": ["M", "N", "T", "Z", "Y", "S"],
+    "S8": ["O", "P", "V", "b", "a", "U"],
+    "S9": ["R", "S", "Y", "e", "d", "X"],
+    "S10": ["T", "U", "a", "g", "f", "Z"],
+    "S11": ["V", "W", "c", "i", "h", "b"],
+    "S12": ["Y", "Z", "f", "l", "k", "e"],
+    "S13": ["a", "b", "h", "n", "m", "g"],
+    "S14": ["d", "e", "k", "q", "p", "j"],
+    "S15": ["f", "g", "m", "s", "r", "l"],
+    "S16": ["h", "i", "o", "u", "t", "n"],
+    "S17": ["k", "l", "r", "w", "v", "q"],
+    "S18": ["m", "n", "t", "y", "x", "s"],
+    "S19": ["r", "s", "x", "+", "z", "w"]
+    }
     number_tokens = make_token_list()
     biomes = make_biomes()
     quick_key, player_dicts = create_player_info()
-    game_bank = create_game_bank(game_info)
-    tiles, robber, settlement_locs, roads = make_grid(biomes, number_tokens, game_info.associated_settlements)
-    
+    player_info = PlayerInfo({}, quick_key, player_dicts)
+    game_bank = create_game_bank(player_info)
+    player_info.game_bank = game_bank
+    tiles, robber, settlement_locs, roads = make_grid(biomes, number_tokens, associated_settlements)
     
     grid = Grid(robber, tiles, settlement_locs, roads, biomes)
-    player_info = PlayerInfo(game_bank, quick_key, player_dicts)
+    
     clear_screen()
     
-    return grid, player_info, game_info
+    return grid, player_info
 
 
 def allow_turn_end(roll_allowed : bool, player_info : PlayerInfo) -> bool:
@@ -1463,10 +1497,10 @@ def main():
         print("If you're playing the game, remove line 1369")
         sys.exit()########remove this line if playing
         get_initial_inputs()#the initial input loop ends as soon as the game starts
-        grid, player_info, game_info = create_classes()#assigns variables to the classes and makes them direct objects to call
+        grid, player_info = create_classes()#assigns variables to the classes and makes them direct objects to call
         function_list.ru(player_info, grid)
         player_info.player_dicts = add_colours(player_info)#gives each player colours
-        player_info.player_dicts = add_keys(player_info, game_info)#adds further keys to player dictionaries
+        player_info.player_dicts = add_keys(player_info)#adds further keys to player dictionaries
         player_info, grid = initial_loop(player_info, grid)#go through the initial loop for the game
         main_game(player_info, grid)
     
