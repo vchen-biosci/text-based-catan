@@ -727,7 +727,9 @@ def steal_one(player_info, victim) -> str:
                 print("Please enter your chosen number in arabic numerals.")
                 
                 
-def choose_trade(player_info, grid):
+def choose_trade(player_info, grid) -> PlayerInfo:
+    """Calls a trade. Only works on the game bank"""
+    
     print("Looks like you want to make a trade?")
     force_password(player_info)
     while True:
@@ -742,23 +744,28 @@ def choose_trade(player_info, grid):
         action = input("˚₊ · »-♡→ ")
         if action.isdigit():
             if int(action) in player_info.quick_key:
-                return int(action)
+                print("Ummmmmmm I scrapped the player player thing so if you want to do a trade do it with the bank sry")
             else:
                 print("Invalid player")
         elif action in names_list:
             if action == 'g':
-                trader = "bank"
+                player_info = trade_bank(player_info, grid)
             else:
-                for player in player_info.quick_key:
+                print("In all honesty, I don't have time to make a player-player trade function before tomorrow." +
+"\nBut nobody ever accepts trades anyways, so... just type cancel please TwT")
+                """for player in player_info.quick_key:
                     if player_info.player_dicts[player]['name'] == action:
-                        trader = player
+                        trader = player"""
         elif action == 'cancel':
-            pass
+            return player_info
         else:
             print("Not eligible. Try again.")
+            
+        return player_info
 
 
-def trade_bank(player_info, grid, trade): #-> tuple[PlayerInfo, bool]:
+def trade_bank(player_info, grid) -> PlayerInfo:
+    
     port_claims = []
     player = player_info.player_turn
     for settlement in player_info.player_dicts[player]['constructs']['settlement list']:
@@ -780,7 +787,7 @@ def trade_bank(player_info, grid, trade): #-> tuple[PlayerInfo, bool]:
             port = action
             break
         elif action in ['x', 'cancel']:
-            return player_info, False
+            return player_info
         else:
             print("That's not a valid input. Either type the number of the port you want to select, its name, or 'x' to leave.")
     if port[0] == '4':
@@ -789,6 +796,8 @@ def trade_bank(player_info, grid, trade): #-> tuple[PlayerInfo, bool]:
         player_info = default_trade(player_info, 3)
     else:
         player_info = specialised_trade(player_info, port)
+        
+    return player_info
       
         
 def default_trade(player_info, num) -> PlayerInfo:
