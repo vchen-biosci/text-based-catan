@@ -1,7 +1,6 @@
 import random, time, sys
 
-##CLASSES
-        
+##CLASSES     
    
     
 class PlayerInfo:
@@ -921,7 +920,10 @@ def dice_roll(player_info : PlayerInfo, grid : Grid) -> tuple[PlayerInfo, Grid]:
         grid, player_info = rolled_a_seven(player_info, grid)
             
     for tile in grid.tiles:
+        
         if grid.tiles[tile]['number'] == roll:
+            
+            print(f"Tile {tile} has number {roll}!")
             if grid.robber != tile:
                 for player in player_info.quick_key:
                     for settlement in player_info.player_dicts[player]['constructs']['settlement list']:
@@ -945,7 +947,7 @@ def roll_die(roll_allowed, player_info, grid) -> tuple[bool, PlayerInfo, Grid]:
     return roll_allowed, player_info, grid
  
  
-def give_resources(resource : str, player_info : PlayerInfo, player, settlement) -> PlayerInfo:
+def give_resources(resource : str, player_info : PlayerInfo, player, settlement='') -> PlayerInfo:
     """Transfers resources from bank to players based on rolls"""
     
     game_bank = player_info.game_bank
@@ -956,7 +958,7 @@ def give_resources(resource : str, player_info : PlayerInfo, player, settlement)
         game_bank['resources'][resource] -= 1
         player_info.player_dicts[player]['resources'][resource] += 1
     else:
-        print(f"The bank has run out of {resource}! P{player} is unable to obtain {resource} from their settlement {settlement}")
+        print(f"The bank has run out of {resource}! P{player} is unable to obtain {resource}{f' from their settlement {settlement}' if settlement != '' else ''}")
         
     player_info.game_bank = game_bank
     return player_info
@@ -991,12 +993,12 @@ def rolled_a_seven(player_info, grid) -> tuple[Grid, PlayerInfo]:
     print(f"Player {player_info.player_turn}, you must place the robber.")
     grid.robber = place_robber(grid)
     player_info = steal_card(player_info, grid)
-    time.sleep(0.1)
+    time.sleep(5)
     clear_screen()
     print_board(player_info, grid)
     player_info = halve_decks(player_info)
     print("Now everyone can look back at the screen :D")
-    time.sleep(0.2)
+    time.sleep(2)
     print_board(player_info, grid)
     
     return grid, player_info
@@ -1124,7 +1126,7 @@ def find_steal_victims(player_info, grid) -> tuple[list, list]:
         if grid.settlement_locs[settlement]['owner'] != 0 and grid.settlement_locs[settlement]['owner'] != player_info.player_turn:
             steal_list.append(grid.settlement_locs[settlement]['owner'])
     steal_set = set(sorted(steal_list))
-    steal_list.append(*steal_set)
+    steal_list = list(steal_set)
     steal_names = []
     for player in steal_list:
         steal_names.append(player_info.player_dicts[player]['name'])
@@ -1139,7 +1141,7 @@ def identify_victim(steal_list, steal_names, player_info) -> int:
         for player in steal_list:
             print(f"Player {player} (aka '{player_info.player_dicts[player]['name']}')")
         action = input("Please select a player to steal from.\n˚₊ · »-♡→ ").strip().lower()
-        if action.isdigit:
+        if action.isdigit():
             if int(action) in steal_list:
                 return int(action)
             else:
