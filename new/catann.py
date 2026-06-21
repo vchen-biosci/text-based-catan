@@ -527,7 +527,7 @@ def draw_development_card(player_info) -> tuple[str, PlayerInfo]:
 
 
 def execute_development_card(card, grid, player_info):
-    """Executes development card based on the card drawn"""
+    """Executes development card based on the card chosen"""
     
     if card == 'knight':
         place_robber(grid)
@@ -536,12 +536,12 @@ def execute_development_card(card, grid, player_info):
         print("Your army has grown. Congratulations, settler!")
     elif card == 'build road':
         for i in range(2):
-            print(f"Free road no.{i}")
+            print(f"Free road no.{i}:")
             player_info, grid = place_road(player_info, grid)
     elif card == 'year of plenty':
         player_info = year_of_plenty(player_info)
     elif card == 'monopoly':
-        pass
+        player_info = monopoly(player_info)
     elif card == 'VP card':
         player_info.player_dicts[player_info.player_turn]['cards']['VP card'] += 1
 
@@ -578,9 +578,15 @@ def year_of_plenty(player_info) -> PlayerInfo:
     return player_info
 
 
-def monopoly(player_info):
+def monopoly(player_info) -> PlayerInfo:
+    """Forcibly steals all of a chosen resource card from all players"""
+    
     print("You've just stumbled on one of the most powerful cards in the game! Announce 1 of any resource to steal all copies of it from all players!")
     resource = choose_resource(player_info, "Choose the resource you'd like to monopolise! (PS enter either the name of the resource or its number)\n˚₊ · »-♡→ ")
+    tax_resources(player_info, resource)
+    print("Forced collection complete. Returning now :)")
+    
+    return player_info
     
             
 def choose_resource(player_info, message):
@@ -600,8 +606,17 @@ def choose_resource(player_info, message):
             print("Oops, not a valid resource!")
 
 
-def tax_resources(player_info):
+def tax_resources(player_info, resource) -> PlayerInfo:
+    """Goes through each player and forcibly hands all of the specified resource to the current player"""
     
+    for player in player_info.quick_key:
+        if player_info.player_dicts[player]['resources'][resource] == 0:
+            print(f"Player {player} was unable to concede their {resource}.")
+        else:
+            player_info = trade_resources(player_info, {resource : player_info.player_dicts[player]['resources'][resource]}, player_info.player_turn, player)
+            
+    return player_info
+
 
 ##CARD TRANSFERS (RESOURCE CARDS)/TRADES
     
