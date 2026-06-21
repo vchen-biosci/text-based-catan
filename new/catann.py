@@ -556,6 +556,7 @@ def execute_development_card(card, grid, player_info):
     
     if card == 'knight':
         place_robber(grid)
+        player_info = steal_card(player_info, grid)
         player_info.player_dicts[player_info.player_turn]['army'] += 1
         print("Your army has grown. Congratulations, settler!")
     elif card == 'build road':
@@ -568,6 +569,25 @@ def execute_development_card(card, grid, player_info):
         pass
     elif card == 'VP card':
         player_info.player_dicts[player_info.player_turn]['cards']['VP card'] += 1
+
+
+def year_of_plenty(player_info):
+    """This mechanic allows a player to take any 2 resource cards from the bank"""
+    print("The bank has the following resources:")
+    
+    """print(f"{resource} : {player_info.game_bank['resources'][resource]}")"""
+    while True:
+        possible_resources = []
+        for resource in player_info.game_bank['resources']:
+            if player_info.game_bank['resources'][resource] != 0:
+                possible_resources.append(resource)
+        if possible_resources == []:
+            print("Sorry, the bank is kinda broke so you can't take a resource")
+            return player_info
+        print("The bank has the following resources:")
+        print(f"{resource} : {player_info.game_bank['resources'][resource]}")
+        action = input("Which resource would you like to take from the bank?\n˚₊ · »-♡→ ")
+        
 
 
 ##CARD TRANSFERS (RESOURCE CARDS)/TRADES
@@ -1425,6 +1445,9 @@ def main_game(player_info, grid):
                 
                 elif action in ['i', 'info']:
                     pass
+                
+                elif action in ['pod', 'print deck', 'deck']:
+                    print_deck(player_info)
                     
                 else:
                     print("That action doesn't exist. Type 'cmds' or 'c' if you're confused on what commands you can use here!")
