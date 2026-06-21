@@ -456,7 +456,6 @@ def create_player_info() -> tuple[list, dict]:
         player_dicts[player]['name'] = name
         player_names.append(name)
         player_dicts[player]['password'] = get_player_password()
-    
     return quick_key, player_dicts
     
     
@@ -532,8 +531,7 @@ def add_keys(player_info : PlayerInfo) -> dict:
 def get_player_password() -> str:
     """Gets a password and checks if it's valid."""
     
-    valid_password = False
-    while not valid_password:
+    while True:
         password = input("Please enter a password; it'll be used to check for your consent later. Keep it short but memorable," + 
                             "and make sure it's not a password you use for important sites.\n˚₊ · »-♡→ ")
         
@@ -541,7 +539,8 @@ def get_player_password() -> str:
             print("That password is way too long. Keep it to 7 or below characters.")
         else:
             print("Okay. At all costs, do NOT forget your password!")
-            valid_password = True
+            time.sleep(1)
+            break
             
     clear_screen()#Clears screen for privacy
     
@@ -552,11 +551,12 @@ def print_deck(player_info, player=0):
     """Prints the player's deck."""
     
     printee = player_info.player_turn if not player else player
+    force_password(player_info, printee)
     
     print("---RESOURCE CARDS---")
     for resource in player_info.player_dicts[printee]['resources']:
         print(f"{resource} : {player_info.player_dicts[printee]['resources'][resource]}")
-    print("---DEVELOPMENT CARDS---")
+    print("\n---DEVELOPMENT CARDS---")
     for card in player_info.player_dicts[printee]['cards']:
         print(f"{card} : {player_info.player_dicts[printee]['cards'][card]}")
     
@@ -1365,7 +1365,7 @@ def place_settlement(player_info : PlayerInfo, grid) -> tuple[PlayerInfo, Grid, 
     clear_screen()
     print_board(player_info, grid)
     
-    player_info.game_bank['constructs']['settlement'] -= 1
+    player_info.player_dicts[player]['constructs']['settlement'] -= 1
     return player_info, grid, True
     
 
@@ -1479,7 +1479,7 @@ def force_password(player_info : PlayerInfo, player=0):
     
     correct_password = False
     while not correct_password:
-        correct_password = check_password(player_info, player)
+        correct_password = check_password(player_info, victim)
         if not correct_password:
             print("This is bad. You're stuck in an infinite loop now :P")
         
@@ -1741,6 +1741,7 @@ def main_game(player_info, grid):
         for player in player_info.quick_key:
             
             turn = True
+            player_info.player_turn = player
             roll_allowed = True
             
             while turn and game:
