@@ -33,23 +33,6 @@ class Grid:
         "desert": " ⛰︎ ོ ༄-"
 }
         self.biomes = biomes
-
-
-class NormalFunctions:
-    def cls(self, player_info, grid):
-        clear_screen()
-        print_board(player_info, grid)
-    def ru(self, player_info, grid):
-        print("""This is how you play catan: 
-PS: if this text is too long, feel free to clear the screen with 'cls'.""")
-    def cmds(self, player_info, grid):
-        print("""These are the possible normal commands available to you:
-> 'cmds' displays commands.
-> 'cls' reprints the board without the other text.
-> 'ru' displays the rules of Catan.
-> 'lb' displays the leaderboard of VPs""")
-    def lb(self, player_info, grid):
-        print("""Here is the leaderboard:""")
     
 
 ##DISPLAY-RELATED
@@ -271,7 +254,7 @@ def print_board(player_info : PlayerInfo, grid : Grid):
         print(f'{dev_card} : {game_bank["cards"][dev_card]}', end="  ||  ")
     print("\n")
     for player in player_info.quick_key:
-        print(ansi_stitching(player_info.player_dicts[player]['colour'], f"Player {player} ({player_info.player_dicts[player]['name']})"), end="  ||  ")
+        print(ansi_stitching(player_info.player_dicts[player]['colour'], f"Player {player} ({player_info.player_dicts[player]['name']}) : {calculate_points(player_info, player, 1)} public VPs, {calculate_hand_size(player_info, player)} resource cards"), end="  ||  ")
     print("\n")
 
     print_grid(grid)
@@ -514,18 +497,15 @@ def print_deck(player_info, player=0):
 ##DEVELOPMENT CARDS
 
 
-def draw_development_card(player_info, grid) -> PlayerInfo:
+def draw_development_card(player_info) -> PlayerInfo:
     """Draws a development card from the game bank with a simple pop method"""
     
     force_password(player_info)
     print("Make everyone else look away.")
-    cards = []
-    for card in player_info.game_bank['cards']:
-        if player_info.game_bank['cards'][card] != 0:
-            cards.append(card)
+    cards = player_info.game_bank['cards']
     random.shuffle(cards)
     card = cards.pop()
-    player_info.game_bank['cards'][card] -= 1
+    player_info.game_bank['cards'].remove(card)
     print(f"You've drawn a {card} card!")
     player_info.player_dicts[player_info.player_turn]['cards'][card] += 1
     if card == 'VP card':
@@ -558,6 +538,31 @@ def execute_development_card(card, grid, player_info) -> tuple[PlayerInfo, Grid]
     
     return player_info, grid
 
+
+def choose_development_card(player_info) -> str:
+    """Allows player to choose a development card"""
+    
+    player = player_info.player_turn
+    force_password(player_info)
+    player_cards = []
+    for card in player_info.player_dicts[player]['dev cards']:
+        if player_info.player_dicts[player]['dev cards'][card] >= 1:
+            player_cards.append(card)
+    if player_cards == []:
+        print("You actually don't have any development cards, lols")
+        return ""
+    while True:
+        action = input("Would you like to play one? Warning: once you confirm you CANNOT go back. These are the cards you can play: " + str(player_cards)[1:-1] + ".\n˚₊ · »-♡→ ")
+        if action in ['y', 'yes', 'confirm']:
+            break
+        elif action in ['n', 'no', 'nope', 'x', 'cancel']:
+            print("Good choice.")
+            return ""
+        else:
+            print("You seem to be a bit mentally challenged right now. Type 'x' to leave or 'y' to continue ^^")
+    
+    card = choose_resource(player_info, "Choose the card you'll play:\n˚₊ · »-♡→ ", player_cards)
+    return card
 
 def year_of_plenty(player_info) -> PlayerInfo:
     """This mechanic allows a player to take any 2 resource cards from the bank"""
@@ -1081,7 +1086,7 @@ def create_game_bank(player_info : PlayerInfo):
     return game_bank
 
  
-def initialise_resource_cards(player_info : PlayerInfo) -> tuple[dict, dict]:
+def initialise_resource_cards(player_info : PlayerInfo) -> tuple[dict, list]:
     """Initialises the dictionary for each resource to be passed into the game bank"""
     
     #Initialises 19 of each resource
@@ -1090,7 +1095,9 @@ def initialise_resource_cards(player_info : PlayerInfo) -> tuple[dict, dict]:
         resources[resource] = 19
         
     #creates the development card bank
-    cards = player_info.cards
+    cards = []
+    for card in player_info.cards:
+        cards.extend([card] * player_info.cards[card])
     
     return resources, cards
 
@@ -1599,13 +1606,14 @@ def evaluate_game(player_info : PlayerInfo) -> bool:
         return True
 
 
-def calculate_points(player_info, player) -> int:
+def calculate_points(player_info, player, public=0) -> int:
     """Calculates the given player's victory points"""
     
     victory_points = 0
     victory_points += len(player_info.player_dicts[player]['constructs']['settlement list'])
     victory_points += len(player_info.player_dicts[player]['constructs']['city list']) * 2#every city is worth 2VPs
-    victory_points += player_info.player_dicts[player]['cards']['VP card']
+    if not public:
+        victory_points += player_info.player_dicts[player]['cards']['VP card']
     if player_info.longest_road[0] == player:
         victory_points += 2
     if player_info.largest_army[0] == player:
@@ -1715,16 +1723,23 @@ def main_game(player_info, grid):
                     
                 elif action in ['d', 'draw']:
                     if proceed(player_info.game_bank['costs']['dev card'], player_info):
-                        player_info = draw_development_card(player_info, grid)
+                        player_info = draw_development_card(player_info)
                         transfer_resources(player_info, player_info.game_bank['costs']['dev card'])
                     print("Type 'cls' to hide the card you drew.")
                     game = evaluate_game(player_info)
                 
                 elif action in ['i', 'info']:
-                    pass
+                    print("""List of omissions:
+> Player-player trades not implemented
+> You won't obtain the resources from your second settlement
+> Longest road and largest army haven't been coded yet
+> Cities aren't explicitly shown, so please use your imagination :D - however they'll still be displayed in terms of victory points.""")
                 
                 elif action in ['pod', 'print deck', 'deck']:
                     print_deck(player_info)
+                    
+                elif action in ['play', 'p']:
+                    pass
                     
                 elif action == 'costs':
                     print("""The costs for actions as follows:
@@ -1750,12 +1765,10 @@ Is this information too long? Type 'cls' to clear :)""")
 def main():
     """Main code for the game, initially called"""
     while True:
-        function_list = NormalFunctions()
-        print("If you're playing the game, remove line 1369")
+        print("If you're playing the game, remove the line with sys.exit (use command F or smth idk)")
         sys.exit()########remove this line if playing
         get_initial_inputs()#the initial input loop ends as soon as the game starts
         grid, player_info = create_classes()#assigns variables to the classes and makes them direct objects to call
-        function_list.ru(player_info, grid)
         player_info.player_dicts = add_colours(player_info)#gives each player colours
         player_info.player_dicts = add_keys(player_info)#adds further keys to player dictionaries
         player_info, grid = initial_loop(player_info, grid)#go through the initial loop for the game
