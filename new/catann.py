@@ -489,9 +489,12 @@ def print_deck(player_info, player=0):
     
     printee = player_info.player_turn if not player else player
     
-    print("Your resources are as follows:")
+    print("---RESOURCE CARDS---")
     for resource in player_info.player_dicts[printee]['resources']:
         print(f"{resource} : {player_info.player_dicts[printee]['resources'][resource]}")
+    print("---DEVELOPMENT CARDS---")
+    for card in player_info.player_dicts[printee]['dev cards']:
+        print(f"{card} : {player_info.player_dicts[printee]['dev cards'][card]}")
     
 
 ##DEVELOPMENT CARDS
@@ -563,6 +566,7 @@ def choose_development_card(player_info) -> str:
     
     card = choose_resource(player_info, "Choose the card you'll play:\n˚₊ · »-♡→ ", player_cards)
     return card
+
 
 def year_of_plenty(player_info) -> PlayerInfo:
     """This mechanic allows a player to take any 2 resource cards from the bank"""
@@ -1681,6 +1685,38 @@ def initial_loop(player_info : PlayerInfo, grid : Grid) -> tuple[PlayerInfo, Gri
 def main_game(player_info, grid):
     """The very time consuming main stage of the game"""
     
+    INFO_MESSAGE = """List of omissions:
+> Player-player trades not implemented
+> You won't obtain the resources from your second settlement
+> Longest road and largest army haven't been coded yet
+> Cities aren't explicitly shown, so please use your imagination :D - however they'll still be displayed in terms of victory points."""
+
+    COSTS = """The costs for actions as follows:
+ROAD: 1x brick, 1x wood
+SETTLEMENT: 1x brick, 1x wood, 1x grain, 1x sheep
+CITY (upgrades from settlement): 2x grain, 3x ores
+DEVELOPMENT CARD (type 'draw'): 1x sheep, 1x grain, 1x ores
+Development cards can include:
+- victory point cards (secret victory points)
+- year of plenty (get 2 free cards from bank)
+- monopoly (get all copies of a specific card from players)
+- knight cards (move robber)
+- build road cards (place 2 free roads).
+Is this information too long? Type 'cls' to clear :)"""
+
+    COMMANDS = """These are the commands available to you:
+'et' ends your turn - you have to roll first. This is password protected!
+'b' allows you to build, should you have enough resources!
+'t' allows you to trade with a player or port.
+'r' lets you roll for resources- you can do this once a turn.
+'cls' clears some text in case you have too much on your screen
+'d' allows you to draw a development card.
+'i' lets you check general information about the game.
+'pod' or 'deck' allows you to see your deck. This is under password protection.
+'costs' lets you see how much each action will cost."""
+
+    ERROR_MESSAGE = "That action doesn't exist. Type 'cmds' or 'c' if you're confused on what commands you can use here!"
+
     game = True
     player_info.game_stage = 2
     
@@ -1710,16 +1746,7 @@ def main_game(player_info, grid):
                     print_board(player_info, grid)
                     
                 elif action in ['c', 'cmds']:
-                    print("""These are the commands available to you:
-'et' ends your turn - you have to roll first. This is password protected!
-'b' allows you to build, should you have enough resources!
-'t' allows you to trade with a player or port.
-'r' lets you roll for resources- you can do this once a turn.
-'cls' clears some text in case you have too much on your screen
-'d' allows you to draw a development card.
-'i' lets you check general information about the game.
-'pod' or 'deck' allows you to see your deck. This is under password protection.
-'costs' lets you see how much each action will cost.""")
+                    print(COMMANDS)
                     
                 elif action in ['d', 'draw']:
                     if proceed(player_info.game_bank['costs']['dev card'], player_info):
@@ -1729,34 +1756,21 @@ def main_game(player_info, grid):
                     game = evaluate_game(player_info)
                 
                 elif action in ['i', 'info']:
-                    print("""List of omissions:
-> Player-player trades not implemented
-> You won't obtain the resources from your second settlement
-> Longest road and largest army haven't been coded yet
-> Cities aren't explicitly shown, so please use your imagination :D - however they'll still be displayed in terms of victory points.""")
+                    print(INFO_MESSAGE)
                 
                 elif action in ['pod', 'print deck', 'deck']:
                     print_deck(player_info)
                     
                 elif action in ['play', 'p']:
-                    pass
+                    card = choose_development_card(player_info)
+                    if card != "":
+                        player_info, grid = execute_development_card(card, grid, player_info)
                     
                 elif action == 'costs':
-                    print("""The costs for actions as follows:
-ROAD: 1x brick, 1x wood
-SETTLEMENT: 1x brick, 1x wood, 1x grain, 1x sheep
-CITY (upgrades from settlement): 2x grain, 3x ores
-DEVELOPMENT CARD (type 'draw'): 1x sheep, 1x grain, 1x ores
-Development cards can include:
-- victory point cards (secret victory points)
-- year of plenty (get 2 free cards from bank)
-- monopoly (get all copies of a specific card from players)
-- knight cards (move robber)
-- build road cards (place 2 free roads).
-Is this information too long? Type 'cls' to clear :)""")
+                    print(COSTS)
                     
                 else:
-                    print("That action doesn't exist. Type 'cmds' or 'c' if you're confused on what commands you can use here!")
+                    print(ERROR_MESSAGE)
                     
             clear_screen()
             print_board(player_info, grid)          
