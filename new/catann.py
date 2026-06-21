@@ -630,7 +630,17 @@ def transfer_resources(player_info : PlayerInfo, resources : dict, player=0, add
 
 
 def trade_resources(player_info : PlayerInfo, resources : dict, recipient, donor=0) -> PlayerInfo:
-    pass
+    """This subroutine facilitates trade but doesn't check if the trade is possible - so check before calling"""
+    
+    donor = player_info.player_turn if donor == 0 else donor
+    
+    for resource in resources:
+        player_info.player_dicts[donor]['resources'][resource] -= resources[resource]
+        player_info.player_dicts[recipient]['resources'][resource] += resources[resource]
+        print(f"{resources[resource]} {'has' if resources[resource] == 1 else 'have'} been transferred to player {recipient} from player {donor}'s account!")
+    print("Thanks for using Catan's trade service. See you again soon!")
+    
+    return player_info
     
 ##GRID GENERATION/DYNAMIC BOARD
 
@@ -932,11 +942,13 @@ def rolled_a_seven(player_info, grid) -> tuple[Grid, PlayerInfo]:
     
     print(f"Player {player_info.player_turn}, you must place the robber.")
     grid.robber = place_robber(grid)
-    steal_card()
+    player_info = steal_card(player_info, grid)
+    time.sleep(0.1)
     clear_screen()
     print_board(player_info, grid)
     player_info = halve_decks(player_info)
     print("Now everyone can look back at the screen :D")
+    time.sleep(0.2)
     print_board(player_info, grid)
     
     return grid, player_info
@@ -1042,7 +1054,9 @@ def change_construct_number(player_info : PlayerInfo, construct, add=0) -> Playe
     return player_info
 
 
-def steal_card(player_info, grid):
+def steal_card(player_info, grid) -> PlayerInfo:
+    """Sets up the steal 1 card mechanic"""
+    
     steal_list, steal_names = find_steal_victims(player_info, grid)
     
     if steal_list == []:
@@ -1050,7 +1064,10 @@ def steal_card(player_info, grid):
         return player_info
     victim = identify_victim(steal_list, steal_names, player_info)
     resource_to_steal = steal_one(player_info, victim)
-        
+    player_info = trade_resources(player_info, {resource_to_steal : 1}, player_info.player_turn, victim)
+    print(f"You have stolen one of player {victim}'s {resource_to_steal}. Returning to the mainframe now...")
+    
+    return player_info
             
             
 def find_steal_victims(player_info, grid) -> tuple[list, list]:
