@@ -700,6 +700,7 @@ def trade_resources(player_info : PlayerInfo, resources : dict, recipient, donor
     
     return player_info
     
+    
 ##GRID GENERATION/DYNAMIC BOARD
 
 
@@ -1456,11 +1457,15 @@ def initial_loop(player_info : PlayerInfo, grid : Grid) -> tuple[PlayerInfo, Gri
     print_board(player_info, grid)
     print(f"We'll go from player 1 to player {len(player_info.quick_key)}; you can place two settlements and two roads for free. Please choose wisely.")
 
-    for i in range(2):
-        for player in player_info.quick_key:
-            player_info.player_turn = player
-            player_info, grid = place_settlement(player_info, grid)
-            player_info, grid = place_road(player_info, grid)
+    
+    for player in player_info.quick_key:
+        player_info.player_turn = player
+        player_info, grid = place_settlement(player_info, grid)
+        player_info, grid = place_road(player_info, grid)
+    for player in player_info.quick_key.reversed():
+        player_info.player_turn = player
+        player_info, grid = place_settlement(player_info, grid)
+        player_info, grid = place_road(player_info, grid)
                     
     player_info.player_turn = 1
     player_info.game_bank = game_bank
@@ -1500,7 +1505,16 @@ def main_game(player_info, grid):
                     print_board(player_info, grid)
                     
                 elif action in ['c', 'cmds']:
-                    print("These are the commands available to you:")
+                    print("""These are the commands available to you:
+'et' ends your turn - you have to roll first. This is password protected!
+'b' allows you to build, should you have enough resources!
+'t' allows you to trade with a player or port.
+'r' lets you roll for resources- you can do this once a turn.
+'cls' clears some text in case you have too much on your screen
+'d' allows you to draw a development card.
+'i' lets you check general information about the game.
+'pod' or 'deck' allows you to see your deck. This is under password protection.
+'costs' lets you see how much each action will cost.""")
                     
                 elif action in ['d', 'draw']:
                     player_info = draw_development_card(player_info, grid)
@@ -1512,6 +1526,20 @@ def main_game(player_info, grid):
                 
                 elif action in ['pod', 'print deck', 'deck']:
                     print_deck(player_info)
+                    
+                elif action == 'costs':
+                    print("""The costs for actions as follows:
+ROAD: 1x brick, 1x wood
+SETTLEMENT: 1x brick, 1x wood, 1x grain, 1x sheep
+CITY (upgrades from settlement): 2x grain, 3x ores
+DEVELOPMENT CARD (type 'draw'): 1x sheep, 1x grain, 1x ores
+Development cards can include:
+- victory point cards (secret victory points)
+- year of plenty (get 2 free cards from bank)
+- monopoly (get all copies of a specific card from players)
+- knight cards (move robber)
+- build road cards (place 2 free roads).
+Is this information too long? Type 'cls' to clear :)""")
                     
                 else:
                     print("That action doesn't exist. Type 'cmds' or 'c' if you're confused on what commands you can use here!")
