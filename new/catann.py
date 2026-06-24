@@ -35,6 +35,7 @@ INFO_MESSAGE = """List of omissions:
 > Your second road can also be attached to an existing road (it's more fun like that)
 > You can build past someone else's settlement as long as you have a road connected to it (I didn't have time to code against that)
 > Cities aren't explicitly shown, so please use your imagination :D - however they'll still be displayed in terms of victory points.
+> Cities will not get double the resources. I forgot about that rule.
 > There are probably more - please let me know if you see any when testing!"""
 
 COSTS = """The costs for actions as follows:
@@ -317,7 +318,8 @@ def print_board(player_info : PlayerInfo, grid : Grid):
         print(f'{card} : {game_bank["cards"].count(card)}', end="  ||  ")
     print("\n")
     for player in player_info.quick_key:
-        print(ansi_stitching(player_info.player_dicts[player]['colour'], f"Player {player} ({player_info.player_dicts[player]['name']}) : {calculate_points(player_info, player, 1)} public VPs, {calculate_hand_size(player_info, player)} resource cards"), end="  ||  ")
+        print(ansi_stitching(player_info.player_dicts[player]['colour'], 
+f"Player {player} ({player_info.player_dicts[player]['name']}) : {calculate_points(player_info, player, 1)} public VPs, {calculate_hand_size(player_info, player)} resource cards"), end="  ||  ")
     print("\n")
 
     print_grid(grid)
@@ -682,7 +684,7 @@ def choose_resource(message, list=[]) -> str:
     while True:
         print("Here are the cards you can choose:")
         for resource in list:
-            print(f"{list.index(resource)}. {resource}")
+            print(f"{list.index(resource) + 1}. {resource}")
         action = input(message).strip().lower()
         if action.isdigit():
             if int(action) >= 1 and int(action) <= len(list):
@@ -1185,18 +1187,24 @@ def dice_roll(player_info : PlayerInfo, grid : Grid) -> tuple[PlayerInfo, Grid]:
     print(f"As everyone watches with bated breath, you roll the die. You pray for a good result. They land as follows: |{dice_1}| |{dice_2}| ... {dice_1} + {dice_2} = {roll}. You've rolled a {roll}.")
     
     if roll == 7:
-        grid, player_info = rolled_a_seven(player_info, grid)
+        return rolled_a_seven(player_info, grid)
             
     for tile in grid.tiles:
         
         if grid.tiles[tile]['number'] == roll:
             
             print(f"Tile {tile} has number {roll}!")
+
             if grid.robber != tile:
                 for player in player_info.quick_key:
-                    for settlement in player_info.player_dicts[player]['constructs']['settlement list']:
-                        if settlement in grid.tiles[tile]['attached_settlements']:
-                            player_info = give_resources(grid.tiles[tile]['biome'], player_info, player, settlement)
+                    for building in ['settlement', 'city']:
+                    
+                        for settlement in player_info.player_dicts[player]['constructs'][f'{building} list']:
+                            if settlement in grid.tiles[tile][f'attached_{building + "s" if building == "settlement" else ""}']:
+                                if settlement in player_info.player_dicts[player]['constructs']['settlement list']:
+                                    player_info = give_resources(grid.tiles[tile]['biome'], player_info, player, settlement)
+                                else:
+                                    player_info = give_resources(grid.tiles[tile]['biome'], player_info, player, settlement, 2)
             else:
                 print(f"The robber has prevented anyone from obtaining resources on {tile}")
     
@@ -1215,18 +1223,18 @@ def roll_die(roll_allowed, player_info, grid) -> tuple[bool, PlayerInfo, Grid]:
     return roll_allowed, player_info, grid
  
  
-def give_resources(resource : str, player_info : PlayerInfo, player, settlement='') -> PlayerInfo:
+def give_resources(resource : str, player_info : PlayerInfo, player, settlement='', num=1) -> PlayerInfo:
     """Transfers resources from bank to players based on rolls"""
     
     game_bank = player_info.game_bank
     if game_bank['resources'][resource] != 0:
         if settlement != "":
-            print(f"P{player} has obtained {resource} from their settlement {settlement}.")
+            print(f"P{player} has obtained {resource} from '{settlement}.'")
                 
         game_bank['resources'][resource] -= 1
         player_info.player_dicts[player]['resources'][resource] += 1
     else:
-        print(f"The bank has run out of {resource}! P{player} is unable to obtain {resource}{f' from their settlement {settlement}' if settlement != '' else ''}")
+        print(f"The bank has run out of {resource}! P{player} is unable to obtain {resource}{f' from {settlement}' if settlement != '' else ''}")
         
     player_info.game_bank = game_bank
     return player_info
@@ -1250,24 +1258,21 @@ def halve_decks(player_info : PlayerInfo) -> PlayerInfo:
             player_info = discard_resource(player_info, player)
             hand_size = calculate_hand_size(player_info, player)
             
-        clear_screen()
-            
     return player_info
 
 
-def rolled_a_seven(player_info, grid) -> tuple[Grid, PlayerInfo]:
+def rolled_a_seven(player_info, grid) -> tuple[PlayerInfo, Grid]:
     """Moves the robber and halves the decks."""
     
     print(f"Player {player_info.player_turn}, you must place the robber.")
     grid.robber = place_robber(grid)
+    print("Now everyone look away apart from the current player.")
+    force_password(player_info)
     player_info = steal_card(player_info, grid)
     player_info = halve_decks(player_info)
-    clear_screen()
-    print_board(player_info, grid)
-    print("Now everyone can look back at the screen :D")
-    print_board(player_info, grid)
+    print("Type 'cls' and then tell everyone to look back at the screen.")
     
-    return grid, player_info
+    return player_info, grid
 
 
 ##BUILDING-RELATED
@@ -1522,7 +1527,7 @@ def check_settlement(text : str, grid : Grid, player_info : PlayerInfo, initial 
         print("Congratulations on obtaining your free settlement!!")
         return True
     else:
-        print("You don't own a connected road - you must have a claim to the road. Sorry.")
+        print("You don't own a connected road - you must have a claim to the settlement. Sorry.")
         return False
 
 
