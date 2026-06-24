@@ -98,6 +98,12 @@ KAOMOJIS = {
         "sheep": ":3 ^^~", 
         "desert": " ⛰︎ ོ ༄-"}
 
+COLOUR_CODES = {"red" : [255, 0, 0], "green" : [0, 255, 0], "blue" : [0, 0, 255]}
+
+CONSTRUCT_COSTS =  {'road' : {'brick' : 1, 'wood' : 1},
+                         'settlement' : {'brick' : 1, 'wood' : 1, 'grain' : 1, 'sheep' : 1},
+                         'city' : {'grain' : 2, 'ores' : 3},
+                         'dev card': {'sheep' : 1, 'grain' : 1, 'ores' : 1}}
 
 ##DISPLAY-RELATED
 
@@ -425,11 +431,10 @@ def print_player_colours(quick_key, player_colours):
                 
                 
 def get_colour(player_colour : list) -> list:
-    colour_codes = {"red" : [255, 0, 0], "green" : [0, 255, 0], "blue" : [0, 0, 255]}
-    for colour in colour_codes:#iterate through colours               
+    for colour in COLOUR_CODES:#iterate through colours               
         valid_input = False
         while not valid_input:#makes sure that it doesn't end without getting the right colour
-            action = input(ansi_stitching(colour_codes[colour], f"‧₊˚♪ 𝄞₊˚⊹ What value would you like to use for {colour}? ‧₊˚♪ 𝄞₊˚⊹\n˚₊ · »-♡→ ")).strip().lower()
+            action = input(ansi_stitching(COLOUR_CODES[colour], f"‧₊˚♪ 𝄞₊˚⊹ What value would you like to use for {colour}? ‧₊˚♪ 𝄞₊˚⊹\n˚₊ · »-♡→ ")).strip().lower()
             try:
                 if int(action) <= 255:
                     player_colour.append(int(action))
@@ -1144,17 +1149,7 @@ def create_game_bank(player_info : PlayerInfo):
     game_bank['resources'] = resources
     game_bank['cards'] = dev_bank
     
-    #initialises construct number
-    game_bank['constructs'] = {'roads' : 60,
-                     'settlements' : 20,
-                     'cities' : 16
-    }
-    
     #creates a bank of building costs that the game can directly access
-    game_bank['costs'] = {'road' : {'brick' : 1, 'wood' : 1},
-                         'settlement' : {'brick' : 1, 'wood' : 1, 'grain' : 1, 'sheep' : 1},
-                         'city' : {'grain' : 2, 'ores' : 3},
-                         'dev card': {'sheep' : 1, 'grain' : 1, 'ores' : 1}}
     
     return game_bank
 
@@ -1297,21 +1292,21 @@ Happy building!""")
             if proceed('road', player_info):
                 player_info, grid, trade = place_road(player_info, grid)
                 if trade:
-                    transfer_resources(player_info, player_info.game_bank['costs']['road'])
+                    transfer_resources(player_info, CONSTRUCT_COSTS['road'])
                     player_info.player_dicts[player_info.player_turn]['constructs']['road'] -=1
                 
         elif action in ['settlement', '2', 's']:
             if proceed('settlement', player_info):
                 player_info, grid, trade = place_settlement(player_info, grid)
                 if trade:
-                    transfer_resources(player_info, player_info.game_bank['costs']['settlement'])
+                    transfer_resources(player_info, CONSTRUCT_COSTS['settlement'])
                     player_info.player_dicts[player_info.player_turn]['constructs']['settlement'] -=1
                     
         elif action in ['city', '3', 'c']:
             if proceed('city', player_info):
                 player_info, grid, trade = upgrade_to_city(player_info, grid)
                 if trade:
-                    transfer_resources(player_info, player_info.game_bank['costs']['city'])
+                    transfer_resources(player_info, CONSTRUCT_COSTS['city'])
                     player_info.player_dicts[player_info.player_turn]['constructs']['city'] -=1
         else:
             print("Looks like that's not a valid command. If you're confused, try using 'check' to see what you're allowed to enter here :)")
@@ -1605,7 +1600,7 @@ def allow_turn_end(roll_allowed : bool, player_info : PlayerInfo) -> bool:
 def proceed(construct : str, player_info : PlayerInfo) -> bool:
     """Checks if the player has enough of the resource, then asks the player if they'd like to continue the trade"""
     
-    materials_needed = player_info.game_bank['costs'][construct]
+    materials_needed = CONSTRUCT_COSTS[construct]
     
     force_password(player_info)
     for resource in materials_needed:
@@ -1775,7 +1770,7 @@ def main_game(player_info, grid):
                     if proceed('dev card', player_info):
                         player_info, bought = draw_development_card(player_info)
                         if bought:
-                            transfer_resources(player_info, player_info.game_bank['costs']['dev card'])
+                            transfer_resources(player_info, CONSTRUCT_COSTS['dev card'])
                     print("Type 'cls', then turn the screen back so everyone can see.")
                     game = evaluate_game(player_info)
                 
